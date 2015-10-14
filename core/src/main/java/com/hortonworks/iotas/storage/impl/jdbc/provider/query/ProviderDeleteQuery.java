@@ -15,27 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hortonworks.iotas.storage.impl.jdbc.mysql.query;
+package com.hortonworks.iotas.storage.impl.jdbc.provider.query;
 
 import com.hortonworks.iotas.storage.StorableKey;
 
-public class MySqlSelect extends MySqlStorableKeyBuilder {
-    public MySqlSelect(String nameSpace) {
-        super(nameSpace);   // super.columns == null => no where clause filtering
+/**
+ *
+ */
+public class ProviderDeleteQuery extends ProviderStorableKeyQuery {
+
+    public ProviderDeleteQuery(StorableKey storableKey) {
+        super(storableKey);
     }
 
-    public MySqlSelect(StorableKey storableKey) {
-        super(storableKey);     // super.columns != null => do where clause filtering on PrimaryKey
-    }
-
-    // "SELECT * FROM DB.TABLE [WHERE C1 = ?, C2 = ?]"
+    // "DELETE FROM DB.TABLE WHERE id1 = val1 AND id2 = val2"
     @Override
     protected void setParameterizedSql() {
-        sql = "SELECT * FROM " + tableName;
-        //where clause is defined by columns specified in the PrimaryKey
-        if (columns != null) {
-            sql += " WHERE " + join(getColumnNames(columns, "%s = ?"), " AND ");
-        }
+        sql = "DELETE FROM  " + tableName + " WHERE "
+                + join(getColumnNames(columns, "%s = ?"), " AND ");
         log.debug(sql);
     }
 }

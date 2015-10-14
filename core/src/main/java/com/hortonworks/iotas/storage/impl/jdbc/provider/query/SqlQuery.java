@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,21 +15,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hortonworks.iotas.storage.impl.jdbc.mysql.query;
+package com.hortonworks.iotas.storage.impl.jdbc.provider.query;
 
-import com.hortonworks.iotas.storage.StorableKey;
+import com.hortonworks.iotas.common.Schema;
+import com.hortonworks.iotas.storage.PrimaryKey;
 
-public class MySqlDelete extends MySqlStorableKeyBuilder {
+import java.sql.PreparedStatement;
+import java.util.List;
 
-    public MySqlDelete(StorableKey storableKey) {
-        super(storableKey);
-    }
+public interface SqlQuery {
 
-    // "DELETE FROM DB.TABLE WHERE id1 = val1 AND id2 = val2"
-    @Override
-    protected void setParameterizedSql() {
-        sql = "DELETE FROM  " + tableName + " WHERE "
-                + join(getColumnNames(columns, "%s = ?"), " AND ");
-        log.debug(sql);
-    }
+    /**
+     * @return The list of columns that constitute this database table
+     */
+    List<Schema.Field> getColumns();
+
+    /**
+     * @return table name or namespace
+     *
+     */
+    String getNamespace();
+
+    /**
+     * @return The {@link PrimaryKey} used in the query construction process <br/>
+     * null if no {@link PrimaryKey} used
+     */
+    PrimaryKey getPrimaryKey();
+
+    /**
+     * @return The SQL query with the place parameters ready to be replaced in a {@link PreparedStatement}
+     */
+    String getParametrizedSql();
 }

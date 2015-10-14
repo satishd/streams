@@ -15,19 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hortonworks.iotas.storage.impl.jdbc.mysql.query;
+package com.hortonworks.iotas.storage.impl.jdbc.provider.query;
 
 import com.hortonworks.iotas.storage.StorableKey;
 
 import java.util.LinkedList;
 
-public abstract class MySqlStorableKeyBuilder extends MySqlBuilder {
-    public MySqlStorableKeyBuilder(String nameSpace) {
+public abstract class ProviderStorableKeyQuery extends ProviderSqlQuery {
+    public ProviderStorableKeyQuery(String nameSpace) {
         tableName = nameSpace;
         setParameterizedSql();
     }
 
-    public MySqlStorableKeyBuilder(StorableKey storableKey) {
+    public ProviderStorableKeyQuery(StorableKey storableKey) {
         tableName = storableKey.getNameSpace();
         primaryKey = storableKey.getPrimaryKey();
         columns = new LinkedList<>(storableKey.getPrimaryKey().getFieldsToVal().keySet());

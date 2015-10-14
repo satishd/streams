@@ -15,15 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hortonworks.iotas.storage.impl.jdbc.mysql.query;
+package com.hortonworks.iotas.storage.impl.jdbc.provider.query;
 
 import com.hortonworks.iotas.storage.Storable;
 import com.hortonworks.iotas.storage.StorableKey;
 
-public abstract class MySqlStorableBuilder extends MySqlBuilder {
+public abstract class ProviderStorableSqlQuery extends ProviderSqlQuery {
     final Storable storable;
 
-    public MySqlStorableBuilder(Storable storable) {
+    public ProviderStorableSqlQuery(Storable storable) {
         this.storable = storable;
         StorableKey storableKey = storable.getStorableKey();
         tableName = storableKey.getNameSpace();

@@ -25,15 +25,17 @@ import com.hortonworks.iotas.storage.AbstractStoreManagerTest;
 import com.hortonworks.iotas.storage.Storable;
 import com.hortonworks.iotas.storage.StorageManager;
 import com.hortonworks.iotas.storage.exception.NonIncrementalColumnException;
+import com.hortonworks.iotas.storage.exception.StorageException;
 import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
 import com.hortonworks.iotas.storage.impl.jdbc.connection.ConnectionBuilder;
 import com.hortonworks.iotas.storage.impl.jdbc.mysql.factory.MySqlExecutor;
 import com.hortonworks.iotas.storage.impl.jdbc.mysql.query.MetadataHelper;
-import com.hortonworks.iotas.storage.impl.jdbc.mysql.query.SqlBuilder;
 import com.hortonworks.iotas.storage.impl.jdbc.mysql.statement.PreparedStatementBuilder;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.query.SqlQuery;
 import org.h2.tools.RunScript;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -52,7 +54,7 @@ public abstract class JdbcStorageManagerIntegrationTest extends AbstractStoreMan
     protected static Database database;
     protected static ConnectionBuilder connectionBuilder;
 
-    protected enum Database {MYSQL, H2}
+    protected enum Database {MYSQL, H2, PHOENIX}
 
     // ===== Tests Setup ====
     // Class level initialization is done in the implementing subclasses
@@ -98,7 +100,13 @@ public abstract class JdbcStorageManagerIntegrationTest extends AbstractStoreMan
     public void testNextId_NoAutoincrementTable_NonIncrementalKeyException() throws Exception {
         for (StorableTest test : storableTests) {
             if (test instanceof DeviceTest) {
-                getStorageManager().nextId(test.getNameSpace());    // should throw exception
+                try {
+                    getStorageManager().nextId(test.getNameSpace());    // should throw exception
+                } catch (StorageException e) {
+                    System.out.println("############# exception = " + e);
+                    e.printStackTrace();
+                    throw e;
+                }
 
             }
         }
@@ -106,6 +114,9 @@ public abstract class JdbcStorageManagerIntegrationTest extends AbstractStoreMan
 
     @Test
     public void testNextId_AutoincrementColumn_IdPlusOne() throws Exception {
+        // todo remove it once there is support for auto_increment columns in phoenix.
+        Assume.assumeTrue(!Database.PHOENIX.equals(database));
+
         for (StorableTest test : storableTests) {
             // Device does not have auto_increment, and therefore there is no concept of nextId and should throw exception (tested below)
             if (!(test instanceof DeviceTest)) {
@@ -158,9 +169,9 @@ public abstract class JdbcStorageManagerIntegrationTest extends AbstractStoreMan
             super(config, connectionBuilder);
         }
 
-        public MySqlExecutorForTest(CacheBuilder<SqlBuilder, PreparedStatementBuilder> cacheBuilder,
+        public MySqlExecutorForTest(CacheBuilder<SqlQuery, PreparedStatementBuilder> cacheBuilder,
             ExecutionConfig config, ConnectionBuilder connectionBuilder) {
-            super(cacheBuilder, config, connectionBuilder);
+            super(config, connectionBuilder, cacheBuilder);
         }
 
         @Override
@@ -184,7 +195,7 @@ public abstract class JdbcStorageManagerIntegrationTest extends AbstractStoreMan
         runScript("drop_tables.sql");
     }
 
-    private void runScript(String fileName) throws SQLException, IOException {
+    protected void runScript(String fileName) throws SQLException, IOException {
         Connection connection = null;
         try {
             connection = getConnection();

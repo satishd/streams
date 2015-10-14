@@ -21,6 +21,7 @@ package com.hortonworks.iotas.storage.impl.jdbc.mysql.query;
 import com.hortonworks.iotas.storage.exception.NonIncrementalColumnException;
 import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
 import com.hortonworks.iotas.storage.impl.jdbc.mysql.statement.PreparedStatementBuilder;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.query.ProviderSelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ public class MetadataHelper {
 
     public static boolean isAutoIncrement(Connection connection, String namespace, int queryTimeoutSecs) throws SQLException {
         final ResultSetMetaData rsMetadata = new PreparedStatementBuilder(connection, new ExecutionConfig(queryTimeoutSecs),
-                new MySqlSelect(namespace)).getMetaData();
+                new ProviderSelectQuery(namespace)).getMetaData();
 
         final int columnCount = rsMetadata.getColumnCount();
 
@@ -51,7 +52,7 @@ public class MetadataHelper {
 
     public static boolean isColumnInNamespace(Connection connection, int queryTimeoutSecs, String namespace, String columnName) throws SQLException {
         final ResultSetMetaData rsMetadata = new PreparedStatementBuilder(connection, new ExecutionConfig(queryTimeoutSecs),
-                new MySqlSelect(namespace)).getMetaData();
+                new ProviderSelectQuery(namespace)).getMetaData();
 
         final int columnCount = rsMetadata.getColumnCount();
 

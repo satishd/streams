@@ -18,8 +18,9 @@
 package com.hortonworks.iotas.storage.impl.jdbc.mysql.query;
 
 import com.hortonworks.iotas.storage.Storable;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.query.ProviderStorableSqlQuery;
 
-public class MySqlInsertUpdateDuplicate extends MySqlStorableBuilder {
+public class MySqlInsertUpdateDuplicate extends ProviderStorableSqlQuery {
 
     public MySqlInsertUpdateDuplicate(Storable storable) {
         super(storable);

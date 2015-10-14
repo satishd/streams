@@ -15,22 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hortonworks.iotas.storage.impl.jdbc.mysql.query;
+package com.hortonworks.iotas.storage.impl.jdbc.provider.query;
 
-import com.hortonworks.iotas.storage.Storable;
+import com.hortonworks.iotas.storage.StorableKey;
 
-public class MySqlInsert extends MySqlStorableBuilder {
-
-    public MySqlInsert(Storable storable) {
-        super(storable);
+public class ProviderSelectQuery extends ProviderStorableKeyQuery {
+    public ProviderSelectQuery(String nameSpace) {
+        super(nameSpace);   // super.columns == null => no where clause filtering
     }
 
-    // "INSERT INTO DB.TABLE (id, name, age) VALUES(1, "A", 19) ON DUPLICATE KEY UPDATE id=1, name="A", age=19";
+    public ProviderSelectQuery(StorableKey storableKey) {
+        super(storableKey);     // super.columns != null => do where clause filtering on PrimaryKey
+    }
+
+    // "SELECT * FROM DB.TABLE [WHERE C1 = ?, C2 = ?]"
     @Override
     protected void setParameterizedSql() {
-        sql = "INSERT INTO " + tableName + " ("
-                + join(getColumnNames(columns, null), ", ")
-                + ") VALUES( " + getBindVariables("?,", columns.size()) + ")";
+        sql = "SELECT * FROM " + tableName;
+        //where clause is defined by columns specified in the PrimaryKey
+        if (columns != null) {
+            sql += " WHERE " + join(getColumnNames(columns, "%s = ?"), " AND ");
+        }
         log.debug(sql);
     }
 }

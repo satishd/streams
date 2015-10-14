@@ -18,7 +18,9 @@
 
 package com.hortonworks.iotas.storage.impl.jdbc.mysql.query;
 
-public class MySqlQuery extends MySqlBuilder {
+import com.hortonworks.iotas.storage.impl.jdbc.provider.query.ProviderSqlQuery;
+
+public class MySqlQuery extends ProviderSqlQuery {
 
     public MySqlQuery(String sql) {
         this.sql = sql;
