@@ -18,6 +18,5 @@ public class PhoenixUpsert extends ProviderStorableSqlQuery {
                 + join(getColumnNames(columns, "\"%s\""), ", ")
                 + ") VALUES( " + getBindVariables("?,", columns.size()) + ")";
         log.debug(sql);
-        System.out.println("###################################### sql = \n" + sql);
     }
 }

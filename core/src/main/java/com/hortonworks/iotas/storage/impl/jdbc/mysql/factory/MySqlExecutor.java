@@ -24,10 +24,10 @@ import com.hortonworks.iotas.storage.exception.StorageException;
 import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
 import com.hortonworks.iotas.storage.impl.jdbc.connection.ConnectionBuilder;
 import com.hortonworks.iotas.storage.impl.jdbc.mysql.query.MetadataHelper;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.query.ProviderInsertQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.mysql.query.MySqlInsertUpdateDuplicate;
 import com.hortonworks.iotas.storage.impl.jdbc.mysql.statement.PreparedStatementBuilder;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.factory.ProviderQueryExecutor;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.query.ProviderInsertQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.query.SqlQuery;
 
 import java.sql.Connection;

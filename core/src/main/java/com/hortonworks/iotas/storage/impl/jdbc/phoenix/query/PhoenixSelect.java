@@ -16,7 +16,6 @@ public class PhoenixSelect extends ProviderStorableKeyQuery {
         super(storableKey);
     }
 
-    // "SELECT * FROM DB.TABLE [WHERE C1 = ?, C2 = ?]"
     @Override
     protected void setParameterizedSql() {
         sql = "SELECT * FROM " + tableName;

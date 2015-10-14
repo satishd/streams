@@ -15,9 +15,9 @@ import com.hortonworks.iotas.storage.exception.StorageException;
 import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
 import com.hortonworks.iotas.storage.impl.jdbc.connection.ConnectionBuilder;
 import com.hortonworks.iotas.storage.impl.jdbc.mysql.statement.PreparedStatementBuilder;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.query.ProviderDeleteQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.query.ProviderInsertQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.query.ProviderSelectQuery;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.query.ProviderDeleteQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.query.SqlQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.util.Util;
 
@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;

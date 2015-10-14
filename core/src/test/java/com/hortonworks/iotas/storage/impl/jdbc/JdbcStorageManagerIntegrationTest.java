@@ -100,13 +100,7 @@ public abstract class JdbcStorageManagerIntegrationTest extends AbstractStoreMan
     public void testNextId_NoAutoincrementTable_NonIncrementalKeyException() throws Exception {
         for (StorableTest test : storableTests) {
             if (test instanceof DeviceTest) {
-                try {
                     getStorageManager().nextId(test.getNameSpace());    // should throw exception
-                } catch (StorageException e) {
-                    System.out.println("############# exception = " + e);
-                    e.printStackTrace();
-                    throw e;
-                }
 
             }
         }
@@ -195,7 +189,7 @@ public abstract class JdbcStorageManagerIntegrationTest extends AbstractStoreMan
         runScript("drop_tables.sql");
     }
 
-    protected void runScript(String fileName) throws SQLException, IOException {
+    private void runScript(String fileName) throws SQLException, IOException {
         Connection connection = null;
         try {
             connection = getConnection();
