@@ -1,28 +1,24 @@
 package com.hortonworks.iotas.storage.impl.jdbc.phoenix;
 
-import com.hortonworks.iotas.IntegrationTest;
 import com.hortonworks.iotas.storage.impl.jdbc.JdbcStorageManager;
 import com.hortonworks.iotas.storage.impl.jdbc.JdbcStorageManagerIntegrationTest;
 import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
 import com.hortonworks.iotas.storage.impl.jdbc.connection.HikariCPConnectionBuilder;
 import com.hortonworks.iotas.storage.impl.jdbc.phoenix.factory.PhoenixExecutor;
+import com.hortonworks.iotas.test.HBaseIntegrationTest;
 import com.zaxxer.hikari.HikariConfig;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.experimental.categories.Category;
 
 /**
  *
  */
 
-@Category(IntegrationTest.class)
-// ignoring for now. need to add a separate group which require HBase with phoenix to be running
-// This test is running fine when hbase is running
-@Ignore
-public class PhoenixStorageManagerIntegrationTest extends JdbcStorageManagerIntegrationTest
-{
+@Category(HBaseIntegrationTest.class)
+public class PhoenixStorageManagerIntegrationTest extends JdbcStorageManagerIntegrationTest {
     @Before
     public void setUp() throws Exception {
         PhoenixClient phoenixClient = new PhoenixClient();
@@ -45,6 +41,11 @@ public class PhoenixStorageManagerIntegrationTest extends JdbcStorageManagerInte
         JdbcStorageManagerIntegrationTest.connectionBuilder = new HikariCPConnectionBuilder(hikariConfig);
         jdbcStorageManager = new JdbcStorageManager(new PhoenixExecutor(new ExecutionConfig(-1), connectionBuilder));
         database = Database.PHOENIX;
+    }
+
+    @Ignore // ignore this test as phoenix does not support auto increment columns
+    public void testNextId_AutoincrementColumn_IdPlusOne() throws Exception {
+        
     }
 
 }

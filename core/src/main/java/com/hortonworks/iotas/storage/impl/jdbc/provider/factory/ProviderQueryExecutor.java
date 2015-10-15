@@ -14,11 +14,11 @@ import com.hortonworks.iotas.storage.exception.NonIncrementalColumnException;
 import com.hortonworks.iotas.storage.exception.StorageException;
 import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
 import com.hortonworks.iotas.storage.impl.jdbc.connection.ConnectionBuilder;
-import com.hortonworks.iotas.storage.impl.jdbc.mysql.statement.PreparedStatementBuilder;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.query.ProviderDeleteQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.query.ProviderInsertQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.query.ProviderSelectQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.query.SqlQuery;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.statement.PreparedStatementBuilder;
 import com.hortonworks.iotas.storage.impl.jdbc.util.Util;
 
 import java.sql.Connection;
@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -262,27 +263,18 @@ public class ProviderQueryExecutor implements QueryExecutor {
 
         // returns null for empty ResultSet or ResultSet with no rows
         private List<Map<String, Object>> getMapsFromResultSet(ResultSet resultSet) {
-            List<Map<String, Object>> maps = new ArrayList<>();
+            List<Map<String, Object>> maps = null;
 
             try {
-                ResultSetMetaData rsMetadata = resultSet.getMetaData();
-                while (resultSet.next()) {
-                    Map<String, Object> map = newMapWithRowContents(resultSet, rsMetadata);
-                    System.out.println("######################## map = " + map);
-                    maps.add(map);
+                boolean next = resultSet.next();
+                if(next) {
+                    maps = new LinkedList<>();
+                    ResultSetMetaData rsMetadata = resultSet.getMetaData();
+                    do {
+                        Map<String, Object> map = newMapWithRowContents(resultSet, rsMetadata);
+                        maps.add(map);
+                    } while(resultSet.next());
                 }
-
-//                if (resultSet.first()) {    // returns false if no rows in result set. Otherwise points to first row
-//                    maps = new LinkedList<>();
-//                    ResultSetMetaData rsMetadata = resultSet.getMetaData();
-//                    Map<String, Object> map = newMapWithRowContents(resultSet, rsMetadata);;
-//                    maps.add(map);
-//
-//                    while (resultSet.next()) {
-//                        map = newMapWithRowContents(resultSet, rsMetadata);;
-//                        maps.add(map);
-//                    }
-//                }
             } catch (SQLException e) {
                 log.error("Exception occurred while processing result set.", e);
             }

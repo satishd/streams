@@ -23,12 +23,12 @@ import com.hortonworks.iotas.storage.Storable;
 import com.hortonworks.iotas.storage.exception.StorageException;
 import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
 import com.hortonworks.iotas.storage.impl.jdbc.connection.ConnectionBuilder;
-import com.hortonworks.iotas.storage.impl.jdbc.mysql.query.MetadataHelper;
 import com.hortonworks.iotas.storage.impl.jdbc.mysql.query.MySqlInsertUpdateDuplicate;
-import com.hortonworks.iotas.storage.impl.jdbc.mysql.statement.PreparedStatementBuilder;
+import com.hortonworks.iotas.storage.impl.jdbc.mysql.query.MySqlQueryUtils;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.factory.ProviderQueryExecutor;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.query.ProviderInsertQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.query.SqlQuery;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.statement.PreparedStatementBuilder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -82,7 +82,7 @@ public class MySqlExecutor extends ProviderQueryExecutor {
 
     // Protected to be able to override it in the test framework
     protected Long getNextId(Connection connection, String namespace) throws SQLException {
-        return MetadataHelper.nextIdMySql(connection, namespace, queryTimeoutSecs);
+        return MySqlQueryUtils.nextIdMySql(connection, namespace, queryTimeoutSecs);
     }
 
 }

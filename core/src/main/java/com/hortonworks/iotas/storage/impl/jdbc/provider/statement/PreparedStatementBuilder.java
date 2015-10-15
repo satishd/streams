@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.hortonworks.iotas.storage.impl.jdbc.mysql.statement;
+package com.hortonworks.iotas.storage.impl.jdbc.provider.statement;
 
 import com.hortonworks.iotas.common.Schema;
 import com.hortonworks.iotas.storage.exception.MalformedQueryException;

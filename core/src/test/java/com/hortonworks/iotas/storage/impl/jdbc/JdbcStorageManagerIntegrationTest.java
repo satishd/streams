@@ -20,22 +20,20 @@
 package com.hortonworks.iotas.storage.impl.jdbc;
 
 import com.google.common.cache.CacheBuilder;
-import com.hortonworks.iotas.IntegrationTest;
 import com.hortonworks.iotas.storage.AbstractStoreManagerTest;
 import com.hortonworks.iotas.storage.Storable;
 import com.hortonworks.iotas.storage.StorageManager;
 import com.hortonworks.iotas.storage.exception.NonIncrementalColumnException;
-import com.hortonworks.iotas.storage.exception.StorageException;
 import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
 import com.hortonworks.iotas.storage.impl.jdbc.connection.ConnectionBuilder;
 import com.hortonworks.iotas.storage.impl.jdbc.mysql.factory.MySqlExecutor;
-import com.hortonworks.iotas.storage.impl.jdbc.mysql.query.MetadataHelper;
-import com.hortonworks.iotas.storage.impl.jdbc.mysql.statement.PreparedStatementBuilder;
+import com.hortonworks.iotas.storage.impl.jdbc.mysql.query.MySqlQueryUtils;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.query.SqlQuery;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.statement.PreparedStatementBuilder;
+import com.hortonworks.iotas.test.IntegrationTest;
 import org.h2.tools.RunScript;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -101,15 +99,12 @@ public abstract class JdbcStorageManagerIntegrationTest extends AbstractStoreMan
         for (StorableTest test : storableTests) {
             if (test instanceof DeviceTest) {
                     getStorageManager().nextId(test.getNameSpace());    // should throw exception
-
             }
         }
     }
 
     @Test
     public void testNextId_AutoincrementColumn_IdPlusOne() throws Exception {
-        // todo remove it once there is support for auto_increment columns in phoenix.
-        Assume.assumeTrue(!Database.PHOENIX.equals(database));
 
         for (StorableTest test : storableTests) {
             // Device does not have auto_increment, and therefore there is no concept of nextId and should throw exception (tested below)
@@ -173,7 +168,7 @@ public abstract class JdbcStorageManagerIntegrationTest extends AbstractStoreMan
             if (database.equals(Database.MYSQL)) {
                 return super.nextId(namespace);
             } else {
-                return MetadataHelper.nextIdH2(connection, namespace, getConfig().getQueryTimeoutSecs());
+                return MySqlQueryUtils.nextIdH2(connection, namespace, getConfig().getQueryTimeoutSecs());
             }
         }
     }

@@ -18,8 +18,8 @@
 
 package com.hortonworks.iotas.storage.impl.jdbc.config;
 
-import com.hortonworks.iotas.storage.impl.jdbc.mysql.statement.PreparedStatementBuilder;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.factory.QueryExecutor;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.statement.PreparedStatementBuilder;
 
 /**
  * Wrapper object that serves has a placeholder for configuration (e.g. {@code query timeout}) that needs

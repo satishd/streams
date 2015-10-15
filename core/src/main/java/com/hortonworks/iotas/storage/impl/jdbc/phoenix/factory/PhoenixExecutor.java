@@ -11,14 +11,11 @@ import com.hortonworks.iotas.storage.impl.jdbc.phoenix.query.PhoenixUpsert;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.factory.ProviderQueryExecutor;
 
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  *
  */
 public class PhoenixExecutor extends ProviderQueryExecutor {
-
-    private static AtomicLong id = new AtomicLong();
 
     public PhoenixExecutor(ExecutionConfig config, ConnectionBuilder connectionBuilder) {
         super(config, connectionBuilder);
