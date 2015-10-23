@@ -26,7 +26,7 @@ import com.hortonworks.iotas.storage.impl.jdbc.connection.ConnectionBuilder;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.mysql.query.MySqlInsertUpdateDuplicate;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.mysql.query.MySqlQueryUtils;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.factory.ProviderQueryExecutor;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.ProviderInsertQuery;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.SqlInsertQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.SqlQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.statement.PreparedStatementBuilder;
 
@@ -57,7 +57,7 @@ public class MySqlExecutor extends ProviderQueryExecutor {
 
     @Override
     public void insert(Storable storable) {
-        executeUpdate(new ProviderInsertQuery(storable));
+        executeUpdate(new SqlInsertQuery(storable));
     }
 
     @Override

@@ -14,10 +14,10 @@ import com.hortonworks.iotas.storage.exception.NonIncrementalColumnException;
 import com.hortonworks.iotas.storage.exception.StorageException;
 import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
 import com.hortonworks.iotas.storage.impl.jdbc.connection.ConnectionBuilder;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.ProviderDeleteQuery;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.ProviderInsertQuery;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.ProviderSelectQuery;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.SqlDeleteQuery;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.SqlInsertQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.SqlQuery;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.SqlSelectQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.statement.PreparedStatementBuilder;
 import com.hortonworks.iotas.storage.impl.jdbc.util.Util;
 
@@ -66,7 +66,7 @@ public class ProviderQueryExecutor implements QueryExecutor {
 
     @Override
     public void insert(Storable storable) {
-        executeUpdate(new ProviderInsertQuery(storable));
+        executeUpdate(new SqlInsertQuery(storable));
     }
 
     @Override
@@ -76,17 +76,17 @@ public class ProviderQueryExecutor implements QueryExecutor {
 
     @Override
     public void delete(StorableKey storableKey) {
-        executeUpdate(new ProviderDeleteQuery(storableKey));
+        executeUpdate(new SqlDeleteQuery(storableKey));
     }
 
     @Override
     public <T extends Storable> Collection<T> select(final String namespace) {
-        return executeQuery(namespace, new ProviderSelectQuery(namespace));
+        return executeQuery(namespace, new SqlSelectQuery(namespace));
     }
 
     @Override
     public <T extends Storable> Collection<T> select(final StorableKey storableKey){
-        return executeQuery(storableKey.getNameSpace(), new ProviderSelectQuery(storableKey));
+        return executeQuery(storableKey.getNameSpace(), new SqlSelectQuery(storableKey));
     }
 
     @Override

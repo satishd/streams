@@ -26,10 +26,10 @@ import com.hortonworks.iotas.storage.StorageManager;
 import com.hortonworks.iotas.storage.exception.NonIncrementalColumnException;
 import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
 import com.hortonworks.iotas.storage.impl.jdbc.connection.ConnectionBuilder;
-import com.hortonworks.iotas.storage.impl.jdbc.mysql.factory.MySqlExecutor;
-import com.hortonworks.iotas.storage.impl.jdbc.mysql.query.MySqlQueryUtils;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.query.SqlQuery;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.statement.PreparedStatementBuilder;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.mysql.factory.MySqlExecutor;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.mysql.query.MySqlQueryUtils;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.SqlQuery;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.statement.PreparedStatementBuilder;
 import com.hortonworks.iotas.test.IntegrationTest;
 import org.h2.tools.RunScript;
 import org.junit.After;
@@ -177,11 +177,11 @@ public abstract class JdbcStorageManagerIntegrationTest extends AbstractStoreMan
     // ========= Private helper methods  ==========
 
     private void createTables() throws SQLException, IOException {
-        runScript("create_tables.sql");
+        runScript("mysql/create_tables.sql");
     }
 
     private void dropTables() throws SQLException, IOException {
-        runScript("drop_tables.sql");
+        runScript("mysql/drop_tables.sql");
     }
 
     private void runScript(String fileName) throws SQLException, IOException {

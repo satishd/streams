@@ -18,9 +18,9 @@
 
 package com.hortonworks.iotas.storage.impl.jdbc.provider.mysql.query;
 
-import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.ProviderSqlQuery;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.AbstractSqlQuery;
 
-public class MySqlQuery extends ProviderSqlQuery {
+public class MySqlQuery extends AbstractSqlQuery {
 
     public MySqlQuery(String sql) {
         this.sql = sql;

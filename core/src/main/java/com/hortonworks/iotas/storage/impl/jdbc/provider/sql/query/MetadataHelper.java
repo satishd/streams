@@ -35,7 +35,7 @@ public class MetadataHelper {
 
     public static boolean isAutoIncrement(Connection connection, String namespace, int queryTimeoutSecs) throws SQLException {
         final ResultSetMetaData rsMetadata = new PreparedStatementBuilder(connection, new ExecutionConfig(queryTimeoutSecs),
-                new ProviderSelectQuery(namespace)).getMetaData();
+                new SqlSelectQuery(namespace)).getMetaData();
 
         final int columnCount = rsMetadata.getColumnCount();
 
@@ -49,7 +49,7 @@ public class MetadataHelper {
 
     public static boolean isColumnInNamespace(Connection connection, int queryTimeoutSecs, String namespace, String columnName) throws SQLException {
         final ResultSetMetaData rsMetadata = new PreparedStatementBuilder(connection, new ExecutionConfig(queryTimeoutSecs),
-                new ProviderSelectQuery(namespace)).getMetaData();
+                new SqlSelectQuery(namespace)).getMetaData();
 
         final int columnCount = rsMetadata.getColumnCount();
 

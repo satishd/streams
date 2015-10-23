@@ -21,8 +21,8 @@ package com.hortonworks.iotas.storage.impl.jdbc.provider.sql.statement;
 import com.hortonworks.iotas.common.Schema;
 import com.hortonworks.iotas.storage.exception.MalformedQueryException;
 import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.ProviderStorableKeyQuery;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.ProviderStorableSqlQuery;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.AbstractStorableKeyQuery;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.AbstractStorableSqlQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.SqlQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,9 +121,9 @@ public class PreparedStatementBuilder {
      * */
     public PreparedStatement getPreparedStatement(SqlQuery sqlBuilder) throws SQLException {
         // If more types become available consider subclassing instead of going with this approach, which was chosen here for simplicity
-        if (sqlBuilder instanceof ProviderStorableKeyQuery) {
+        if (sqlBuilder instanceof AbstractStorableKeyQuery) {
             setStorableKeyPreparedStatement(sqlBuilder);
-        } else if (sqlBuilder instanceof ProviderStorableSqlQuery) {
+        } else if (sqlBuilder instanceof AbstractStorableSqlQuery) {
             setStorablePreparedStatement(sqlBuilder);
         }
         log.debug("Successfully prepared statement [{}]", preparedStatement);
@@ -151,7 +151,7 @@ public class PreparedStatementBuilder {
 
         if (columns != null) {
             final int len = columns.size();
-            final Map columnsToValues = ((ProviderStorableSqlQuery)sqlBuilder).getStorable().toMap();
+            final Map columnsToValues = ((AbstractStorableSqlQuery)sqlBuilder).getStorable().toMap();
             final int nTimes = numPrepStmntParams /len;   // Number of times each column must be replaced on a query parameter
 
             for (int j = 0; j < len*nTimes; j++) {

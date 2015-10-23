@@ -27,9 +27,9 @@ import com.hortonworks.iotas.storage.StorageManager;
 import com.hortonworks.iotas.storage.exception.AlreadyExistsException;
 import com.hortonworks.iotas.storage.exception.IllegalQueryParameterException;
 import com.hortonworks.iotas.storage.exception.StorageException;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.factory.QueryExecutor;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.query.MetadataHelper;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.query.ProviderSelectQuery;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.factory.QueryExecutor;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.MetadataHelper;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.SqlSelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,7 +143,7 @@ public class JdbcStorageManager implements StorageManager {
 
     /**
      * Query parameters are typically specified for a column or key in a database table or storage namespace. Therefore, we build
-     * the {@link StorableKey} from the list of query parameters, and then can use {@link ProviderSelectQuery} builder to generate the query using
+     * the {@link StorableKey} from the list of query parameters, and then can use {@link SqlSelectQuery} builder to generate the query using
      * the query parameters in the where clause
      *
      * @return {@link StorableKey} with all query parameters that match database columns <br/>
