@@ -43,17 +43,11 @@ public class PhoenixClient {
     }
 
     public static void main(String[] args) throws Exception {
-
-        int ct = 0;
-        do {
-            System.out.println("######## ct:"+ct);
-        } while (ct <0);
-
-//        String url = "jdbc:phoenix:localhost:2181";
-//        String createPath = "phoenix/create_tables.sql";
-//        String dropPath = "phoenix/drop_tables.sql";
-//        PhoenixClient phoenixClient = new PhoenixClient(url);
-//        phoenixClient.runScript(dropPath);
-//        phoenixClient.runScript(createPath);
+        String url = "jdbc:phoenix:localhost:2181";
+        String createPath = "phoenix/create_tables.sql";
+        String dropPath = "phoenix/drop_tables.sql";
+        PhoenixClient phoenixClient = new PhoenixClient(url);
+        phoenixClient.runScript(dropPath);
+        phoenixClient.runScript(createPath);
     }
 }
