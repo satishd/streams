@@ -32,7 +32,7 @@ import javax.script.ScriptException;
  *
  */
 public class TransformerRuntime {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransformerRuntime.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TransformerRuntime.class);
 
     private final Transformer transformer;
     private GroovyScript<? extends Object> groovyScript;
@@ -51,23 +51,23 @@ public class TransformerRuntime {
 
             Object value = null;
             if(groovyScript != null) {
-                LOGGER.debug("Running script [{}] with input [{}]", groovyScript, iotasEvent);
+                LOG.debug("Running script [{}] with input [{}]", groovyScript, iotasEvent);
 
                 value = groovyScript.evaluate(iotasEvent);
 
-                LOGGER.debug("Computed value is {}. transformer: [{}] script: [{}] input: [{}]", value, transformer, groovyScript, iotasEvent);
+                LOG.debug("Computed value is {}. transformer: [{}] script: [{}] input: [{}]", value, transformer, groovyScript, iotasEvent);
                 Schema.Type type = transformer.getOutputField().getType();
                 if (!type.equals(Schema.fromJavaType(value))) {
                     throw new NormalizationException("Computed value is not of expected type: " + type);
                 }
             } else {
                 value = iotasEvent.getFieldsAndValues().get(inputFieldName);
-                LOGGER.debug("Input field value returned: {}", value);
+                LOG.debug("Input field value returned: {}", value);
             }
 
             return value;
         } catch (ScriptException | ParseException e) {
-            LOGGER.error("Error occurred while converting input fields in tranformer: "+transformer);
+            LOG.error("Error occurred while converting input fields in tranformer: " + transformer);
             throw new NormalizationException("Error occurred while converting input fields in a normalization", e);
         }
 

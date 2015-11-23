@@ -37,7 +37,7 @@ import java.util.Set;
  *
  */
 public class NormalizationBolt extends BaseRichBolt {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NormalizationBolt.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NormalizationBolt.class);
 
     private TopologyContext context;
     private OutputCollector collector;
@@ -67,7 +67,7 @@ public class NormalizationBolt extends BaseRichBolt {
 
             collector.ack(input);
         } catch (Exception e) {
-            LOGGER.error("Error occurred while normalizing the tuple", e);
+            LOG.error("Error occurred while normalizing the tuple", e);
             collector.fail(input);
             collector.reportError(e);
         }

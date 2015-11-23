@@ -38,7 +38,7 @@ import java.util.Set;
  */
 public class NormalizationProcessorRuntime {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(NormalizationProcessorRuntime.class);
+    private static Logger LOG = LoggerFactory.getLogger(NormalizationProcessorRuntime.class);
 
     private final List<TransformerRuntime> transformerRuntimes;
     private final List<ValueGeneratorRuntime> valueGeneratorRuntimes;
@@ -56,7 +56,7 @@ public class NormalizationProcessorRuntime {
     public Map<String, Object> execute(IotasEvent iotasEvent) throws NormalizationException {
         Map<String, Object> outputFieldValuesMap = new HashMap<String, Object>(iotasEvent.getFieldsAndValues());
 
-        LOGGER.debug("Received iotas event {}", iotasEvent);
+        LOG.debug("Received iotas event {}", iotasEvent);
 
         // run transformers
         for (TransformerRuntime transformerRuntime : transformerRuntimes) {
@@ -68,7 +68,7 @@ public class NormalizationProcessorRuntime {
         // run filters
         for (String filterField : normalizationProcessor.getNormalizer().getFieldsToBeFiltered()) {
             outputFieldValuesMap.remove(filterField);
-            LOGGER.debug("Removed filter field [{}] in [{}]", filterField, normalizationProcessor);
+            LOG.debug("Removed filter field [{}] in [{}]", filterField, normalizationProcessor);
         }
 
         // run value generators, fields to be added, may need to run script to compute the default value
@@ -78,7 +78,7 @@ public class NormalizationProcessorRuntime {
                 Object value = valueGeneratorRuntime.generateValue(iotasEvent);
                 outputFieldValuesMap.putIfAbsent(name, value);
             } else {
-                LOGGER.debug("Default value for field [{}] is not generated as it exists in the received event [{}]", name, iotasEvent);
+                LOG.debug("Default value for field [{}] is not generated as it exists in the received event [{}]", name, iotasEvent);
             }
         }
 
@@ -89,7 +89,7 @@ public class NormalizationProcessorRuntime {
     }
 
     private void validate(Map<String, Object> outputFieldValuesMap) throws NormalizationException {
-        LOGGER.debug("Validating generated output field values: [{}] with [{}]", outputFieldValuesMap, declaredOutputSet);
+        LOG.debug("Validating generated output field values: [{}] with [{}]", outputFieldValuesMap, declaredOutputSet);
 
         for (Map.Entry<String,Object> entry : outputFieldValuesMap.entrySet()) {
             try {

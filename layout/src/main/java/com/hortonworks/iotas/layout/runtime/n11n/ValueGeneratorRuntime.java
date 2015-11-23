@@ -32,7 +32,7 @@ import javax.script.ScriptException;
  *
  */
 public class ValueGeneratorRuntime {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ValueGeneratorRuntime.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ValueGeneratorRuntime.class);
 
     private final Schema.Field field;
     private GroovyScript<Object> groovyScript;
@@ -44,15 +44,15 @@ public class ValueGeneratorRuntime {
 
     public Object generateValue(IotasEvent iotasEvent) throws NormalizationException {
         if(value != null) {
-            LOGGER.debug("Returning default static value [{}] for [{}]", value, iotasEvent);
+            LOG.debug("Returning default static value [{}] for [{}]", value, iotasEvent);
             return value;
         }
 
         try {
-            LOGGER.debug("Running script [{}] with input [{}]", groovyScript, iotasEvent);
+            LOG.debug("Running script [{}] with input [{}]", groovyScript, iotasEvent);
             Object evaluatedValue = groovyScript.evaluate(iotasEvent);
 
-            LOGGER.debug("Computed value is {}. field: [{}] script: [{}] input: [{}]", value, field, groovyScript, iotasEvent);
+            LOG.debug("Computed value is {}. field: [{}] script: [{}] input: [{}]", value, field, groovyScript, iotasEvent);
             Schema.Type type = field.getType();
             if(!type.valueOfSameType(evaluatedValue)) {
                 throw new NormalizationException("Computed value is not of expected type: "+ type);
