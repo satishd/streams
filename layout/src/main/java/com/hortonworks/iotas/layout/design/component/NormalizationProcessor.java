@@ -18,23 +18,65 @@
 package com.hortonworks.iotas.layout.design.component;
 
 
-import com.hortonworks.iotas.layout.design.n11n.Normalizer;
+import com.hortonworks.iotas.layout.design.n11n.Transformer;
+import com.hortonworks.iotas.layout.design.n11n.ValueGenerator;
+
+import java.util.List;
 
 /**
+ * Design time component of Normalization processor containing configuration of Transformers,
+ * fields to be filtered/removed and new output field/value generators.
  *
  */
 public class NormalizationProcessor extends Processor {
-    private Normalizer normalizer;
 
-    public NormalizationProcessor(Normalizer normalizer) {
-        this.normalizer = normalizer;
+    private List<Transformer> transformers;
+
+    /**
+     * List of input fields filtered or removed. These will not be passed to output fields.
+     */
+    private List<String> fieldsToBeFiltered;
+    private List<ValueGenerator> newValueGenerators;
+
+    public NormalizationProcessor() {
     }
 
-    public Normalizer getNormalizer() {
-        return normalizer;
+    public NormalizationProcessor(List<Transformer> transformers, List<String> fieldsToBeFiltered, List<ValueGenerator> newValueGenerators) {
+        this.transformers = transformers;
+        this.fieldsToBeFiltered = fieldsToBeFiltered;
+        this.newValueGenerators = newValueGenerators;
     }
 
-    public void setNormalizer(Normalizer normalizer) {
-        this.normalizer = normalizer;
+    public List<Transformer> getTransformers() {
+        return transformers;
+    }
+
+    public void setTransformers(List<Transformer> transformers) {
+        this.transformers = transformers;
+    }
+
+    public List<String> getFieldsToBeFiltered() {
+        return fieldsToBeFiltered;
+    }
+
+    public void setFieldsToBeFiltered(List<String> fieldsToBeFiltered) {
+        this.fieldsToBeFiltered = fieldsToBeFiltered;
+    }
+
+    public List<ValueGenerator> getNewValueGenerators() {
+        return newValueGenerators;
+    }
+
+    public void setNewValueGenerators(List<ValueGenerator> newValueGenerators) {
+        this.newValueGenerators = newValueGenerators;
+    }
+
+    @Override
+    public String toString() {
+        return "NormalizationProcessor{" +
+                "transformers=" + transformers +
+                ", fieldsToBeFiltered=" + fieldsToBeFiltered +
+                ", newValueGenerators=" + newValueGenerators +
+                '}';
     }
 }

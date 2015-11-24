@@ -1,7 +1,7 @@
 package com.hortonworks.iotas.layout.runtime.n11n;
 
 /**
- *
+ * It is thrown when an issue occurs while normalizing the event.
  */
 public class NormalizationException extends Exception {
     public NormalizationException() {

@@ -22,6 +22,8 @@ import com.hortonworks.iotas.common.Schema;
 import java.io.Serializable;
 
 /**
+ * This class represents design time value generator of a given field which is part of
+ * {@link com.hortonworks.iotas.layout.design.component.NormalizationProcessor}.
  *
  */
 public class ValueGenerator implements Serializable {
@@ -32,9 +34,8 @@ public class ValueGenerator implements Serializable {
     public ValueGenerator() {
     }
 
-    public ValueGenerator(Schema.Field field, String script, Object value) {
+    public ValueGenerator(Schema.Field field, Object value) {
         this.field = field;
-        this.script = script;
         this.value = value;
     }
 

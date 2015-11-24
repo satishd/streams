@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 import javax.script.ScriptException;
 
 /**
+ * This class represents runtime component of {@link ValueGenerator}. It represents an output field with a value.
+ * That value can be either static value or computed dynamically by running the given script with received IotasEvent.
  *
  */
 public class ValueGeneratorRuntime {

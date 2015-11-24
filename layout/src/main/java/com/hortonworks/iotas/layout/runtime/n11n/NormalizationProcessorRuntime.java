@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +35,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * It represents runtime abstraction of NormalizationProcessor.
+ * It involves running list of {@link TransformerRuntime}, filters {@link NormalizationProcessor#fieldsToBeFiltered}
+ * and list of {@link ValueGeneratorRuntime}.
+ *
+ * todo:
+ * we may still have uber script which can generate output fields for a given map of input fields.
  *
  */
 public class NormalizationProcessorRuntime {
@@ -43,14 +50,14 @@ public class NormalizationProcessorRuntime {
     private final List<TransformerRuntime> transformerRuntimes;
     private final List<ValueGeneratorRuntime> valueGeneratorRuntimes;
     private final NormalizationProcessor normalizationProcessor;
-    private final Set<Schema.Field> declaredOutputSet;
+    private final Set<Schema.Field> declaredOutput;
 
     private NormalizationProcessorRuntime(List<TransformerRuntime> transformerRuntimes,
                                           List<ValueGeneratorRuntime> valueGeneratorRuntimes, NormalizationProcessor normalizationProcessor) {
         this.transformerRuntimes = transformerRuntimes;
         this.valueGeneratorRuntimes = valueGeneratorRuntimes;
         this.normalizationProcessor = normalizationProcessor;
-        declaredOutputSet = new HashSet<>(normalizationProcessor.getDeclaredOutput());
+        declaredOutput = new HashSet<>(normalizationProcessor.getDeclaredOutput());
     }
 
     public Map<String, Object> execute(IotasEvent iotasEvent) throws NormalizationException {
@@ -58,20 +65,20 @@ public class NormalizationProcessorRuntime {
 
         LOG.debug("Received iotas event {}", iotasEvent);
 
-        // run transformers
-        for (TransformerRuntime transformerRuntime : transformerRuntimes) {
-            Object result = transformerRuntime.execute(iotasEvent);
-            outputFieldValuesMap.remove(transformerRuntime.getTransformer().getInputField().getName());
-            outputFieldValuesMap.put(transformerRuntime.getTransformer().getOutputField().getName(), result);
-        }
+        runTransformers(iotasEvent, outputFieldValuesMap);
 
-        // run filters
-        for (String filterField : normalizationProcessor.getNormalizer().getFieldsToBeFiltered()) {
-            outputFieldValuesMap.remove(filterField);
-            LOG.debug("Removed filter field [{}] in [{}]", filterField, normalizationProcessor);
-        }
+        runFilters(outputFieldValuesMap);
 
-        // run value generators, fields to be added, may need to run script to compute the default value
+        runValueGenerators(iotasEvent, outputFieldValuesMap);
+
+        // todo this should go to a common schema/parser layer
+        validate(outputFieldValuesMap);
+
+        return outputFieldValuesMap;
+    }
+
+    private void runValueGenerators(IotasEvent iotasEvent, Map<String, Object> outputFieldValuesMap) throws NormalizationException {
+
         for (ValueGeneratorRuntime valueGeneratorRuntime : valueGeneratorRuntimes) {
             String name = valueGeneratorRuntime.getField().getName();
             if(!outputFieldValuesMap.containsKey(name)) {
@@ -81,20 +88,37 @@ public class NormalizationProcessorRuntime {
                 LOG.debug("Default value for field [{}] is not generated as it exists in the received event [{}]", name, iotasEvent);
             }
         }
+    }
 
-        // todo this should go to a common schema/parser layer
-        validate(outputFieldValuesMap);
+    private void runFilters(Map<String, Object> outputFieldValuesMap) {
+        List<String> fieldsToBeFiltered = normalizationProcessor.getFieldsToBeFiltered();
 
-        return outputFieldValuesMap;
+        if(fieldsToBeFiltered == null) {
+            return;
+        }
+
+        for (String filterField : fieldsToBeFiltered) {
+            outputFieldValuesMap.remove(filterField);
+            LOG.debug("Removed filter field [{}] in [{}]", filterField, normalizationProcessor);
+        }
+    }
+
+    private void runTransformers(IotasEvent iotasEvent, Map<String, Object> outputFieldValuesMap) throws NormalizationException {
+
+        for (TransformerRuntime transformerRuntime : transformerRuntimes) {
+            Object result = transformerRuntime.execute(iotasEvent);
+            outputFieldValuesMap.remove(transformerRuntime.getTransformer().getInputField().getName());
+            outputFieldValuesMap.put(transformerRuntime.getTransformer().getOutputField().getName(), result);
+        }
     }
 
     private void validate(Map<String, Object> outputFieldValuesMap) throws NormalizationException {
-        LOG.debug("Validating generated output field values: [{}] with [{}]", outputFieldValuesMap, declaredOutputSet);
+        LOG.debug("Validating generated output field values: [{}] with [{}]", outputFieldValuesMap, declaredOutput);
 
         for (Map.Entry<String,Object> entry : outputFieldValuesMap.entrySet()) {
             try {
                 Object value = entry.getValue();
-                if(value != null && !declaredOutputSet.contains(new Schema.Field(entry.getKey(), Schema.fromJavaType(value)))) {
+                if(value != null && !declaredOutput.contains(new Schema.Field(entry.getKey(), Schema.fromJavaType(value)))) {
                     throw new NormalizationException("Normalized payload does not conform to declared output schema.");
                 }
             } catch (ParseException e) {
@@ -112,16 +136,24 @@ public class NormalizationProcessorRuntime {
         }
 
         private List<TransformerRuntime> buildTransformerRuntimes() throws NormalizationException {
+            if(normalizationProcessor.getTransformers() == null || normalizationProcessor.getTransformers().isEmpty()) {
+                Collections.emptyList();
+            }
+
             List<TransformerRuntime> transformers = new ArrayList<>();
-            for (Transformer transformer : normalizationProcessor.getNormalizer().getTransformers()) {
+            for (Transformer transformer : normalizationProcessor.getTransformers()) {
                 transformers.add(new TransformerRuntime.Builder(transformer).build());
             }
             return transformers;
         }
 
         private List<ValueGeneratorRuntime> buildValueGeneratorRuntimes() throws NormalizationException {
+            if(normalizationProcessor.getNewValueGenerators() == null || normalizationProcessor.getNewValueGenerators().isEmpty()) {
+                Collections.emptyList();
+            }
+
             List<ValueGeneratorRuntime> valueGeneratorRuntimes = new ArrayList<>();
-            for (ValueGenerator valueGenerator : normalizationProcessor.getNormalizer().getNewValueGenerators()) {
+            for (ValueGenerator valueGenerator : normalizationProcessor.getNewValueGenerators()) {
                 valueGeneratorRuntimes.add(new ValueGeneratorRuntime.Builder().withValueGenerator(valueGenerator).build());
             }
             return valueGeneratorRuntimes;
@@ -141,7 +173,7 @@ public class NormalizationProcessorRuntime {
                 "transformerRuntimes=" + transformerRuntimes +
                 ", valueGeneratorRuntimes=" + valueGeneratorRuntimes +
                 ", normalizationProcessor=" + normalizationProcessor +
-                ", declaredOutputSet=" + declaredOutputSet +
+                ", declaredOutput=" + declaredOutput +
                 '}';
     }
 }

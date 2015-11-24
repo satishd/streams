@@ -9,7 +9,6 @@ import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
 import com.hortonworks.iotas.common.Schema;
 import com.hortonworks.iotas.layout.design.component.NormalizationProcessor;
-import com.hortonworks.iotas.layout.design.n11n.Normalizer;
 import com.hortonworks.iotas.layout.design.n11n.Transformer;
 import com.hortonworks.iotas.layout.design.n11n.ValueGenerator;
 import com.hortonworks.iotas.layout.runtime.n11n.NormalizationException;
@@ -124,11 +123,10 @@ public class NormalizationBoltTest {
     }
 
     private NormalizationProcessorRuntime buildNormalizationProcessorRuntime() throws NormalizationException {
-        List<Transformer> transformers = Collections.singletonList(new Transformer(new Schema.Field("temp", Schema.Type.INTEGER), new Schema.Field("temperature", Schema.Type.INTEGER), null));
+        List<Transformer> transformers = Collections.singletonList(new Transformer(new Schema.Field("temp", Schema.Type.INTEGER), new Schema.Field("temperature", Schema.Type.INTEGER)));
         List<String> filters = Collections.singletonList("foo");
-        List<ValueGenerator> valueGenerators = Collections.singletonList(new ValueGenerator(new Schema.Field("new-field", Schema.Type.STRING), null, "new value"));
-        Normalizer normalizer = new Normalizer(transformers, filters, valueGenerators);
-        NormalizationProcessor normalizationProcessor = new NormalizationProcessor(normalizer);
+        List<ValueGenerator> valueGenerators = Collections.singletonList(new ValueGenerator(new Schema.Field("new-field", Schema.Type.STRING), "new value"));
+        NormalizationProcessor normalizationProcessor = new NormalizationProcessor(transformers, filters, valueGenerators);
         normalizationProcessor.setDeclaredOutput(OUTPUT_SCHEMA);
 
         return new NormalizationProcessorRuntime.Builder(normalizationProcessor).build();
