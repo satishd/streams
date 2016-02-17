@@ -1,6 +1,7 @@
 package com.hortonworks.iotas.common;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -11,10 +12,11 @@ public class IotasEventImpl implements IotasEvent {
     // Default value chosen to be blank and not the default used in storm since wanted to keep it independent of storm.
     public final static String DEFAULT_SOURCE_STREAM = "";
     private final Map<String, Object> header;
+    private final String sourceStreamId;
     private final Map<String, Object> fieldsAndValues;
+    private final Map<String, Object> auxiliaryFieldsAndValues;
     private final String dataSourceId;
     private final String id;
-    private final String sourceStream;
 
     /**
      * Creates an IotasEvent with given keyValues, dataSourceId
@@ -48,17 +50,28 @@ public class IotasEventImpl implements IotasEvent {
     /**
      * Creates an IotasEvent with given keyValues, dataSourceId, id and header.
      */
-    public IotasEventImpl(Map<String, Object> keyValues, String dataSourceId, String id, Map<String, Object> header, String sourceStream) {
+    public IotasEventImpl(Map<String, Object> keyValues, String dataSourceId, String id, Map<String, Object> header, String sourceStreamId) {
         this.fieldsAndValues = keyValues;
         this.dataSourceId = dataSourceId;
         this.id = id;
         this.header = header;
-        this.sourceStream = sourceStream;
+        this.auxiliaryFieldsAndValues = new HashMap<>();
+        this.sourceStreamId = sourceStreamId;
+        this.auxiliaryFieldsAndValues = new HashMap<>(auxiliaryFieldsAndValues);
     }
 
     @Override
     public Map<String, Object> getFieldsAndValues() {
         return Collections.unmodifiableMap(fieldsAndValues);
+    }
+
+    @Override
+    public Map<String, Object> getAuxiliaryFieldsAndValues() {
+        return Collections.unmodifiableMap(auxiliaryFieldsAndValues);
+    }
+
+    public void addAuxiliaryFieldAndValue(String field, Object value) {
+        auxiliaryFieldsAndValues.put(field, value);
     }
 
     @Override
@@ -71,9 +84,8 @@ public class IotasEventImpl implements IotasEvent {
         return dataSourceId;
     }
 
-    @Override
-    public String getSourceStream() {
-        return sourceStream;
+    public String getSourceStreamId() {
+        return this.sourceStreamId;
     }
 
     @Override

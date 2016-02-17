@@ -19,6 +19,34 @@ public interface IotasEvent {
 
 
     /**
+     * Auxiliary fields and values. Different Actions can add transformed or new fields and values without changing the original
+     * {@code #getFieldsAndValues} received in this event.
+     * For example, enrichment Action can add enrichments in the below format.
+     * <p>
+     * "enrichments":
+     *      {"device-location-enrichment" :
+     *                  {"enriched-fields": ["device-location"],
+     *                  "enriched-value":
+     *                      "device-address" : {
+     *                          "addr" : "5470, Great America Pkwy",
+     *                          "city" : "Santa Clara",
+     *                          "state" : "CA",
+     *                          "zip" : "95054",
+     *                          "country" : "US"
+     *                      }
+     *                  }
+     *      }
+     * </p>
+     * @return the auxiliary fields and values
+     */
+    Map<String, Object> getAuxiliaryFieldsAndValues();
+
+    /**
+     * Adds given {@code field} and {@code value} to auxiliary Map.
+     */
+    public void addAuxiliaryFieldAndValue(String field, Object value);
+
+    /**
      * The event header that represents some meta data about
      * this event. This is optional and by default empty.
      *
@@ -44,5 +72,5 @@ public interface IotasEvent {
      * The source stream that generated this event
      * @return stream name
      */
-    String getSourceStream ();
+    String getSourceStreamId();
 }
