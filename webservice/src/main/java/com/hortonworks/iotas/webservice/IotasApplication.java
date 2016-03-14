@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 public class IotasApplication extends Application<IotasConfiguration> {
 
@@ -92,62 +93,13 @@ public class IotasApplication extends Application<IotasConfiguration> {
     private StorageManager getCacheBackedDao(IotasConfiguration iotasConfiguration) {
         StorageProviderConfiguration storageProviderConfiguration = iotasConfiguration.getStorageProviderConfiguration();
         final String providerType = storageProviderConfiguration.getType();
-        final StorageManager dao = providerType.equalsIgnoreCase("jdbc") ? createJDBCStorageManager(storageProviderConfiguration.getProperties()) : new InMemoryStorageManager();
+        final StorageManager dao = providerType.equalsIgnoreCase("jdbc") ?
+                JdbcStorageManager.createStorageManager(storageProviderConfiguration.getProperties()) : new InMemoryStorageManager();
         final CacheBuilder cacheBuilder = getGuavaCacheBuilder();
         final Cache<StorableKey, Storable> cache = getCache(dao, cacheBuilder);
         final StorageWriter storageWriter = getStorageWriter(dao);
 
         return doGetCacheBackedDao(cache, storageWriter);
-    }
-
-    // this can be moved to JDBCStorageManager
-    private StorageManager createJDBCStorageManager(Map<String, String> jdbcProps) {
-        validateJdbcProperties(jdbcProps);
-        QueryExecutor queryExecutor = null;
-
-        try {
-            String driverClassName = jdbcProps.get("jdbcDriverClass");
-            log.info("jdbc driver class: [{}]", driverClassName);
-            Class.forName(driverClassName);
-
-            String jdbcUrl = jdbcProps.get("jdbcUrl");
-            log.info("jdbc url is: [{}] ", jdbcUrl);
-
-            String provider = jdbcUrl.split(":")[1];
-            log.info("jdbc provider type: [{}]", provider);
-
-            HikariConfig hikariConfig = new HikariConfig();
-            hikariConfig.setJdbcUrl(jdbcUrl);
-
-            JdbcClient jdbcClient = new JdbcClient(jdbcUrl);
-            log.info("creating tables");
-            String createPath = provider+"/create_tables.sql";
-            jdbcClient.runScript(createPath);
-
-            if("phoenix".equals(provider)) {
-                queryExecutor = new PhoenixExecutor(new ExecutionConfig(-1), new HikariCPConnectionBuilder(hikariConfig));
-            } else if("mysql".equals(provider)) {
-                queryExecutor = new MySqlExecutor(new ExecutionConfig(-1), new HikariCPConnectionBuilder(hikariConfig));
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return new JdbcStorageManager(queryExecutor);
-    }
-
-    private void validateJdbcProperties(Map<String, String> jdbcProps) {
-        if(jdbcProps == null || jdbcProps.isEmpty()) {
-            throw new IllegalArgumentException("jdbc properties can neither be null nor empty");
-        }
-
-        String[] properties = {"jdbcDriverClass", "jdbcUrl"};
-        for (String property : properties) {
-            if(!jdbcProps.containsKey(property)) {
-                throw new IllegalArgumentException("jdbc properties should contain "+property);
-            }
-        }
     }
 
     private StorageWriter getStorageWriter(StorageManager dao) {
