@@ -3,10 +3,10 @@ package com.hortonworks.iotas.storage.impl.jdbc.provider.phoenix.factory;
 import com.google.common.cache.CacheBuilder;
 import com.hortonworks.iotas.storage.Storable;
 import com.hortonworks.iotas.storage.StorableKey;
-import com.hortonworks.iotas.storage.exception.NonIncrementalColumnException;
 import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
 import com.hortonworks.iotas.storage.impl.jdbc.connection.ConnectionBuilder;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.phoenix.query.PhoenixDeleteQuery;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.phoenix.query.PhoenixNextIdQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.phoenix.query.PhoenixSelectQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.phoenix.query.PhoenixUpsertQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.factory.AbstractQueryExecutor;
@@ -16,7 +16,7 @@ import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.statement.PreparedSt
 import java.util.Collection;
 
 /**
- *
+ * SQL query executor for Phoenix
  */
 public class PhoenixExecutor extends AbstractQueryExecutor {
 
@@ -24,8 +24,7 @@ public class PhoenixExecutor extends AbstractQueryExecutor {
         super(config, connectionBuilder);
     }
 
-    public PhoenixExecutor(ExecutionConfig config, ConnectionBuilder connectionBuilder, CacheBuilder<SqlQuery,
-            PreparedStatementBuilder> cacheBuilder) {
+    public PhoenixExecutor(ExecutionConfig config, ConnectionBuilder connectionBuilder, CacheBuilder<SqlQuery, PreparedStatementBuilder> cacheBuilder) {
         super(config, connectionBuilder, cacheBuilder);
     }
 
@@ -56,8 +55,8 @@ public class PhoenixExecutor extends AbstractQueryExecutor {
 
     @Override
     public Long nextId(String namespace) {
-        // SEQUENCE can be used for such columns in UPSERT queries
-        throw new NonIncrementalColumnException("Phoenix does not support auto increment columns");
+        PhoenixNextIdQuery phoenixNextIdQuery = new PhoenixNextIdQuery(namespace, connectionBuilder, queryTimeoutSecs);
+        return phoenixNextIdQuery.getNextID();
     }
 
 }

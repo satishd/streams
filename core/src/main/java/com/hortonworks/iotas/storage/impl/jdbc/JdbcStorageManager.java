@@ -27,22 +27,25 @@ import com.hortonworks.iotas.storage.StorageManager;
 import com.hortonworks.iotas.storage.exception.AlreadyExistsException;
 import com.hortonworks.iotas.storage.exception.IllegalQueryParameterException;
 import com.hortonworks.iotas.storage.exception.StorageException;
+import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
+import com.hortonworks.iotas.storage.impl.jdbc.connection.HikariCPConnectionBuilder;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.mysql.factory.MySqlExecutor;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.phoenix.JdbcClient;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.phoenix.factory.PhoenixExecutor;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.factory.QueryExecutor;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.MetadataHelper;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.SqlSelectQuery;
+import com.zaxxer.hikari.HikariConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //TODO: Need to assess synchronization
 public class JdbcStorageManager implements StorageManager {
     private static final Logger log = LoggerFactory.getLogger(StorageManager.class);
+    public static final String DB_TYPE = "db.type";
 
     private final QueryExecutor queryExecutor;
 
@@ -184,4 +187,105 @@ public class JdbcStorageManager implements StorageManager {
 
         return storableKey;
     }
+
+    /**
+     * Returns an instance of {@link JdbcStorageManager} with the given {@code jdbcProps}.
+     * Some of these properties are jdbcDriverClass, jdbcUrl, queryTimeoutInSecs.
+     *
+     * @param jdbcProps properties with name/value pairs
+     */
+    public static JdbcStorageManager createStorageManager(Map<String, Object> jdbcProps) {
+
+        if(!jdbcProps.containsKey(DB_TYPE)) {
+            throw new IllegalArgumentException("db.type should be set on jdbc properties");
+        }
+
+        String type = (String) jdbcProps.get(DB_TYPE);
+
+        // When we have more providers we can add a layer to have a factory to create respective jdbc storage managers.
+        // For now, keeping it simple as there are only 2.
+        if(!"phoenix".equals(type) && !"mysql".equals(type)) {
+            throw new IllegalArgumentException("Unknown jdbc storage provider type:"+type);
+        }
+
+        validateJdbcProperties(jdbcProps);
+
+        log.info("jdbc provider type: [{}]", type);
+
+        try {
+            if("phoenix".equals(type)) {
+                return createPhoenixBasedStorageManager(jdbcProps);
+            } else if("mysql".equals(type)) {
+                return createMySqlStorageManager(jdbcProps);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        throw new IllegalArgumentException("Unsupported storage provider type");
+    }
+
+    private static JdbcStorageManager createMySqlStorageManager(Map<String, Object> jdbcProps) {
+        int queryTimeOutInSecs = -1;
+        if(jdbcProps.containsKey("queryTimeoutInSecs")) {
+            int timeout = (Integer) jdbcProps.get("queryTimeoutInSecs");
+            if(timeout < 0) {
+                throw new IllegalArgumentException("queryTimeoutInSecs property can not be negative");
+            }
+        }
+
+        Properties properties = new Properties();
+        properties.putAll(jdbcProps);
+        HikariConfig hikariConfig = new HikariConfig(properties);
+
+        HikariCPConnectionBuilder connectionBuilder = new HikariCPConnectionBuilder(hikariConfig);
+        ExecutionConfig executionConfig = new ExecutionConfig(queryTimeOutInSecs);
+        MySqlExecutor queryExecutor = new MySqlExecutor(executionConfig, connectionBuilder);
+        return new JdbcStorageManager(queryExecutor);
+    }
+
+    private static JdbcStorageManager createPhoenixBasedStorageManager(Map<String, Object> jdbcProps) throws Exception {
+        String driverClassName = (String) jdbcProps.get("jdbcDriverClass");
+        log.info("jdbc driver class: [{}]", driverClassName);
+        Class.forName(driverClassName);
+
+        String jdbcUrl = (String) jdbcProps.get("jdbcUrl");
+        log.info("jdbc url is: [{}] ", jdbcUrl);
+
+        int queryTimeOutInSecs = -1;
+        if(jdbcProps.containsKey("queryTimeoutInSecs")) {
+            int timeout = (Integer) jdbcProps.get("queryTimeoutInSecs");
+            if(timeout < 0) {
+                throw new IllegalArgumentException("queryTimeoutInSecs property can not be negative");
+            }
+        }
+
+        HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setJdbcUrl(jdbcUrl);
+
+        JdbcClient jdbcClient = new JdbcClient(jdbcUrl);
+        log.info("creating tables");
+        String createPath = "phoenix/create_tables.sql";
+        jdbcClient.runScript(createPath);
+
+        final HikariCPConnectionBuilder connectionBuilder = new HikariCPConnectionBuilder(hikariConfig);
+        final ExecutionConfig executionConfig = new ExecutionConfig(queryTimeOutInSecs);
+
+        PhoenixExecutor queryExecutor = new PhoenixExecutor(executionConfig, connectionBuilder);
+        return new JdbcStorageManager(queryExecutor);
+    }
+
+    private static void validateJdbcProperties(Map<String, Object> jdbcProps) {
+        if(jdbcProps == null || jdbcProps.isEmpty()) {
+            throw new IllegalArgumentException("jdbc properties can neither be null nor empty");
+        }
+
+        String[] properties = {"jdbcDriverClass", "jdbcUrl"};
+        for (String property : properties) {
+            if(!jdbcProps.containsKey(property)) {
+                throw new IllegalArgumentException("jdbc properties should contain "+property);
+            }
+        }
+    }
+
 }
