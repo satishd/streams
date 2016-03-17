@@ -7,6 +7,7 @@ import com.hortonworks.iotas.storage.exception.NonIncrementalColumnException;
 import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
 import com.hortonworks.iotas.storage.impl.jdbc.connection.ConnectionBuilder;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.phoenix.query.PhoenixDeleteQuery;
+import com.hortonworks.iotas.storage.impl.jdbc.provider.phoenix.query.PhoenixNextIdQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.phoenix.query.PhoenixSelectQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.phoenix.query.PhoenixUpsertQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.factory.AbstractQueryExecutor;
@@ -56,8 +57,14 @@ public class PhoenixExecutor extends AbstractQueryExecutor {
 
     @Override
     public Long nextId(String namespace) {
+        // this is kind of work around as there is no direct support in phoenix, it involves 3 roundtrips to phoenix/hbase.
         // SEQUENCE can be used for such columns in UPSERT queries
-        throw new NonIncrementalColumnException("Phoenix does not support auto increment columns");
+        // create sequence for each namespace and insert id into it with a value uuid.
+        // get the id for inserted uuid.
+        // delete that entry from the table.
+        PhoenixNextIdQuery phoenixNextIdQuery = new PhoenixNextIdQuery(namespace);
+        return 0L;
+//        throw new NonIncrementalColumnException("Phoenix does not support auto increment columns");
     }
 
 }
