@@ -40,12 +40,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.*;
 
 //TODO: Need to assess synchronization
 public class JdbcStorageManager implements StorageManager {
     private static final Logger log = LoggerFactory.getLogger(StorageManager.class);
+    public static final String DB_TYPE = "db.type";
 
     private final QueryExecutor queryExecutor;
 
@@ -196,11 +196,11 @@ public class JdbcStorageManager implements StorageManager {
      */
     public static JdbcStorageManager createStorageManager(Map<String, Object> jdbcProps) {
 
-        if(!jdbcProps.containsKey("db.type")) {
+        if(!jdbcProps.containsKey(DB_TYPE)) {
             throw new IllegalArgumentException("db.type should be set on jdbc properties");
         }
 
-        String type = (String) jdbcProps.get("db.type");
+        String type = (String) jdbcProps.get(DB_TYPE);
 
         // When we have more providers we can add a layer to have a factory to create respective jdbc storage managers.
         // For now, keeping it simple as there are only 2.
