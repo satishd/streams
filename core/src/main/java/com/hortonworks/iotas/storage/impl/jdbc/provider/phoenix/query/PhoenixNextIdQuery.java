@@ -20,7 +20,6 @@ package com.hortonworks.iotas.storage.impl.jdbc.provider.phoenix.query;
 
 import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
 import com.hortonworks.iotas.storage.impl.jdbc.connection.ConnectionBuilder;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.mysql.query.MySqlQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.query.AbstractSqlQuery;
 import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.statement.PreparedStatementBuilder;
 import org.slf4j.Logger;
@@ -36,7 +35,9 @@ import java.util.UUID;
  */
 public class PhoenixNextIdQuery {
 
-    private static final Logger logger = LoggerFactory.getLogger(PhoenixNextIdQuery.class);
+    private static final Logger log = LoggerFactory.getLogger(PhoenixNextIdQuery.class);
+    private static final String ID = "id";
+    private static final String VALUE = "value";
     private String namespace;
     private final ConnectionBuilder connectionBuilder;
     private final int queryTimeoutSecs;
@@ -48,31 +49,38 @@ public class PhoenixNextIdQuery {
     }
 
     public Long getNextID() {
-        // this is kind of work around as there is no direct support, it involves 3 roundtrips to phoenix/hbase (inefficient!!).
+        // this is kind of work around as there is no direct support in phoenix to get next sequence-id without using any tables,
+        // it involves 3 roundtrips to phoenix/hbase (inefficient!!).
         // SEQUENCE can be used for such columns in UPSERT queries directly but to get a simple sequence-id involves all this.
         // create sequence for each namespace and insert it into with a value uuid.
         // get the id for inserted uuid.
         // delete that entry from the table.
         long nextId = 0;
         UUID uuid = UUID.randomUUID();
-        PhoenixSqlQuery updateQuery =new PhoenixSqlQuery("UPSERT INTO "+namespace+"_sequence_table(\"id\", \"value\") VALUES( NEXT VALUE FOR "+namespace+"_sequence, '"+uuid+"')");
-        PhoenixSqlQuery selectQuery = new PhoenixSqlQuery("SELECT \"id\" FROM "+namespace+"_sequence_table WHERE \"value\"='"+uuid+"'");
-        PhoenixSqlQuery deleteQuery = new PhoenixSqlQuery("DELETE FROM "+namespace+"_sequence_table WHERE \"value\"='"+uuid+"'");
+        PhoenixSqlQuery updateQuery = new PhoenixSqlQuery("UPSERT INTO " + namespace + "_sequence_table(\"" + ID + "\", \"" + VALUE + "\") VALUES( NEXT VALUE FOR " + namespace + "_sequence, '" + uuid + "')");
+        PhoenixSqlQuery selectQuery = new PhoenixSqlQuery("SELECT \"" + ID + "\" FROM " + namespace + "_sequence_table WHERE \"" + VALUE + "\"='" + uuid + "'");
+        PhoenixSqlQuery deleteQuery = new PhoenixSqlQuery("DELETE FROM " + namespace + "_sequence_table WHERE \"" + VALUE + "\"='" + uuid + "'");
 
         try (Connection connection = connectionBuilder.getConnection();) {
-            int x = new PreparedStatementBuilder(connection, new ExecutionConfig(queryTimeoutSecs), updateQuery).getPreparedStatement(updateQuery).executeUpdate();
-            System.out.println("####### x = " + x);
-            ResultSet selectResultSet =  new PreparedStatementBuilder(connection, new ExecutionConfig(queryTimeoutSecs), selectQuery).getPreparedStatement(selectQuery).executeQuery();
-            if(selectResultSet.next()) {
-                nextId = selectResultSet.getLong("id");
+            int upsertResult = new PreparedStatementBuilder(connection, new ExecutionConfig(queryTimeoutSecs), updateQuery).getPreparedStatement(updateQuery).executeUpdate();
+            log.debug("Query [{}] is executed and returns result with [{}]", updateQuery, upsertResult);
+
+            ResultSet selectResultSet = new PreparedStatementBuilder(connection, new ExecutionConfig(queryTimeoutSecs), selectQuery).getPreparedStatement(selectQuery).executeQuery();
+            if (selectResultSet.next()) {
+                nextId = selectResultSet.getLong(ID);
             } else {
-                throw new RuntimeException("No id created for the current sequence");
+                throw new RuntimeException("No sequence-id created for the current sequence of [" + namespace + "]");
             }
-            System.out.println("####### id = " + nextId);
-            int y =  new PreparedStatementBuilder(connection, new ExecutionConfig(queryTimeoutSecs), deleteQuery).getPreparedStatement(deleteQuery).executeUpdate();
-            System.out.println("####### y = " + y);
+            log.debug("Generated sequence id [{}] for [{}]", nextId, namespace);
+            int deleteResult = new PreparedStatementBuilder(connection, new ExecutionConfig(queryTimeoutSecs), deleteQuery).getPreparedStatement(deleteQuery).executeUpdate();
+            if (deleteResult == 0) {
+                log.error("Could not delete entry in [{}+_sequence_table] for value [{}]", namespace, uuid);
+            } else {
+                log.debug("Deleted entry with id [{}] and value [{}] successfully", nextId, uuid);
+            }
         } catch (SQLException e) {
-            logger.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
         }
 
         return nextId;
@@ -81,7 +89,6 @@ public class PhoenixNextIdQuery {
     static class PhoenixSqlQuery extends AbstractSqlQuery {
 
         public PhoenixSqlQuery(String sql) {
-            super();
             this.sql = sql;
         }
 
