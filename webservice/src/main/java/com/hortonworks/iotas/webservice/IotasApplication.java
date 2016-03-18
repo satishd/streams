@@ -30,18 +30,11 @@ import com.hortonworks.iotas.storage.Storable;
 import com.hortonworks.iotas.storage.StorableKey;
 import com.hortonworks.iotas.storage.StorageManager;
 import com.hortonworks.iotas.storage.impl.jdbc.JdbcStorageManager;
-import com.hortonworks.iotas.storage.impl.jdbc.config.ExecutionConfig;
-import com.hortonworks.iotas.storage.impl.jdbc.connection.HikariCPConnectionBuilder;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.mysql.factory.MySqlExecutor;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.phoenix.JdbcClient;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.phoenix.factory.PhoenixExecutor;
-import com.hortonworks.iotas.storage.impl.jdbc.provider.sql.factory.QueryExecutor;
 import com.hortonworks.iotas.storage.impl.memory.InMemoryStorageManager;
 import com.hortonworks.iotas.topology.TopologyActions;
 import com.hortonworks.iotas.topology.TopologyLayoutConstants;
 import com.hortonworks.iotas.util.ReflectionHelper;
 import com.hortonworks.iotas.webservice.catalog.*;
-import com.zaxxer.hikari.HikariConfig;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.setup.Bootstrap;
@@ -53,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 public class IotasApplication extends Application<IotasConfiguration> {
 
