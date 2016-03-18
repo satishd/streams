@@ -10,11 +10,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Storm implementation of the TopologyActions interface
@@ -32,7 +28,7 @@ public class StormTopologyActionsImpl implements TopologyActions {
     }
 
     @Override
-    public void init (Map<String, String> conf) {
+    public void init(Map<String, String> conf) {
         if (conf != null) {
             if (conf.containsKey(TopologyLayoutConstants.STORM_ARTIFACTS_LOCATION_KEY)) {
                 stormArtifactsLocation = conf.get(TopologyLayoutConstants.STORM_ARTIFACTS_LOCATION_KEY);
@@ -47,12 +43,12 @@ public class StormTopologyActionsImpl implements TopologyActions {
             stormJarLocation = conf.get(TopologyLayoutConstants.STORM_JAR_LOCATION_KEY);
             catalogRootUrl = conf.get(TopologyLayoutConstants.YAML_KEY_CATALOG_ROOT_URL);
         }
-        File f = new File (stormArtifactsLocation);
+        File f = new File(stormArtifactsLocation);
         f.mkdirs();
     }
 
     @Override
-    public void deploy (Topology topology) throws Exception {
+    public void deploy(Topology topology) throws Exception {
         String fileName = this.createYamlFile(topology);
         List<String> commands = new ArrayList<String>();
         commands.add(stormCliPath);
@@ -63,13 +59,12 @@ public class StormTopologyActionsImpl implements TopologyActions {
         commands.add(fileName);
         int exitValue = executeShellProcess(commands);
         if (exitValue != 0) {
-            throw new Exception("Topology could not be deployed " +
-                    "successfully.");
+            throw new Exception("Topology could not be deployed successfully.");
         }
     }
 
     @Override
-    public void kill (Topology topology) throws Exception {
+    public void kill(Topology topology) throws Exception {
         List<String> commands = new ArrayList<String>();
         commands.add(stormCliPath);
         commands.add("kill");
@@ -82,7 +77,7 @@ public class StormTopologyActionsImpl implements TopologyActions {
     }
 
     @Override
-    public void validate (Topology topology) throws Exception {
+    public void validate(Topology topology) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         Map topologyConfig = mapper.readValue(topology.getConfig(), Map.class);
         StormTopologyValidator validator = new StormTopologyValidator(topologyConfig, this.catalogRootUrl);
@@ -90,7 +85,7 @@ public class StormTopologyActionsImpl implements TopologyActions {
     }
 
     @Override
-    public void suspend (Topology topology) throws Exception {
+    public void suspend(Topology topology) throws Exception {
         List<String> commands = new ArrayList<String>();
         commands.add(stormCliPath);
         commands.add("deactivate");
@@ -103,7 +98,7 @@ public class StormTopologyActionsImpl implements TopologyActions {
     }
 
     @Override
-    public void resume (Topology topology) throws Exception {
+    public void resume(Topology topology) throws Exception {
         List<String> commands = new ArrayList<String>();
         commands.add(stormCliPath);
         commands.add("activate");
@@ -115,7 +110,7 @@ public class StormTopologyActionsImpl implements TopologyActions {
         }
     }
 
-    private String createYamlFile (Topology topology) throws
+    private String createYamlFile(Topology topology) throws
             Exception {
         String configJson = topology.getConfig();
         Map<String, Object> yamlMap;
@@ -133,11 +128,9 @@ public class StormTopologyActionsImpl implements TopologyActions {
             }
 
             jsonMap = objectMapper.readValue(configJson, Map.class);
-            yamlMap = new LinkedHashMap<String, Object>();
-            yamlMap.put(TopologyLayoutConstants.YAML_KEY_NAME, this
-                    .getTopologyName(topology));
-            addTopologyConfig(yamlMap, (Map<String, Object>) jsonMap.get
-                    (TopologyLayoutConstants.JSON_KEY_CONFIG));
+            yamlMap = new LinkedHashMap<>();
+            yamlMap.put(TopologyLayoutConstants.YAML_KEY_NAME, getTopologyName(topology));
+            addTopologyConfig(yamlMap, (Map<String, Object>) jsonMap.get(TopologyLayoutConstants.JSON_KEY_CONFIG));
             addToYamlTopLevelComponents(yamlMap, (List<Map<String, Object>>) jsonMap.get(TopologyLayoutConstants.JSON_KEY_DATA_SOURCES), TopologyLayoutConstants.YAML_KEY_SPOUTS);
             addToYamlTopLevelComponents(yamlMap, (List<Map<String, Object>>) jsonMap.get(TopologyLayoutConstants.JSON_KEY_PROCESSORS), TopologyLayoutConstants.YAML_KEY_BOLTS);
             addToYamlTopLevelComponents(yamlMap, (List<Map<String, Object>>) jsonMap.get(TopologyLayoutConstants.JSON_KEY_DATA_SINKS), TopologyLayoutConstants.YAML_KEY_BOLTS);
@@ -145,7 +138,7 @@ public class StormTopologyActionsImpl implements TopologyActions {
             DumperOptions options = new DumperOptions();
             options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
             //options.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
-            Yaml yaml = new Yaml (options);
+            Yaml yaml = new Yaml(options);
             fileWriter = new FileWriter(f);
             yaml.dump(yamlMap, fileWriter);
             return f.getAbsolutePath();
@@ -156,52 +149,49 @@ public class StormTopologyActionsImpl implements TopologyActions {
         }
     }
 
-    private String getTopologyName (Topology topology) {
+    private String getTopologyName(Topology topology) {
         return "iotas-" + topology.getId() + "-" + topology.getName();
     }
 
-    private String getFilePath (Topology topology) {
-        return this.stormArtifactsLocation + getTopologyName(topology) + "" +
-                ".yaml";
+    private String getFilePath(Topology topology) {
+        return this.stormArtifactsLocation + getTopologyName(topology) + ".yaml";
     }
 
     // Add topology level configs. catalogRootUrl, hbaseConf, hdfsConf,
     // numWorkers, etc.
-    private void addTopologyConfig (Map<String, Object> yamlMap, Map<String,
-            Object> topologyConfig) {
+    private void addTopologyConfig(Map<String, Object> yamlMap, Map<String, Object> topologyConfig) {
         Map<String, Object> config = new LinkedHashMap<String, Object>();
         config.put(TopologyLayoutConstants.YAML_KEY_CATALOG_ROOT_URL, catalogRootUrl);
         config.putAll(topologyConfig);
         yamlMap.put(TopologyLayoutConstants.YAML_KEY_CONFIG, config);
     }
 
-    private void addToYamlTopLevelComponents (Map<String, Object> yamlMap, List<Map<String,
-            Object>> components, String collectionKey) throws Exception {
-        for (Map component: components) {
+    private void addToYamlTopLevelComponents(Map<String, Object> yamlMap, List<Map<String, Object>> components, String collectionKey) throws Exception {
+        for (Map component : components) {
             String transformationClass = (String) component.get
                     (TopologyLayoutConstants.JSON_KEY_TRANSFORMATION_CLASS);
             String uiname = (String) component.get
                     (TopologyLayoutConstants.JSON_KEY_UINAME);
-            Map<String, Object> config = (Map<String, Object>) component.get
-                    (TopologyLayoutConstants.JSON_KEY_CONFIG);
+            Map<String, Object> config = (Map<String, Object>) component.get(TopologyLayoutConstants.JSON_KEY_CONFIG);
             FluxComponent fluxComponent = (FluxComponent) ReflectionHelper
                     .newInstance(transformationClass);
             fluxComponent.withConfig(config);
             List<Map<String, Object>> referencedComponents = fluxComponent
                     .getReferencedComponents();
             // add all the components referenced by this yaml component
-            for (Map<String, Object> referencedComponent: referencedComponents) {
+            for (Map<String, Object> referencedComponent : referencedComponents) {
                 this.addComponentToCollection(yamlMap, referencedComponent,
                         TopologyLayoutConstants.YAML_KEY_COMPONENTS);
             }
-            Map<String, Object> yamlComponent = fluxComponent
-                    .getComponent();
+            Map<String, Object> yamlComponent = fluxComponent.getComponent();
+
             // getComponent either returns a spouts/bolt or stream. Update
             // the id or the name field to uiname to guarantee uniqueness in
             // yaml file since uiname is presumed to be unique
             String idField = yamlComponent.containsKey
                     (TopologyLayoutConstants.YAML_KEY_ID) ? TopologyLayoutConstants.YAML_KEY_ID : TopologyLayoutConstants.YAML_KEY_NAME;
             yamlComponent.put(idField, uiname);
+
             // add the yaml component itself
             this.addComponentToCollection(yamlMap, yamlComponent, collectionKey);
         }
@@ -209,8 +199,8 @@ public class StormTopologyActionsImpl implements TopologyActions {
     }
 
 
-    private void addComponentToCollection (Map<String, Object> yamlMap, Map<String, Object> yamlComponent, String collectionKey) {
-        if (yamlComponent == null ) {
+    private void addComponentToCollection(Map<String, Object> yamlMap, Map<String, Object> yamlComponent, String collectionKey) {
+        if (yamlComponent == null) {
             return;
         }
         List<Map<String, Object>> components = (ArrayList) yamlMap.get
@@ -223,7 +213,7 @@ public class StormTopologyActionsImpl implements TopologyActions {
     }
 
 
-    private int executeShellProcess (List<String> commands) throws  Exception {
+    private int executeShellProcess(List<String> commands) throws Exception {
         ProcessBuilder processBuilder = new ProcessBuilder(commands);
         processBuilder.inheritIO();
         Process process = processBuilder.start();

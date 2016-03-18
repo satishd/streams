@@ -14,7 +14,7 @@ import java.util.Map;
 public class KafkaSpoutFluxComponent extends AbstractFluxComponent {
 
     @Override
-    protected void generateComponent () {
+    protected void generateComponent() {
         String spoutConfigRef = addSpoutConfigComponent();
         String spoutId = "kafkaSpout" + UUID_FOR_COMPONENTS;
         String spoutClassName = "org.apache.storm.kafka.KafkaSpout";
@@ -26,7 +26,7 @@ public class KafkaSpoutFluxComponent extends AbstractFluxComponent {
         addParallelismToComponent();
     }
 
-    private String addSpoutConfigComponent () {
+    private String addSpoutConfigComponent() {
         String zkHostsRef = addBrokerHostsComponent();
         String spoutConfigComponentId = "spoutConfig" + UUID_FOR_COMPONENTS;
         String spoutConfigClassName = "org.apache.storm.kafka.SpoutConfig";
@@ -54,45 +54,40 @@ public class KafkaSpoutFluxComponent extends AbstractFluxComponent {
         Map ref = getRefYaml(zkHostsRef);
         spoutConfigConstructorArgs.add(ref);
         String[] constructorArgNames = {
-            TopologyLayoutConstants.JSON_KEY_TOPIC,
-            TopologyLayoutConstants.JSON_KEY_ZK_ROOT,
-            TopologyLayoutConstants.JSON_KEY_SPOUT_CONFIG_ID
+                TopologyLayoutConstants.JSON_KEY_TOPIC,
+                TopologyLayoutConstants.JSON_KEY_ZK_ROOT,
+                TopologyLayoutConstants.JSON_KEY_SPOUT_CONFIG_ID
         };
-        spoutConfigConstructorArgs.addAll(getConstructorArgsYaml
-                (constructorArgNames));
-        this.addToComponents(createComponent(spoutConfigComponentId, spoutConfigClassName,
-                propertiesYaml, spoutConfigConstructorArgs, null));
+        spoutConfigConstructorArgs.addAll(getConstructorArgsYaml(constructorArgNames));
+        addToComponents(createComponent(spoutConfigComponentId, spoutConfigClassName, propertiesYaml, spoutConfigConstructorArgs, null));
         return spoutConfigComponentId;
     }
 
     // Add BrokerHosts yaml component and return its yaml id to further use
     // it as a ref
-    private String addBrokerHostsComponent () {
+    private String addBrokerHostsComponent() {
         String zkHostsComponentId = "zkHosts" + UUID_FOR_COMPONENTS;
 
         // currently only BrokerHosts is supported.
         String zkHostsClassName = "org.apache.storm.kafka.ZkHosts";
 
-        String[] propertyNames = {TopologyLayoutConstants
-                .JSON_KEY_REFRESH_FREQ_SECS};
+        String[] propertyNames = {TopologyLayoutConstants.JSON_KEY_REFRESH_FREQ_SECS};
         //properties
-        List properties = getPropertiesYaml(propertyNames);
+        List<Map<String, Object>> properties = getPropertiesYaml(propertyNames);
 
         //constructor args
         String[] constructorArgNames = {
-            TopologyLayoutConstants.JSON_KEY_ZK_URL,
-            TopologyLayoutConstants.JSON_KEY_ZK_PATH
+                TopologyLayoutConstants.JSON_KEY_ZK_URL,
+                TopologyLayoutConstants.JSON_KEY_ZK_PATH
         };
-        List zkHostsConstructorArgs = getConstructorArgsYaml
-                (constructorArgNames);
+        List zkHostsConstructorArgs = getConstructorArgsYaml(constructorArgNames);
 
-        this.addToComponents(this.createComponent(zkHostsComponentId,
-                zkHostsClassName, properties, zkHostsConstructorArgs, null));
+        addToComponents(createComponent(zkHostsComponentId, zkHostsClassName, properties, zkHostsConstructorArgs, null));
         return zkHostsComponentId;
     }
 
     @Override
-    public void validateConfig () throws BadTopologyLayoutException {
+    public void validateConfig() throws BadTopologyLayoutException {
         super.validateConfig();
         validateBooleanFields();
         validateStringFields();
@@ -115,67 +110,67 @@ public class KafkaSpoutFluxComponent extends AbstractFluxComponent {
         }
     }
 
-    private void validateBooleanFields () throws BadTopologyLayoutException {
+    private void validateBooleanFields() throws BadTopologyLayoutException {
         String[] optionalBooleanFields = {
-            TopologyLayoutConstants.JSON_KEY_IGNORE_ZK_OFFSETS,
-            TopologyLayoutConstants.JSON_KEY_USE_START_OFFSET_IF_OFFSET_OUT_OF_RANGE
+                TopologyLayoutConstants.JSON_KEY_IGNORE_ZK_OFFSETS,
+                TopologyLayoutConstants.JSON_KEY_USE_START_OFFSET_IF_OFFSET_OUT_OF_RANGE
         };
         validateBooleanFields(optionalBooleanFields, false);
     }
 
-    private void validateStringFields () throws BadTopologyLayoutException {
+    private void validateStringFields() throws BadTopologyLayoutException {
         String[] requiredStringFields = {
-            TopologyLayoutConstants.JSON_KEY_ZK_URL,
-            TopologyLayoutConstants.JSON_KEY_TOPIC,
-            TopologyLayoutConstants.JSON_KEY_ZK_ROOT,
-            TopologyLayoutConstants.JSON_KEY_SPOUT_CONFIG_ID
+                TopologyLayoutConstants.JSON_KEY_ZK_URL,
+                TopologyLayoutConstants.JSON_KEY_TOPIC,
+                TopologyLayoutConstants.JSON_KEY_ZK_ROOT,
+                TopologyLayoutConstants.JSON_KEY_SPOUT_CONFIG_ID
         };
         validateStringFields(requiredStringFields, true);
         String[] optionalStringFields = {
-            TopologyLayoutConstants.JSON_KEY_ZK_PATH
+                TopologyLayoutConstants.JSON_KEY_ZK_PATH
         };
         validateStringFields(optionalStringFields, false);
     }
 
-    private void validateIntegerFields () throws BadTopologyLayoutException {
+    private void validateIntegerFields() throws BadTopologyLayoutException {
         String[] optionalIntegerFields = {
-            TopologyLayoutConstants.JSON_KEY_REFRESH_FREQ_SECS,
-            TopologyLayoutConstants.JSON_KEY_FETCH_SIZE_BYTES,
-            TopologyLayoutConstants.JSON_KEY_SOCKET_TIMEOUT_MS,
-            TopologyLayoutConstants.JSON_KEY_FETCH_MAX_WAIT,
-            TopologyLayoutConstants.JSON_KEY_BUFFER_SIZE_BYTES,
-            TopologyLayoutConstants.JSON_KEY_METRICS_TIME_BUCKET_SIZE_IN_SECS,
-            TopologyLayoutConstants.JSON_KEY_ZK_PORT
+                TopologyLayoutConstants.JSON_KEY_REFRESH_FREQ_SECS,
+                TopologyLayoutConstants.JSON_KEY_FETCH_SIZE_BYTES,
+                TopologyLayoutConstants.JSON_KEY_SOCKET_TIMEOUT_MS,
+                TopologyLayoutConstants.JSON_KEY_FETCH_MAX_WAIT,
+                TopologyLayoutConstants.JSON_KEY_BUFFER_SIZE_BYTES,
+                TopologyLayoutConstants.JSON_KEY_METRICS_TIME_BUCKET_SIZE_IN_SECS,
+                TopologyLayoutConstants.JSON_KEY_ZK_PORT
         };
         Integer[] mins = {
-            0, 0, 0, 0, 0, 0, 1025
+                0, 0, 0, 0, 0, 0, 1025
         };
         Integer[] maxes = {
-            Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer
+                Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer
                 .MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 65536
         };
         validateIntegerFields(optionalIntegerFields, false, mins, maxes);
     }
 
-    private void validateLongFields () throws BadTopologyLayoutException {
+    private void validateLongFields() throws BadTopologyLayoutException {
         String[] optionalLongFields = {
-            TopologyLayoutConstants.JSON_KEY_MAX_OFFSET_BEHIND,
-            TopologyLayoutConstants.JSON_KEY_STATE_UPDATE_INTERVAL_MS,
-            TopologyLayoutConstants.JSON_KEY_RETRY_INITIAL_DELAY_MS,
-            TopologyLayoutConstants.JSON_KEY_RETRY_DELAY_MAX_MS
+                TopologyLayoutConstants.JSON_KEY_MAX_OFFSET_BEHIND,
+                TopologyLayoutConstants.JSON_KEY_STATE_UPDATE_INTERVAL_MS,
+                TopologyLayoutConstants.JSON_KEY_RETRY_INITIAL_DELAY_MS,
+                TopologyLayoutConstants.JSON_KEY_RETRY_DELAY_MAX_MS
         };
         Long[] mins = {
-            0l, 0l, 0l, 0l
+                0l, 0l, 0l, 0l
         };
         Long[] maxes = {
-            Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE
+                Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE
         };
         validateLongFields(optionalLongFields, false, mins, maxes);
     }
 
-    private void validateFloatOrDoubleFields () throws BadTopologyLayoutException {
+    private void validateFloatOrDoubleFields() throws BadTopologyLayoutException {
         String[] optionalFields = {
-            TopologyLayoutConstants.JSON_KEY_RETRY_DELAY_MULTIPLIER
+                TopologyLayoutConstants.JSON_KEY_RETRY_DELAY_MULTIPLIER
         };
         validateFloatOrDoubleFields(optionalFields, false);
     }

@@ -17,7 +17,7 @@ public interface ProcessorRuntime {
      * @return
      * @throws ProcessingException
      */
-    List<Result> process (IotasEvent iotasEvent) throws ProcessingException;
+    List<Result> process(IotasEvent iotasEvent) throws ProcessingException;
 
     /**
      * Initialize any necessary resources needed for the implementation

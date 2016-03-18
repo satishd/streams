@@ -52,6 +52,7 @@ public class CustomProcessorBolt extends BaseRichBolt {
         this.customProcessorImpl = customProcessorImpl;
         return this;
     }
+
     /**
      * Associate the jar file name to be downloaded
      * @param jarFileName

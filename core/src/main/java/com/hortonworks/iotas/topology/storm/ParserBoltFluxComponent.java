@@ -23,8 +23,7 @@ public class ParserBoltFluxComponent extends AbstractFluxComponent {
                 TopologyLayoutConstants.JSON_KEY_PARSER_ID,
                 TopologyLayoutConstants.JSON_KEY_DATA_SOURCE_ID
         };
-        List configMethods = getConfigMethodsYaml(configMethodNames,
-                configKeys);
+        List configMethods = getConfigMethodsYaml(configMethodNames, configKeys);
         component = createComponent(boltId, boltClassName, null, null, configMethods);
         addParallelismToComponent();
     }

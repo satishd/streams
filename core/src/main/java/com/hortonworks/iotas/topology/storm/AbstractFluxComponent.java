@@ -5,12 +5,7 @@ import com.hortonworks.iotas.topology.ConfigFieldValidation;
 import com.hortonworks.iotas.topology.TopologyLayoutConstants;
 import com.hortonworks.iotas.util.exception.BadTopologyLayoutException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Abstract implementation of FluxComponent interface. Child classes just
@@ -18,16 +13,26 @@ import java.util.UUID;
  * components and component variables
  */
 public abstract class AbstractFluxComponent implements FluxComponent {
-    // conf is the map representing the configuration parameters for this
-    // storm component picked by the user. For eg kafka component will have
-    // zkUrl, topic, etc.
+
+    /**
+     * conf is the map representing the configuration parameters for this
+     * storm component picked by the user. For eg kafka component will have
+     * zkUrl, topic, etc.
+     */
     protected Map<String, Object> conf;
-    private boolean isGenerated = false;
-    protected List<Map<String, Object>> referencedComponents = new
-            ArrayList<Map<String, Object>>();
-    protected Map<String, Object> component = new LinkedHashMap<String, Object>();
+
+    /**
+     * referenced components by this component.
+     */
+    protected List<Map<String, Object>> referencedComponents = new ArrayList<>();
+
+    protected Map<String, Object> component = new LinkedHashMap<>();
+
     protected final UUID UUID_FOR_COMPONENTS = UUID.randomUUID();
+
     protected CatalogRestClient catalogRestClient;
+
+    private boolean isGenerated = false;
 
     @Override
     public void withCatalogRootUrl(String catalogRootUrl) {
@@ -35,12 +40,12 @@ public abstract class AbstractFluxComponent implements FluxComponent {
     }
 
     @Override
-    public void withConfig (Map<String, Object> conf) {
+    public void withConfig(Map<String, Object> conf) {
         this.conf = conf;
     }
 
     @Override
-    public List<Map<String, Object>> getReferencedComponents () {
+    public List<Map<String, Object>> getReferencedComponents() {
         if (!isGenerated) {
             generateComponent();
             isGenerated = true;
@@ -49,7 +54,7 @@ public abstract class AbstractFluxComponent implements FluxComponent {
     }
 
     @Override
-    public Map<String, Object> getComponent () {
+    public Map<String, Object> getComponent() {
         if (!isGenerated) {
             generateComponent();
             isGenerated = true;
@@ -58,17 +63,19 @@ public abstract class AbstractFluxComponent implements FluxComponent {
     }
 
     @Override
-    public void validateConfig () throws BadTopologyLayoutException {
+    public void validateConfig() throws BadTopologyLayoutException {
         String[] fieldNames = {TopologyLayoutConstants.JSON_KEY_PARALLELISM};
         Long[] mins = {1l};
         Long[] maxes = {Long.MAX_VALUE};
         this.validateLongFields(fieldNames, false, mins, maxes);
     }
 
-    // private helper method to generate referenced components and the component
-    abstract protected void generateComponent ();
+    /**
+     * Generate referenced components and the component
+     */
+    protected abstract void generateComponent();
 
-    protected void addParallelismToComponent () {
+    protected void addParallelismToComponent() {
         Integer parallelism;
         if ((parallelism = (Integer) conf.get(TopologyLayoutConstants
                 .JSON_KEY_PARALLELISM)) != null) {
@@ -76,15 +83,15 @@ public abstract class AbstractFluxComponent implements FluxComponent {
         }
     }
 
-    protected void addToComponents (Map<String, Object> componentMap) {
-        if (componentMap == null ) {
+    protected void addToComponents(Map<String, Object> componentMap) {
+        if (componentMap == null) {
             return;
         }
         referencedComponents.add(componentMap);
     }
 
-    protected Map createComponent (String id, String className, List properties, List constructorArgs, List configMethods) {
-        Map component = new LinkedHashMap();
+    protected Map<String, Object> createComponent(String id, String className, List<Map<String, Object>> properties, List constructorArgs, List configMethods) {
+        Map<String, Object> component = new LinkedHashMap<>();
         component.put(TopologyLayoutConstants.YAML_KEY_ID, id);
         component.put(TopologyLayoutConstants.YAML_KEY_CLASS_NAME, className);
         if (properties != null && properties.size() > 0) {
@@ -99,17 +106,17 @@ public abstract class AbstractFluxComponent implements FluxComponent {
         return component;
     }
 
-    protected List getPropertiesYaml (String[] propertyNames) {
-        List properties = new ArrayList();
+    protected List<Map<String, Object>> getPropertiesYaml(String[] propertyNames) {
+        List<Map<String, Object>> properties = new ArrayList<>();
         if ((propertyNames != null) && (propertyNames.length > 0)) {
-            for (int i = 0; i < propertyNames.length; ++i) {
-                Object value = conf.get(propertyNames[i]);
+            for (String propertyName : propertyNames) {
+                Object value = conf.get(propertyName);
                 if (value != null) {
-                    Map propertyMap = new LinkedHashMap();
+                    Map<String, Object> propertyMap = new LinkedHashMap<>();
                     propertyMap.put(TopologyLayoutConstants.YAML_KEY_NAME,
-                            propertyNames[i]);
+                            propertyName);
                     propertyMap.put(TopologyLayoutConstants.YAML_KEY_VALUE,
-                              value);
+                            value);
                     properties.add(propertyMap);
                 }
             }
@@ -117,11 +124,11 @@ public abstract class AbstractFluxComponent implements FluxComponent {
         return properties;
     }
 
-    protected List getConstructorArgsYaml (String[] constructorArgNames) {
+    protected List getConstructorArgsYaml(String[] constructorArgNames) {
         List constructorArgs = new ArrayList();
         if ((constructorArgNames != null) && (constructorArgNames.length > 0)) {
-            for (int i = 0; i < constructorArgNames.length; ++i) {
-                Object value = conf.get(constructorArgNames[i]);
+            for (String constructorArgName : constructorArgNames) {
+                Object value = conf.get(constructorArgName);
                 if (value != null) {
                     constructorArgs.add(value);
                 }
@@ -130,7 +137,7 @@ public abstract class AbstractFluxComponent implements FluxComponent {
         return constructorArgs;
     }
 
-    protected List getConfigMethodsYaml (String[] configMethodNames, String[] configKeys) {
+    protected List getConfigMethodsYaml(String[] configMethodNames, String[] configKeys) {
         List configMethods = new ArrayList();
         List<String> nonNullConfigMethodNames = new ArrayList<String>();
         List values = new ArrayList();
@@ -147,7 +154,7 @@ public abstract class AbstractFluxComponent implements FluxComponent {
         return configMethods;
     }
 
-    protected List getConfigMethodsYaml (String[] configMethodNames, Object[] values) {
+    protected List getConfigMethodsYaml(String[] configMethodNames, Object[] values) {
         List configMethods = new ArrayList();
         if ((configMethodNames != null) && (values != null) &&
                 (configMethodNames.length == values.length) && (values.length > 0)) {
@@ -164,13 +171,13 @@ public abstract class AbstractFluxComponent implements FluxComponent {
         return configMethods;
     }
 
-    protected Map getRefYaml (String refId) {
+    protected Map getRefYaml(String refId) {
         Map ref = new LinkedHashMap();
         ref.put(TopologyLayoutConstants.YAML_KEY_REF, refId);
         return ref;
     }
 
-    protected List getConfigMethodWithRefArg (String[] configMethodNames,
+    protected List getConfigMethodWithRefArg(String[] configMethodNames,
                                              String[] refIds) {
         List configMethods = new ArrayList();
         if ((configMethodNames != null) && (refIds != null) &&
@@ -190,14 +197,16 @@ public abstract class AbstractFluxComponent implements FluxComponent {
         return configMethods;
     }
 
-    // validate boolean fields based on if they are required or not. Meant to
-    // be called from base classes that need to validate
-    protected void validateBooleanFields (String[] fieldNames, boolean areRequiredFields) throws BadTopologyLayoutException {
+    /**
+     * validate boolean fields based on if they are required or not. Meant to
+     * be called from base classes that need to validate
+     */
+    protected void validateBooleanFields(String[] fieldNames, boolean areRequiredFields) throws BadTopologyLayoutException {
         this.validateBooleanFields(fieldNames, areRequiredFields, conf);
     }
 
     // Overloaded version of above method since we need it for NotificationBolt and perhaps other components in future
-    protected void validateBooleanFields (String[] fieldNames, boolean areRequiredFields, Map<String, Object> conf) throws BadTopologyLayoutException {
+    protected void validateBooleanFields(String[] fieldNames, boolean areRequiredFields, Map<String, Object> conf) throws BadTopologyLayoutException {
         for (int i = 0; i < fieldNames.length; ++i) {
             String fieldName = fieldNames[i];
             Object value = conf.get(fieldName);
@@ -220,15 +229,19 @@ public abstract class AbstractFluxComponent implements FluxComponent {
         }
     }
 
-    // validate string fields based on if they are required or not. Meant to
-    // be called from base classes that need to validate
-    protected void validateStringFields (String[] fieldNames, boolean areRequiredFields) throws BadTopologyLayoutException {
+    /**
+     * Validate string fields based on if they are required or not. Meant to
+     * be called from base classes that need to validate
+     */
+    protected void validateStringFields(String[] fieldNames, boolean areRequiredFields) throws BadTopologyLayoutException {
         this.validateStringFields(fieldNames, areRequiredFields, conf);
     }
 
-    // Overloaded version of above method since we need it for NotificationBolt and perhaps other components in future
-    protected void validateStringFields (String[] fieldNames, boolean areRequiredFields, Map<String, Object> conf) throws BadTopologyLayoutException {
-        for (String fieldName: fieldNames) {
+    /**
+     * Overloaded version of above method since we need it for NotificationBolt and perhaps other components in future
+     */
+    protected void validateStringFields(String[] fieldNames, boolean areRequiredFields, Map<String, Object> conf) throws BadTopologyLayoutException {
+        for (String fieldName : fieldNames) {
             Object value = conf.get(fieldName);
             boolean isValid = true;
             if (areRequiredFields) {
@@ -249,9 +262,11 @@ public abstract class AbstractFluxComponent implements FluxComponent {
         }
     }
 
-    // validate byte fields based on if they are required or not and their
-    // valid range. Meant to // be called from base classes that need to validate
-    protected void validateByteFields (String[] fieldNames, boolean
+    /**
+     * validate byte fields based on if they are required or not and their
+     * valid range. Meant to // be called from base classes that need to validate
+     */
+    protected void validateByteFields(String[] fieldNames, boolean
             areRequiredFields, Byte[] mins, Byte[] maxes) throws
             BadTopologyLayoutException {
         if ((fieldNames == null) || (fieldNames.length != mins.length) ||
@@ -282,9 +297,11 @@ public abstract class AbstractFluxComponent implements FluxComponent {
         }
     }
 
-    // validate short fields based on if they are required or not and their
-    // valid range. Meant to // be called from base classes that need to validate
-    protected void validateShortFields (String[] fieldNames, boolean
+    /**
+     * Validate short fields based on if they are required or not and their
+     * valid range. Meant to // be called from base classes that need to validate
+     */
+    protected void validateShortFields(String[] fieldNames, boolean
             areRequiredFields, Short[] mins, Short[] maxes) throws
             BadTopologyLayoutException {
         if ((fieldNames == null) || (fieldNames.length != mins.length) ||
@@ -315,14 +332,18 @@ public abstract class AbstractFluxComponent implements FluxComponent {
         }
     }
 
-    // validate integer fields based on if they are required or not and their
-    // valid range. Meant to // be called from base classes that need to validate
-    protected void validateIntegerFields (String[] fieldNames, boolean areRequiredFields, Integer[] mins, Integer[] maxes) throws BadTopologyLayoutException {
+    /**
+     * Validate integer fields based on if they are required or not and their
+     * valid range. Meant to // be called from base classes that need to validate
+     */
+    protected void validateIntegerFields(String[] fieldNames, boolean areRequiredFields, Integer[] mins, Integer[] maxes) throws BadTopologyLayoutException {
         this.validateIntegerFields(fieldNames, areRequiredFields, mins, maxes, conf);
     }
 
-    // Overloaded version of above method since we need it for NotificationBolt and perhaps other components in future
-    protected void validateIntegerFields (String[] fieldNames, boolean areRequiredFields, Integer[] mins, Integer[] maxes, Map<String, Object> conf) throws
+    /**
+     * Overloaded version of above method since we need it for NotificationBolt and perhaps other components in future
+     */
+    protected void validateIntegerFields(String[] fieldNames, boolean areRequiredFields, Integer[] mins, Integer[] maxes, Map<String, Object> conf) throws
             BadTopologyLayoutException {
         if ((fieldNames == null) || (fieldNames.length != mins.length) ||
                 (fieldNames.length != maxes.length)) {
@@ -352,9 +373,10 @@ public abstract class AbstractFluxComponent implements FluxComponent {
         }
     }
 
-    // validate long fields based on if they are required or not and their
-    // valid range. Meant to // be called from base classes that need to validate
-    protected void validateLongFields (String[] fieldNames, boolean
+    /**
+     * Validate long fields based on if they are required or not and their valid range. Meant to // be called from base classes that need to validate
+     */
+    protected void validateLongFields(String[] fieldNames, boolean
             areRequiredFields, Long[] mins, Long[] maxes) throws
             BadTopologyLayoutException {
         if ((fieldNames == null) || (fieldNames.length != mins.length) ||
@@ -385,7 +407,7 @@ public abstract class AbstractFluxComponent implements FluxComponent {
         }
     }
 
-    protected void validateFloatOrDoubleFields (String[] fieldNames, boolean
+    protected void validateFloatOrDoubleFields(String[] fieldNames, boolean
             areRequiredFields) throws BadTopologyLayoutException {
         for (int i = 0; i < fieldNames.length; ++i) {
             String fieldName = fieldNames[i];

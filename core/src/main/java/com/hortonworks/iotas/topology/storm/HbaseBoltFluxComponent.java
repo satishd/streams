@@ -10,13 +10,15 @@ import java.util.Map;
  * Implementation for HbaseBolt
  */
 public class HbaseBoltFluxComponent extends AbstractFluxComponent {
+
     @Override
-    protected void generateComponent () {
+    protected void generateComponent() {
         String hbaseMapperRef = addHbaseMapperComponent();
         String boltId = "hbaseBolt" + UUID_FOR_COMPONENTS;
         String boltClassName = "org.apache.storm.hbase.bolt.HBaseBolt";
+
         String[] constructorArgNames = {
-            TopologyLayoutConstants.JSON_KEY_TABLE
+                TopologyLayoutConstants.JSON_KEY_TABLE
         };
         List boltConstructorArgs = getConstructorArgsYaml(constructorArgNames);
         Map ref = getRefYaml(hbaseMapperRef);
@@ -27,13 +29,13 @@ public class HbaseBoltFluxComponent extends AbstractFluxComponent {
                 TopologyLayoutConstants.JSON_KEY_WRITE_TO_WAL,
                 TopologyLayoutConstants.JSON_KEY_CONFIG_KEY
         };
-        List configMethods = getConfigMethodsYaml(configMethodNames,
-                configKeys);
+
+        List configMethods = getConfigMethodsYaml(configMethodNames, configKeys);
         component = createComponent(boltId, boltClassName, null, boltConstructorArgs, configMethods);
         addParallelismToComponent();
     }
 
-    private String addHbaseMapperComponent () {
+    private String addHbaseMapperComponent() {
         String hbaseMapperComponentId = "hbaseMapper" + UUID_FOR_COMPONENTS;
 
         // currently only ParserOutputHbaseMapper is supported.
@@ -42,7 +44,7 @@ public class HbaseBoltFluxComponent extends AbstractFluxComponent {
 
         //constructor args
         String[] constructorArgNames = {
-            TopologyLayoutConstants.JSON_KEY_COLUMN_FAMILY
+                TopologyLayoutConstants.JSON_KEY_COLUMN_FAMILY
         };
         List hbaseMapperConstructorArgs = getConstructorArgsYaml
                 (constructorArgNames);
@@ -54,27 +56,28 @@ public class HbaseBoltFluxComponent extends AbstractFluxComponent {
     }
 
     @Override
-    public void validateConfig () throws BadTopologyLayoutException {
+    public void validateConfig() throws BadTopologyLayoutException {
         super.validateConfig();
         validateBooleanFields();
         validateStringFields();
     }
 
-    private void validateBooleanFields () throws BadTopologyLayoutException {
+    private void validateBooleanFields() throws BadTopologyLayoutException {
         String[] optionalBooleanFields = {
-            TopologyLayoutConstants.JSON_KEY_WRITE_TO_WAL
+                TopologyLayoutConstants.JSON_KEY_WRITE_TO_WAL
         };
         validateBooleanFields(optionalBooleanFields, false);
     }
 
-    private void validateStringFields () throws BadTopologyLayoutException {
+    private void validateStringFields() throws BadTopologyLayoutException {
         String[] requiredStringFields = {
-            TopologyLayoutConstants.JSON_KEY_TABLE,
-            TopologyLayoutConstants.JSON_KEY_COLUMN_FAMILY
+                TopologyLayoutConstants.JSON_KEY_TABLE,
+                TopologyLayoutConstants.JSON_KEY_COLUMN_FAMILY
         };
         validateStringFields(requiredStringFields, true);
+
         String[] optionalStringFields = {
-            TopologyLayoutConstants.JSON_KEY_CONFIG_KEY
+                TopologyLayoutConstants.JSON_KEY_CONFIG_KEY
         };
         validateStringFields(optionalStringFields, false);
     }
