@@ -16,28 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipelines;
+package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
-import com.hortonworks.iotas.layout.design.component.IotasProcessor;
-import com.hortonworks.iotas.layout.design.component.Processor;
-import com.hortonworks.iotas.layout.runtime.ActionRuntime;
+import com.hortonworks.iotas.common.Schema;
+import com.hortonworks.iotas.layout.design.component.Stream;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Split the payload based on a given criteria. It splits the payload and sends it to parallel stages. Each stage can have
- * List of Actions. Current supported Action is Enrichment and other actions like projection/filters etc can be added.
+ *
  */
-public abstract class SplitProcessor extends IotasProcessor {
+public class FieldsBasedSplitProcessorRuntime extends SplitProcessorRuntime {
+    private final List<Schema.Field> groupFields;
 
-    public static final String ROOT_MESSAGE_STREAM = "root-message-stream";
-    protected final List<Stage> parallelStages;
-
-    protected SplitProcessor(List<Stage> parallelStages) {
-        this.parallelStages = parallelStages;
+    public FieldsBasedSplitProcessorRuntime(List<Schema.Field> groupFields, List<Stream> ouputStreams) {
+        super(ouputStreams);
+        this.groupFields = groupFields;
     }
 
-    public abstract List<Result> splitPayload(IotasEvent iotasEvent);
+    @Override
+    public List<Result> splitEvent(IotasEvent iotasEvent) {
+        List<Result> results = new ArrayList<>();
+        for (Stream stream : outputStreams) {
+            // todo check whether this is really needed as this logic can be pushed to stream grouping on output streams.
+        }
+        return null;
+    }
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipelines;
+package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * This class creates a loadable cache for given backing {@link DataProvider} with caching configuration like maximum size, expiration interval
  * and refresh interval.
- *
  */
 public class CachedDataProvider<K, V> implements DataProvider<K, V> {
 
@@ -50,9 +49,9 @@ public class CachedDataProvider<K, V> implements DataProvider<K, V> {
         backedDataProvider.prepare();
         loadingCache =
                 CacheBuilder.newBuilder()
-                .maximumSize(maxCacheSize)
-                .refreshAfterWrite(refreshInterval, TimeUnit.SECONDS)
-                .expireAfterWrite(entryExpirationInterval, TimeUnit.SECONDS)
+                        .maximumSize(maxCacheSize)
+                        .refreshAfterWrite(refreshInterval, TimeUnit.SECONDS)
+                        .expireAfterWrite(entryExpirationInterval, TimeUnit.SECONDS)
                         .build(new CacheLoader<K, V>() {
                             @Override
                             public V load(K key) throws Exception {

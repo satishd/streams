@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipelines;
+package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Schema;
@@ -46,11 +46,11 @@ public class EnrichmentAction<K, V> implements Action {
     /**
      * Used for lookups of enrich field values.
      */
-    private final DataProvider<K,V> enrichmentDataProvider;
+    private final DataProvider<K, V> enrichmentDataProvider;
 
     public static final long DEFAULT_MAX_CACHE_SIZE = 1000;
-    public static final long DEFAULT_ENTRY_EXPIRATION_INTERVAL = 60*5*1000;
-    public static final long DEFAULT_ENTRY_REFRESH_INTERVAL = 60*5*1000;
+    public static final long DEFAULT_ENTRY_EXPIRATION_INTERVAL = 60 * 5 * 1000;
+    public static final long DEFAULT_ENTRY_REFRESH_INTERVAL = 60 * 5 * 1000;
 
     /**
      * maximum size of the cache

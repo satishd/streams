@@ -16,30 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipelines;
+package com.hortonworks.iotas.layout.runtime.pipeline;
+
+import com.hortonworks.iotas.common.IotasEvent;
+import com.hortonworks.iotas.common.IotasEventImpl;
+
+import java.util.Collections;
+import java.util.HashMap;
 
 /**
- * Data provider for {@link Action} which can be used for lookups.
  *
  */
-public interface DataProvider<K, V> {
+public class GroupRootEvent extends IotasEventImpl {
 
-    /**
-     * Prepare resources which can be used in retrieving values from data store.
-     *
-     */
-    public void prepare(); //Config config);
+    protected String groupId;
+    protected int noOfMessages;
 
-    /**
-     * Retrieves a value for a given key from a data store.
-     * @param key
-     */
-    public V get(K key);
+    public GroupRootEvent(IotasEvent iotasEvent, String groupId, int noOfMessages) {
+        super(iotasEvent.getFieldsAndValues(), iotasEvent.getDataSourceId(), iotasEvent.getId(), iotasEvent.getHeader(), SplitProcessorRuntime.ROOT_MESSAGE_STREAM);
+        this.groupId = groupId;
+        this.noOfMessages = noOfMessages;
+    }
 
-    /**
-     * cleanup any resources held by this instance.
-     *
-     */
-    public void cleanup();
 
 }

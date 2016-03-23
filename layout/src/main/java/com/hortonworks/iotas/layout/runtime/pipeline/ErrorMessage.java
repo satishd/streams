@@ -16,17 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipelines;
+package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
-import com.hortonworks.iotas.layout.runtime.ActionRuntime;
 
 import java.util.List;
 
 /**
  * Error message to be sent in error stream from an Action or Stage Processor to a RuleProcessor or Sink.
- *
  */
 public class ErrorMessage {
     /**

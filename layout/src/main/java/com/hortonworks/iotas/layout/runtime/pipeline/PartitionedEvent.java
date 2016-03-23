@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipelines;
+package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
 
 /**
- *
+ * Partitioned event sent by split processor. It contains {@code groupId} and {@code partNo} of the split event.
  */
 public class PartitionedEvent extends IotasEventImpl {
 
@@ -50,6 +50,9 @@ public class PartitionedEvent extends IotasEventImpl {
 
     @Override
     public int hashCode() {
-        return partNo;
+        int result = super.hashCode();
+        result = 31 * result + (groupId != null ? groupId.hashCode() : 0);
+        result = 31 * result + partNo;
+        return result;
     }
 }

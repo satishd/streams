@@ -16,23 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipelines;
+package com.hortonworks.iotas.layout.runtime.pipeline;
 
-import com.hortonworks.iotas.common.IotasEventImpl;
+import com.hortonworks.iotas.common.IotasEvent;
+
+import java.util.List;
 
 /**
  *
  */
-public class GroupRootEvent extends IotasEventImpl {
+public interface Action {
 
-    protected String groupId;
-    protected int noOfMessages;
-
-    public GroupRootEvent(String id, String groupId, int noOfMessages) {
-        super(null, null, id, null, SplitProcessor.ROOT_MESSAGE_STREAM);
-        this.groupId = groupId;
-        this.noOfMessages = noOfMessages;
-    }
-
+    public List<IotasEvent> execute(IotasEvent iotasEvent);
 
 }
