@@ -16,17 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipelines;
-
-import com.hortonworks.iotas.common.IotasEvent;
-
-import java.util.List;
+package com.hortonworks.iotas.layout.runtime.pipeline;
 
 /**
- *
+ * Data provider for {@link Action} which can be used for lookups.
  */
-public interface Action {
+public interface DataProvider<K, V> {
 
-    public List<IotasEvent> execute(IotasEvent iotasEvent);
+    /**
+     * Prepare resources which can be used in retrieving values from data store.
+     */
+    public void prepare(); //Config config);
+
+    /**
+     * Retrieves a value for a given key from a data store.
+     *
+     * @param key
+     */
+    public V get(K key);
+
+    /**
+     * cleanup any resources held by this instance.
+     */
+    public void cleanup();
 
 }

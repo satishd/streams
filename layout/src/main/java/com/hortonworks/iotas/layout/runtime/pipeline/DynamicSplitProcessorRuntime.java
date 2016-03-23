@@ -16,28 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipelines;
+package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
-import com.hortonworks.iotas.common.Schema;
-import com.hortonworks.iotas.layout.runtime.ActionRuntime;
+import com.hortonworks.iotas.layout.design.component.Stream;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  *
  */
-public class FieldsBasedSplitProcessor extends SplitProcessor {
-    private final List<Schema.Field> groupFields;
+public class DynamicSplitProcessorRuntime extends SplitProcessorRuntime {
 
-    public FieldsBasedSplitProcessor(List<Schema.Field> groupFields, List<Stage> parallelStages) {
-        super(parallelStages);
-        this.groupFields = groupFields;
+    public DynamicSplitProcessorRuntime(List<Stream> outputStreams) {
+        super(outputStreams);
     }
 
     @Override
-    public List<Result> splitPayload(IotasEvent iotasEvent) {
-        return null;
+    public List<Result> splitEvent(IotasEvent iotasEvent) {
+        List<Result> results = new ArrayList<>();
+        String groupId = getGroupId(iotasEvent);
+        int curPartNo = 0;
+        for (Stream stream : outputStreams) {
+            results.add(new Result(stream.getId(), Collections.singletonList((IotasEvent)
+                    new PartitionedEvent(iotasEvent, stream.getId(), groupId, ++curPartNo))));
+        }
+        results.add(new Result(ROOT_MESSAGE_STREAM, Collections.singletonList((IotasEvent) new GroupRootEvent(iotasEvent, groupId, curPartNo))));
+        return results;
     }
+
 }

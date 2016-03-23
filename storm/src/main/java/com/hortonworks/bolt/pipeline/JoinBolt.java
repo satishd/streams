@@ -20,7 +20,8 @@ package com.hortonworks.bolt.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
-import com.hortonworks.iotas.layout.runtime.pipelines.JoinProcessor;
+import com.hortonworks.iotas.common.errors.ProcessingException;
+import com.hortonworks.iotas.layout.runtime.pipeline.JoinProcessorRuntime;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -28,6 +29,7 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,10 +41,10 @@ public class JoinBolt extends BaseRichBolt {
     private TopologyContext context;
     private OutputCollector collector;
 
-    private JoinProcessor joinProcessor;
+    private JoinProcessorRuntime joinProcessorRuntime;
 
-    public JoinBolt(JoinProcessor joinProcessor) {
-        this.joinProcessor = joinProcessor;
+    public JoinBolt(JoinProcessorRuntime joinProcessorRuntime) {
+        this.joinProcessorRuntime = joinProcessorRuntime;
     }
 
     @Override
@@ -56,13 +58,21 @@ public class JoinBolt extends BaseRichBolt {
     public void execute(Tuple tuple) {
         IotasEvent iotasEvent = (IotasEvent) tuple.getValueByField(IotasEvent.IOTAS_EVENT);
         String sourceStreamId = tuple.getSourceStreamId();
-        Result result = joinProcessor.execute(iotasEvent);
-        if(result != null) {
-            for (IotasEvent event : result.events) {
-                collector.emit(result.stream, tuple, new Values(event));
+        List<Result> results = null;
+        try {
+            results = joinProcessorRuntime.process(iotasEvent);
+            if (results != null) {
+                for (Result result : results) {
+                    for (IotasEvent event : result.events) {
+                        collector.emit(result.stream, tuple, new Values(event));
+                    }
+                }
+                collector.ack(tuple);
             }
-            collector.ack(tuple);
+        } catch (ProcessingException e) {
+            e.printStackTrace();
         }
+
     }
 
     @Override
