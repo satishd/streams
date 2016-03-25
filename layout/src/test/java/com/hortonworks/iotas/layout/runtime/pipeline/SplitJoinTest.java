@@ -40,7 +40,7 @@ public class SplitJoinTest {
     private static Schema outputSchema = Schema.of(new Schema.Field("foo", Schema.Type.STRING),
             new Schema.Field("bar", Schema.Type.STRING));
 
-//    @Test
+    @Test
     public void testSplitJoinProcessors() throws Exception {
         String[] streamIds = {"stream-1", "stream-2", "stream-3"};
         List<Stream> outputStreams = new ArrayList<>();
@@ -65,10 +65,13 @@ public class SplitJoinTest {
                     }
                 }
 
-                IotasEventImpl joinedEvent = new IotasEventImpl(fieldValues, eventGroup.getGroupRootEvent().getDataSourceId(), UUID.randomUUID().toString(), eventGroup.getGroupRootEvent().getHeader(), this.outputStream.getId(), auxiliaryFieldValues);
+                IotasEventImpl joinedEvent = new IotasEventImpl(fieldValues, eventGroup.getGroupRootEvent().getDataSourceId(),
+                        UUID.randomUUID().toString(), eventGroup.getGroupRootEvent().getHeader(), this.outputStream.getId(), auxiliaryFieldValues);
                 return new Result(this.outputStream.getId(), Collections.singletonList((IotasEvent) joinedEvent));
             }
         };
+
+        joinProcessorRuntime.setOutputStream(new Stream("output", outputSchema));
 
         for (Result result : results) {
             joinProcessorRuntime.addIncomingStream(result.stream);

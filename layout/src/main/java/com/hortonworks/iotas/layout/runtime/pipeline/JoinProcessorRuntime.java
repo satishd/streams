@@ -24,11 +24,9 @@ import com.hortonworks.iotas.common.errors.ProcessingException;
 import com.hortonworks.iotas.layout.design.component.Stream;
 import com.hortonworks.iotas.processor.ProcessorRuntime;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +41,14 @@ public abstract class JoinProcessorRuntime implements ProcessorRuntime {
     protected Stream outputStream;
 
     public JoinProcessorRuntime() {
+    }
+
+    public Stream getOutputStream() {
+        return outputStream;
+    }
+
+    public void setOutputStream(Stream outputStream) {
+        this.outputStream = outputStream;
     }
 
     @Override
