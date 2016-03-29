@@ -2,6 +2,7 @@ package com.hortonworks.iotas.layout.runtime.rule;
 
 import com.hortonworks.iotas.layout.design.rule.Rule;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
+import com.hortonworks.iotas.layout.design.rule.action.NotifierAction;
 import com.hortonworks.iotas.layout.runtime.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.TransformAction;
 import com.hortonworks.iotas.layout.runtime.transform.AddHeaderTransform;
@@ -34,7 +35,6 @@ public abstract class AbstractRuleRuntimeBuilder implements RuleRuntimeBuilder {
         actions = runtimeActions;
     }
 
-
     /**
      * Returns the necessary transforms to perform based on the action.
      */
@@ -45,11 +45,14 @@ public abstract class AbstractRuleRuntimeBuilder implements RuleRuntimeBuilder {
             transforms.add(new SubstituteTransform(action.getOutputFieldsAndDefaults().keySet()));
             transforms.add(new ProjectionTransform(action.getOutputFieldsAndDefaults().keySet()));
         }
-        if (action.isIncludeMeta()) {
-            Map<String, Object> headers = new HashMap<>();
-            headers.put(AddHeaderTransform.HEADER_FIELD_NOTIFIER_NAME, action.getNotifierName());
-            headers.put(AddHeaderTransform.HEADER_FIELD_RULE_ID, getRule().getId());
-            transforms.add(new AddHeaderTransform(headers));
+        if (action instanceof NotifierAction){
+            NotifierAction notifierAction = (NotifierAction) action;
+            if(notifierAction.isIncludeMeta()) {
+                Map<String, Object> headers = new HashMap<>();
+                headers.put(AddHeaderTransform.HEADER_FIELD_NOTIFIER_NAME, notifierAction.getNotifierName());
+                headers.put(AddHeaderTransform.HEADER_FIELD_RULE_ID, getRule().getId());
+                transforms.add(new AddHeaderTransform(headers));
+            }
         }
         // default is to just forward the event
         if(transforms.isEmpty()) {
