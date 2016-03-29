@@ -18,6 +18,7 @@
 
 package com.hortonworks.iotas.layout.design.rule;
 
+import com.google.common.collect.Lists;
 import com.hortonworks.iotas.common.Schema;
 import com.hortonworks.iotas.common.Schema.Field;
 import com.hortonworks.iotas.layout.design.component.IotasSink;
@@ -26,6 +27,7 @@ import com.hortonworks.iotas.layout.design.component.RulesProcessorBuilder;
 import com.hortonworks.iotas.layout.design.component.Sink;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.design.rule.condition.BinaryExpression;
+import com.hortonworks.iotas.layout.design.rule.action.NotifierAction;
 import com.hortonworks.iotas.layout.design.rule.condition.Condition;
 import com.hortonworks.iotas.layout.design.rule.condition.Expression;
 import com.hortonworks.iotas.layout.design.rule.condition.FieldExpression;
@@ -81,19 +83,19 @@ public class RuleProcessorMockBuilder implements RulesProcessorBuilder {
         return rules;
     }
 
-    private Rule buildRule(long ruleId, Condition condition, Action action) {
+    private Rule buildRule(long ruleId, Condition condition, NotifierAction action) {
         Rule rule = new Rule();
         rule.setId(ruleId);
         rule.setName(RULE + "_" + ruleId);
         rule.setDescription(RULE + "_" + ruleId + "_desc");
         rule.setRuleProcessorName(RULE_PROCESSOR + "_" + ruleProcessorId);
         rule.setCondition(condition);
-        rule.setActions(Collections.singletonList(action));
+        rule.setActions(Collections.singletonList((Action) action));
         return rule;
     }
 
-    private Action buildAction(List<Sink> sinks) {
-        Action action = new Action();
+    private NotifierAction buildAction(List<Sink> sinks) {
+        NotifierAction action = new NotifierAction();
         return action;
     }
 

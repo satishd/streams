@@ -29,6 +29,7 @@ import java.util.Set;
  * - Splitter jar
  * - Splitter class to be loaded from jar using proxy class loader
  * - Add centralized jar storage utility so that any component can use those jars
+ * todo - Use RulesProcessor as the only action with Split
  */
 public class SplitProcessor extends IotasProcessor {
 
