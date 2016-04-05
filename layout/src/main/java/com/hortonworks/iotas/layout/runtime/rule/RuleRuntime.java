@@ -54,7 +54,7 @@ public class RuleRuntime implements Serializable, ProcessorRuntime {
 
     public boolean evaluate(IotasEvent input) {
         try {
-            boolean evaluates = script.evaluate(input);
+            boolean evaluates = script != null ? script.evaluate(input) : true;
             LOG.debug("Rule condition evaluated to [{}].\n\t[{}]\n\tInput[{}]", evaluates, rule, input);
             return evaluates;
         } catch (ScriptException e) {
@@ -73,9 +73,9 @@ public class RuleRuntime implements Serializable, ProcessorRuntime {
         List<Result> results = new ArrayList<>();
         try {
             for (ActionRuntime action : actions) {
-                Result result = action.execute(input);
+                List<Result> result = action.execute(input);
                 LOG.debug("Applied action {}, Result {}", action, result);
-                results.add(result);
+                results.addAll(result);
             }
         } catch (Exception e) {
             String message = "Error evaluating rule with id:" + rule.getId();
@@ -100,8 +100,8 @@ public class RuleRuntime implements Serializable, ProcessorRuntime {
         LOG.debug("in getStreams");
         List<String> streams = new ArrayList<>();
         for(ActionRuntime action: actions) {
-            LOG.debug("Action {}, Stream {}", action, action.getStream());
-            streams.add(action.getStream());
+            LOG.debug("Action {}, Stream {}", action, action.getStreams());
+            streams.addAll(action.getStreams());
         }
         LOG.debug("Returning streams {}", streams);
         return streams;

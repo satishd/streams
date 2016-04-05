@@ -4,6 +4,7 @@ import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Runtime abstraction for the action to be taken when a rule matches the condition
@@ -11,18 +12,19 @@ import java.io.Serializable;
 public interface ActionRuntime extends Serializable {
 
     /**
-     * Execute the current action and return the Result object.
+     * Execute the current action and return a {@link List} of {@link Result}s.
+     *
      * @param input the input IotasEvent
      * @return the result
      */
-    Result execute(IotasEvent input);
+    List<Result> execute(IotasEvent input);
 
 
     /**
-     * The stream where the result of this action are sent out
+     * The streams where the result of this action are sent out
      *
-     * @return the stream where the result of this action are sent out
+     * @return streams where the result of this action are sent out
      */
-    String getStream();
+    List<String> getStreams();
 
 }

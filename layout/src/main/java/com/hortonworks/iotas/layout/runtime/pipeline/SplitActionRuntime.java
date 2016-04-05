@@ -19,14 +19,30 @@
 package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
+import com.hortonworks.iotas.common.Result;
+import com.hortonworks.iotas.layout.runtime.ActionRuntime;
 
 import java.util.List;
 
 /**
- *
+ * Runtime for {@link SplitAction}
  */
-public interface Action {
+public class SplitActionRuntime implements ActionRuntime {
+    private final SplitAction splitAction;
+    private final List<String> streams;
 
-    public List<IotasEvent> execute(IotasEvent iotasEvent);
+    public SplitActionRuntime(SplitAction splitAction, List<String> streams) {
+        this.splitAction = splitAction;
+        this.streams = streams;
+    }
 
+    @Override
+    public List<Result> execute(IotasEvent input) {
+        return null;
+    }
+
+    @Override
+    public List<String> getStreams() {
+        return streams;
+    }
 }

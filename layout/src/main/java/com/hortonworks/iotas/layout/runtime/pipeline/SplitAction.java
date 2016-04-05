@@ -18,26 +18,31 @@
  */
 package com.hortonworks.iotas.layout.runtime.pipeline;
 
+import com.hortonworks.iotas.layout.design.rule.action.Action;
+
 /**
- * Data provider for {@link PipelineAction} which can be used for lookups.
+ *
  */
-public interface DataProvider<K, V> {
+public class SplitAction extends Action {
+    private String jarId;
+    private String splitterClassName;
 
-    /**
-     * Prepare resources which can be used in retrieving values from data store.
-     */
-    public void prepare(); //Config config);
+    public SplitAction() {
+    }
 
-    /**
-     * Retrieves a value for a given key from a data store.
-     *
-     * @param key
-     */
-    public V get(K key);
+    public String getJarId() {
+        return jarId;
+    }
 
-    /**
-     * cleanup any resources held by this instance.
-     */
-    public void cleanup();
+    public void setJarId(String jarId) {
+        this.jarId = jarId;
+    }
 
+    public String getSplitterClassName() {
+        return splitterClassName;
+    }
+
+    public void setSplitterClassName(String splitterClassName) {
+        this.splitterClassName = splitterClassName;
+    }
 }

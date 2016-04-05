@@ -18,10 +18,12 @@
  */
 package com.hortonworks.iotas.layout.design.pipeline;
 
-import com.hortonworks.iotas.layout.design.component.IotasProcessor;
-import com.hortonworks.iotas.layout.design.component.Stream;
+import com.hortonworks.iotas.layout.design.component.RulesProcessor;
+import com.hortonworks.iotas.layout.design.rule.Rule;
+import com.hortonworks.iotas.layout.design.rule.action.Action;
+import com.hortonworks.iotas.layout.runtime.pipeline.SplitAction;
 
-import java.util.Set;
+import java.util.Collections;
 
 /**
  * - output streams list
@@ -31,16 +33,24 @@ import java.util.Set;
  * - Add centralized jar storage utility so that any component can use those jars
  * todo - Use RulesProcessor as the only action with Split
  */
-public class SplitProcessor extends IotasProcessor {
+public class SplitProcessor extends RulesProcessor {
 
     private String jarId;
 
-    public SplitProcessor(Set<Stream> outputStreams) {
-        super(outputStreams);
+    public SplitProcessor(SplitAction splitAction) {
+        final TrueRule trueRule = new TrueRule();
+        trueRule.setActions(Collections.<Action>singletonList(splitAction));
+        setRules(Collections.<Rule>singletonList(trueRule));
+    }
+
+    static class TrueRule extends Rule {
+        public TrueRule() {
+            setName("true-rule");
+            setId(System.currentTimeMillis());
+        }
     }
 
     public void setJar(String jarId) {
-
         this.jarId = jarId;
     }
 

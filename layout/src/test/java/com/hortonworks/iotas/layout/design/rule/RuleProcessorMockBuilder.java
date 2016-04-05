@@ -18,7 +18,6 @@
 
 package com.hortonworks.iotas.layout.design.rule;
 
-import com.google.common.collect.Lists;
 import com.hortonworks.iotas.common.Schema;
 import com.hortonworks.iotas.common.Schema.Field;
 import com.hortonworks.iotas.layout.design.component.IotasSink;

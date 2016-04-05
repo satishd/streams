@@ -39,8 +39,8 @@ public class TransformAction implements ActionRuntime {
      * TransformAction object and returns the {@link Result}
      */
     @Override
-    public Result execute(IotasEvent input) {
-        return new Result(stream, doTransform(input));
+    public List<Result> execute(IotasEvent input) {
+        return Collections.singletonList(new Result(stream, doTransform(input)));
     }
 
     /*
@@ -66,8 +66,8 @@ public class TransformAction implements ActionRuntime {
     }
 
     @Override
-    public String getStream() {
-        return stream;
+    public List<String> getStreams() {
+        return Collections.singletonList(stream);
     }
 
     @Override
