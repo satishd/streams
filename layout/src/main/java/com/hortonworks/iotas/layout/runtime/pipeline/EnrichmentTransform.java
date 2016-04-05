@@ -20,6 +20,7 @@ package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Schema;
+import com.hortonworks.iotas.layout.runtime.transform.Transform;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Enrichment adds an extra enriched message of original message's fields or already enriched fields.
  */
-public class EnrichmentAction<K, V> implements Action {
+public class EnrichmentTransform<K, V> implements Transform {
     /**
      * Name of the enrichment
      */
@@ -69,7 +70,7 @@ public class EnrichmentAction<K, V> implements Action {
 
     private CachedDataProvider<K, V> cachedActionDataProvider;
 
-    public EnrichmentAction(String name, List<Schema.Field> fieldsToBeEnriched, Schema.Field outputField, DataProvider<K, V> enrichmentDataProvider) {
+    public EnrichmentTransform(String name, List<Schema.Field> fieldsToBeEnriched, Schema.Field outputField, DataProvider<K, V> enrichmentDataProvider) {
         this.name = name;
         this.fieldsToBeEnriched = fieldsToBeEnriched;
         this.outputField = outputField;

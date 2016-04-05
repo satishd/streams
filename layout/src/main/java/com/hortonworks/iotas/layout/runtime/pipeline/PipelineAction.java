@@ -18,26 +18,15 @@
  */
 package com.hortonworks.iotas.layout.runtime.pipeline;
 
+import com.hortonworks.iotas.common.IotasEvent;
+
+import java.util.List;
+
 /**
- * Data provider for {@link PipelineAction} which can be used for lookups.
+ *
  */
-public interface DataProvider<K, V> {
+public interface PipelineAction {
 
-    /**
-     * Prepare resources which can be used in retrieving values from data store.
-     */
-    public void prepare(); //Config config);
-
-    /**
-     * Retrieves a value for a given key from a data store.
-     *
-     * @param key
-     */
-    public V get(K key);
-
-    /**
-     * cleanup any resources held by this instance.
-     */
-    public void cleanup();
+    public List<IotasEvent> execute(IotasEvent iotasEvent);
 
 }

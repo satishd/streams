@@ -20,12 +20,14 @@ package com.hortonworks.iotas.layout.runtime;
 import com.google.common.collect.ImmutableList;
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
+import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.layout.runtime.transform.MergeTransform;
 import com.hortonworks.iotas.layout.runtime.transform.ProjectionTransform;
 import com.hortonworks.iotas.layout.runtime.transform.SubstituteTransform;
 import com.hortonworks.iotas.layout.runtime.transform.Transform;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +37,7 @@ import static org.junit.Assert.*;
 /**
  * Unit tests for {@link TransformAction}
  */
-public class TransformActionTest {
+public class TransformPipelineActionTest {
 
     @Test
     public void testMergeProject() throws Exception {
@@ -51,11 +53,14 @@ public class TransformActionTest {
         Transform merge = new MergeTransform(defaults);
         Transform projection = new ProjectionTransform(defaults.keySet());
         ActionRuntime actionRuntime = new TransformAction("streamid", ImmutableList.of(merge, projection));
-        List<IotasEvent> result = actionRuntime.execute(event).events;
-        assertEquals(1, result.size());
-        assertEquals(2, result.get(0).getFieldsAndValues().size());
-        assertEquals("THREE", result.get(0).getFieldsAndValues().get("3"));
-        assertEquals("two", result.get(0).getFieldsAndValues().get("2"));
+        List<IotasEvent> resultEvents = new ArrayList<>();
+        for (Result result : actionRuntime.execute(event)) {
+            resultEvents.addAll(result.events);
+        }
+        assertEquals(1, resultEvents.size());
+        assertEquals(2, resultEvents.get(0).getFieldsAndValues().size());
+        assertEquals("THREE", resultEvents.get(0).getFieldsAndValues().get("3"));
+        assertEquals("two", resultEvents.get(0).getFieldsAndValues().get("2"));
     }
 
     @Test
@@ -74,11 +79,14 @@ public class TransformActionTest {
         Transform substitute = new SubstituteTransform();
         Transform projection = new ProjectionTransform(defaults.keySet());
         ActionRuntime actionRuntime = new TransformAction("streamid", ImmutableList.of(merge, substitute, projection));
-        List<IotasEvent> result = actionRuntime.execute(event).events;
-        assertEquals(1, result.size());
-        assertEquals(3, result.get(0).getFieldsAndValues().size());
-        assertEquals("THREE", result.get(0).getFieldsAndValues().get("3"));
-        assertEquals("one plus one", result.get(0).getFieldsAndValues().get("2"));
-        assertEquals("one plus one plus one plus one", result.get(0).getFieldsAndValues().get("4"));
+        List<IotasEvent> resultEvents = new ArrayList<>();
+        for (Result result : actionRuntime.execute(event)) {
+            resultEvents.addAll(result.events);
+        }
+        assertEquals(1, resultEvents.size());
+        assertEquals(3, resultEvents.get(0).getFieldsAndValues().size());
+        assertEquals("THREE", resultEvents.get(0).getFieldsAndValues().get("3"));
+        assertEquals("one plus one", resultEvents.get(0).getFieldsAndValues().get("2"));
+        assertEquals("one plus one plus one plus one", resultEvents.get(0).getFieldsAndValues().get("4"));
     }
 }

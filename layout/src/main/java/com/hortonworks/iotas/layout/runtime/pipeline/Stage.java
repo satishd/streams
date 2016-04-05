@@ -25,16 +25,15 @@ import java.util.List;
  */
 public class Stage {
     public final String name;
-    public final List<Action> actions;
+    public final List<PipelineAction> pipelineActions;
     public final Stage nextStage;
 
     // can have error handler which is kind of sink of errors generated from this stage
 
-    public Stage(String name, List<Action> actions, Stage nextStage) {
+    public Stage(String name, List<PipelineAction> pipelineActions, Stage nextStage) {
         this.name = name;
-        this.actions = actions;
+        this.pipelineActions = pipelineActions;
         this.nextStage = nextStage;
     }
-
 
 }
