@@ -51,25 +51,7 @@ public class SplitJoinTest {
 
         IotasEvent iotasEvent = createRootEvent();
         final List<Result> results = dynamicSplitProcessor.process(iotasEvent);
-        JoinProcessorRuntime joinProcessorRuntime = new JoinProcessorRuntime() {
-            @Override
-            protected Result joinEvents(EventGroup eventGroup) {
-                Map<String, Object> fieldValues = new HashMap<>();
-                Map<String, Object> auxiliaryFieldValues = new HashMap<>();
-                for (PartitionedEvent subEvent : eventGroup.getPartitionedEvents()) {
-                    if(subEvent.getAuxiliaryFieldsAndValues() != null) {
-                        auxiliaryFieldValues.putAll(subEvent.getAuxiliaryFieldsAndValues());
-                    }
-                    if(subEvent.getFieldsAndValues() != null) {
-                        fieldValues.putAll(subEvent.getFieldsAndValues());
-                    }
-                }
-
-                IotasEventImpl joinedEvent = new IotasEventImpl(fieldValues, eventGroup.getGroupRootEvent().getDataSourceId(),
-                        UUID.randomUUID().toString(), eventGroup.getGroupRootEvent().getHeader(), this.outputStream.getId(), auxiliaryFieldValues);
-                return new Result(this.outputStream.getId(), Collections.singletonList((IotasEvent) joinedEvent));
-            }
-        };
+        JoinProcessorRuntime joinProcessorRuntime = new JoinProcessorRuntime();
 
         joinProcessorRuntime.setOutputStream(new Stream("output", outputSchema));
 

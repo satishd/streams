@@ -4,8 +4,9 @@ import com.hortonworks.iotas.layout.design.rule.Rule;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.design.rule.action.NotifierAction;
 import com.hortonworks.iotas.layout.runtime.ActionRuntime;
-import com.hortonworks.iotas.layout.runtime.TransformAction;
+import com.hortonworks.iotas.layout.runtime.TransformActionRuntime;
 import com.hortonworks.iotas.layout.runtime.pipeline.SplitAction;
+import com.hortonworks.iotas.layout.runtime.pipeline.SplitActionRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.AddHeaderTransform;
 import com.hortonworks.iotas.layout.runtime.transform.IdentityTransform;
 import com.hortonworks.iotas.layout.runtime.transform.MergeTransform;
@@ -27,14 +28,27 @@ public abstract class AbstractRuleRuntimeBuilder implements RuleRuntimeBuilder {
         List<ActionRuntime> runtimeActions = new ArrayList<>();
         Rule rule = getRule();
         for (Action action : rule.getActions()) {
+            final ActionRuntime actionRuntime = createActionRuntime(rule, action);
+            runtimeActions.add(actionRuntime);
+        }
+        actions = runtimeActions;
+    }
+
+    protected ActionRuntime createActionRuntime(Rule rule, Action action) {
+        ActionRuntime actionRuntime = null;
+        if(action instanceof NotifierAction) {
             String streamId = rule.getRuleProcessorName() + "." + rule.getName() + "."
                     + rule.getId() + "." + action.getName();
             /*
              * Add an TransformAction to perform necessary transformation for notification
              */
-            runtimeActions.add(new TransformAction(streamId, getTransforms(action)));
+            actionRuntime = new TransformActionRuntime(streamId, getTransforms(action));
+        } else if(action instanceof SplitAction){
+            actionRuntime = new SplitActionRuntime((SplitAction) action);
+        } else {
+            throw new IllegalArgumentException("Action: "+action+" is not supported");
         }
-        actions = runtimeActions;
+        return actionRuntime;
     }
 
     protected List<Transform> getTransforms(Action action) {

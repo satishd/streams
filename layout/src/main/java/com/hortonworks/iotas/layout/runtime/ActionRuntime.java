@@ -25,6 +25,6 @@ public interface ActionRuntime extends Serializable {
      *
      * @return streams where the result of this action are sent out
      */
-    List<String> getStreams();
+    List<String> getOutputStreams();
 
 }
