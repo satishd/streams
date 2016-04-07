@@ -35,7 +35,7 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for {@link TransformAction}
+ * Unit tests for {@link TransformActionRuntime}
  */
 public class TransformPipelineActionTest {
 
@@ -52,7 +52,7 @@ public class TransformPipelineActionTest {
         IotasEvent event = new IotasEventImpl(fieldsAndValues, "dsrcid");
         Transform merge = new MergeTransform(defaults);
         Transform projection = new ProjectionTransform(defaults.keySet());
-        ActionRuntime actionRuntime = new TransformAction("streamid", ImmutableList.of(merge, projection));
+        ActionRuntime actionRuntime = new TransformActionRuntime("streamid", ImmutableList.of(merge, projection));
         List<IotasEvent> resultEvents = new ArrayList<>();
         for (Result result : actionRuntime.execute(event)) {
             resultEvents.addAll(result.events);
@@ -78,7 +78,7 @@ public class TransformPipelineActionTest {
         Transform merge = new MergeTransform(defaults);
         Transform substitute = new SubstituteTransform();
         Transform projection = new ProjectionTransform(defaults.keySet());
-        ActionRuntime actionRuntime = new TransformAction("streamid", ImmutableList.of(merge, substitute, projection));
+        ActionRuntime actionRuntime = new TransformActionRuntime("streamid", ImmutableList.of(merge, substitute, projection));
         List<IotasEvent> resultEvents = new ArrayList<>();
         for (Result result : actionRuntime.execute(event)) {
             resultEvents.addAll(result.events);

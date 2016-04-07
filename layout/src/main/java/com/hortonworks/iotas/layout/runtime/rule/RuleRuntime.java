@@ -100,8 +100,8 @@ public class RuleRuntime implements Serializable, ProcessorRuntime {
         LOG.debug("in getStreams");
         List<String> streams = new ArrayList<>();
         for(ActionRuntime action: actions) {
-            LOG.debug("Action {}, Stream {}", action, action.getStreams());
-            streams.addAll(action.getStreams());
+            LOG.debug("Action {}, Stream {}", action, action.getOutputStreams());
+            streams.addAll(action.getOutputStreams());
         }
         LOG.debug("Returning streams {}", streams);
         return streams;

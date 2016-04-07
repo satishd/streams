@@ -9,26 +9,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TransformAction implements ActionRuntime {
+public class TransformActionRuntime implements ActionRuntime {
     private final String stream;
     private final List<Transform> transforms;
 
     /**
-     * Creates a new {@link TransformAction}
+     * Creates a new {@link TransformActionRuntime}
      *
      * @param stream the stream where the results are sent out
      */
-    public TransformAction(String stream) {
+    public TransformActionRuntime(String stream) {
         this(stream, Collections.<Transform>singletonList(new IdentityTransform()));
     }
 
     /**
-     * Creates a new {@link TransformAction}
+     * Creates a new {@link TransformActionRuntime}
      *
      * @param stream  the stream where the results are sent out
      * @param transforms the chain of transformations to be applied (in order)
      */
-    public TransformAction(String stream, List<Transform> transforms) {
+    public TransformActionRuntime(String stream, List<Transform> transforms) {
         this.stream = stream;
         this.transforms = transforms;
     }
@@ -66,7 +66,7 @@ public class TransformAction implements ActionRuntime {
     }
 
     @Override
-    public List<String> getStreams() {
+    public List<String> getOutputStreams() {
         return Collections.singletonList(stream);
     }
 

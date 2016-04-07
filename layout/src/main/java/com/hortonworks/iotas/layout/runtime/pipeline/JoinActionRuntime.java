@@ -21,39 +21,21 @@ package com.hortonworks.iotas.layout.runtime.pipeline;
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.layout.runtime.ActionRuntime;
-import com.hortonworks.iotas.util.ProxyUtil;
 
 import java.util.List;
 
 /**
- * Runtime for {@link SplitAction}
+ * //todo move JoinProcessorRuntime logic to here.
  */
-public class SplitActionRuntime implements ActionRuntime {
-    private final SplitAction splitAction;
-
-    public SplitActionRuntime(SplitAction splitAction) {
-        this.splitAction = splitAction;
-    }
+public class JoinActionRuntime implements ActionRuntime {
 
     @Override
     public List<Result> execute(IotasEvent input) {
-        // based on split-action configuration, generate events for respective streams
-        final String jarId = splitAction.getJarId();
-        final String splitterClassName = splitAction.getSplitterClassName();
-        ProxyUtil<Splitter> proxyUtil = new ProxyUtil<>(Splitter.class, this.getClass().getClassLoader());
-        Splitter splitter = null;
-        try {
-            splitter = proxyUtil.loadClassFromJar(jarId, splitterClassName);
-            final List<Result> results = splitter.splitEvent(input);
-            //todo add groupId and no of partitions etc as part of headers before they are sent from here.
-            return results;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return null;
     }
 
     @Override
     public List<String> getOutputStreams() {
-        return splitAction.getOutputStreams();
+        return null;
     }
 }

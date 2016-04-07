@@ -19,6 +19,7 @@
 package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
+import com.hortonworks.iotas.common.IotasEventImpl;
 import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.common.errors.ProcessingException;
 import com.hortonworks.iotas.layout.design.component.Stream;
@@ -30,11 +31,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Processor to join all sub-events for a root-event and emit to the output stream.
  */
-public abstract class JoinProcessorRuntime implements ProcessorRuntime {
+public class JoinProcessorRuntime implements ProcessorRuntime {
 
     private Set<String> incomingStreams = new HashSet<>();
     private Map<String, EventGroup> groupedEvents = new HashMap<>();
@@ -74,31 +76,6 @@ public abstract class JoinProcessorRuntime implements ProcessorRuntime {
 
     }
 
-    public static class EventGroup {
-        private Map<Integer, PartitionedEvent> partitionedEvents = new HashMap<>();
-        private GroupRootEvent groupRootEvent;
-
-        private void addPartitionEvent(PartitionedEvent partitionedEvent) {
-            partitionedEvents.put(partitionedEvent.partNo, partitionedEvent);
-        }
-
-        public boolean isComplete() {
-            return groupRootEvent != null && partitionedEvents.size() == groupRootEvent.noOfMessages;
-        }
-
-        private void setGroupRootEvent(GroupRootEvent groupRootEvent) {
-            this.groupRootEvent = groupRootEvent;
-        }
-
-        public GroupRootEvent getGroupRootEvent() {
-            return groupRootEvent;
-        }
-
-        public Iterable<PartitionedEvent> getPartitionedEvents() {
-            return Collections.unmodifiableCollection(partitionedEvents.values());
-        }
-    }
-
     public void addIncomingStream(String stream) {
         incomingStreams.add(stream);
     }
@@ -106,9 +83,24 @@ public abstract class JoinProcessorRuntime implements ProcessorRuntime {
     /**
      * Join all subevents and generate an event for the given output stream.
      *
-     * @param iotasEvents
+     * @param eventGroup
      */
-    protected abstract Result joinEvents(EventGroup iotasEvents);
+    protected Result joinEvents(EventGroup eventGroup) {
+        Map<String, Object> fieldValues = new HashMap<>();
+        Map<String, Object> auxiliaryFieldValues = new HashMap<>();
+        for (PartitionedEvent subEvent : eventGroup.getPartitionedEvents()) {
+            if(subEvent.getAuxiliaryFieldsAndValues() != null) {
+                auxiliaryFieldValues.putAll(subEvent.getAuxiliaryFieldsAndValues());
+            }
+            if(subEvent.getFieldsAndValues() != null) {
+                fieldValues.putAll(subEvent.getFieldsAndValues());
+            }
+        }
+
+        IotasEventImpl joinedEvent = new IotasEventImpl(fieldValues, eventGroup.getGroupRootEvent().getDataSourceId(),
+                UUID.randomUUID().toString(), eventGroup.getGroupRootEvent().getHeader(), this.outputStream.getId(), auxiliaryFieldValues);
+        return new Result(this.outputStream.getId(), Collections.singletonList((IotasEvent) joinedEvent));
+    }
 
     protected EventGroup groupEvents(IotasEvent iotasEvent) {
         EventGroup eventGroup = null;

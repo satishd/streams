@@ -21,23 +21,22 @@ package com.hortonworks.iotas.layout.design.pipeline;
 import com.hortonworks.iotas.layout.design.component.RulesProcessor;
 import com.hortonworks.iotas.layout.design.rule.Rule;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
-import com.hortonworks.iotas.layout.runtime.pipeline.SplitAction;
+import com.hortonworks.iotas.layout.runtime.TransformActionRuntime;
+import com.hortonworks.iotas.layout.runtime.transform.Transform;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
+ * - Stage has list of transforms to be applied and send the out put to given stream.
  * - output streams list
  *      - containing schema, stream id.
- * - Splitter jar
- * - Splitter class to be loaded from jar using proxy class loader
- * - Add centralized jar storage utility so that any component can use those jars
- * todo - Use RulesProcessor as the only action with Split
  */
-public class SplitProcessor extends RulesProcessor {
+public class StageProcessor extends RulesProcessor {
 
-    public SplitProcessor(SplitAction splitAction) {
+    public StageProcessor(List<Transform> transforms) {
         final TrueRule trueRule = new TrueRule();
-        trueRule.setActions(Collections.<Action>singletonList(splitAction));
+//        trueRule.setActions(Collections.<Action>singletonList(new TransformAction("" , transforms)));
         setRules(Collections.<Rule>singletonList(trueRule));
     }
 
