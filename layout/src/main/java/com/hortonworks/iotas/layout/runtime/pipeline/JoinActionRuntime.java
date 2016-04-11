@@ -21,17 +21,87 @@ package com.hortonworks.iotas.layout.runtime.pipeline;
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.layout.runtime.ActionRuntime;
+import com.hortonworks.iotas.util.ProxyUtil;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * //todo move JoinProcessorRuntime logic to here.
+ *
  */
 public class JoinActionRuntime implements ActionRuntime {
+    private Map<String, EventGroup> groupedEvents = new HashMap<>();
+    private String outputStream;
+    private final JoinAction joinAction;
+    private Joiner joiner;
+
+    public JoinActionRuntime(String outputStream, JoinAction joinAction) {
+        this.outputStream = outputStream;
+        this.joinAction = joinAction;
+    }
+
+    public void prepare() {
+        final String jarId = joinAction.getJarId();
+        final String splitterClassName = joinAction.getJoinerClassName();
+        if(jarId != null || splitterClassName != null) {
+            ProxyUtil<Joiner> proxyUtil = new ProxyUtil<>(Joiner.class, this.getClass().getClassLoader());
+            try {
+                joiner = proxyUtil.loadClassFromJar(jarId, splitterClassName);
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
+        } else {
+            joiner = new DefaultJoiner(outputStream);
+        }
+    }
 
     @Override
-    public List<Result> execute(IotasEvent input) {
+    public List<Result> execute(IotasEvent iotasEvent) {
+        // group received event if possible
+        final EventGroup eventGroup = groupEvents(iotasEvent);
+
+        // join them if group is complete
+        if (eventGroup != null && eventGroup.isComplete()) {
+            return Collections.singletonList(joinEvents(eventGroup));
+        }
+
         return null;
+    }
+
+    /**
+     * Join all subevents and generate an event for the given output stream.
+     *
+     * @param eventGroup
+     */
+    protected Result joinEvents(EventGroup eventGroup) {
+        IotasEvent joinedEvent = joiner.join(eventGroup);
+        return new Result(outputStream, Collections.singletonList(joinedEvent));
+    }
+
+    protected EventGroup groupEvents(IotasEvent iotasEvent) {
+        EventGroup eventGroup = null;
+        if (iotasEvent instanceof GroupRootEvent) { // todo use header instead of a separate event class
+            GroupRootEvent groupRootEvent = (GroupRootEvent) iotasEvent;
+            eventGroup = getGroupedEvents(groupRootEvent.groupId);
+            eventGroup.setGroupRootEvent(groupRootEvent);
+        } else if (iotasEvent instanceof PartitionedEvent) { // todo use header instead of a separate event class
+            PartitionedEvent partitionedEvent = (PartitionedEvent) iotasEvent;
+            eventGroup = getGroupedEvents(partitionedEvent.groupId);
+            eventGroup.addPartitionEvent(partitionedEvent);
+        }
+
+        return eventGroup;
+    }
+
+    private EventGroup getGroupedEvents(String groupId) {
+        EventGroup eventGroup = groupedEvents.get(groupId);
+        if (eventGroup == null) {
+            eventGroup = new EventGroup();
+            groupedEvents.put(groupId, eventGroup);
+        }
+        return eventGroup;
     }
 
     @Override

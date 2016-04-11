@@ -25,14 +25,18 @@ import com.hortonworks.iotas.layout.design.component.Stream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
+ * This class broadcasts the received event to all the output streams. This can be extended to customize split logic.
  *
  */
-public class DynamicSplitProcessorRuntime extends SplitProcessorRuntime {
+public class DefaultSplitter implements Splitter {
 
-    public DynamicSplitProcessorRuntime(List<Stream> outputStreams) {
-        super(outputStreams);
+    private final List<Stream> outputStreams;
+
+    public DefaultSplitter(List<Stream> outputStreams) {
+        this.outputStreams = outputStreams;
     }
 
     @Override
@@ -44,8 +48,16 @@ public class DynamicSplitProcessorRuntime extends SplitProcessorRuntime {
             results.add(new Result(stream.getId(), Collections.singletonList((IotasEvent)
                     new PartitionedEvent(iotasEvent, stream.getId(), groupId, ++curPartNo))));
         }
-        results.add(new Result(ROOT_MESSAGE_STREAM, Collections.singletonList((IotasEvent) new GroupRootEvent(iotasEvent, groupId, curPartNo))));
+//        results.add(new Result(ROOT_MESSAGE_STREAM, Collections.singletonList((IotasEvent) new GroupRootEvent(iotasEvent, groupId, curPartNo))));
         return results;
+    }
+
+    /**
+     * @param iotasEvent
+     * @return groupid for a given {@code iotasEvent}
+     */
+    protected String getGroupId(IotasEvent iotasEvent) {
+        return UUID.randomUUID().toString();
     }
 
 }

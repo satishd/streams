@@ -20,9 +20,7 @@ package com.hortonworks.iotas.layout.design.pipeline;
 
 import com.hortonworks.iotas.layout.design.component.RulesProcessor;
 import com.hortonworks.iotas.layout.design.rule.Rule;
-import com.hortonworks.iotas.layout.design.rule.action.Action;
-import com.hortonworks.iotas.layout.runtime.TransformActionRuntime;
-import com.hortonworks.iotas.layout.runtime.transform.Transform;
+import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +32,7 @@ import java.util.List;
  */
 public class StageProcessor extends RulesProcessor {
 
-    public StageProcessor(List<Transform> transforms) {
+    public StageProcessor(List<TransformRuntime> transformRuntimes) {
         final TrueRule trueRule = new TrueRule();
 //        trueRule.setActions(Collections.<Action>singletonList(new TransformAction("" , transforms)));
         setRules(Collections.<Rule>singletonList(trueRule));

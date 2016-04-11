@@ -34,20 +34,20 @@ import java.util.Set;
  * Expands template variables in the IotasEvent values by looking up the
  * variables in the IotasEvent fieldsAndValues.
  */
-public class SubstituteTransform implements Transform {
-    private static final Logger LOG = LoggerFactory.getLogger(SubstituteTransform.class);
+public class SubstituteTransformRuntime implements TransformRuntime {
+    private static final Logger LOG = LoggerFactory.getLogger(SubstituteTransformRuntime.class);
     private final Set<String> fields;
     /**
      * Does variable substitution for all the fields in the IotasEvent
      */
-    public SubstituteTransform() {
+    public SubstituteTransformRuntime() {
         this.fields = new HashSet<>();
     }
 
     /**
      * Does variable substitution for the specified set of fields in the IotasEvent
      */
-    public SubstituteTransform(Set<String> fields) {
+    public SubstituteTransformRuntime(Set<String> fields) {
         this.fields = fields;
     }
 

@@ -73,9 +73,11 @@ public class RuleRuntime implements Serializable, ProcessorRuntime {
         List<Result> results = new ArrayList<>();
         try {
             for (ActionRuntime action : actions) {
-                List<Result> result = action.execute(input);
-                LOG.debug("Applied action {}, Result {}", action, result);
-                results.addAll(result);
+                List<Result> executedResults = action.execute(input);
+                LOG.debug("Applied action {}, Result {}", action, executedResults);
+                if(executedResults != null) {
+                    results.addAll(executedResults);
+                }
             }
         } catch (Exception e) {
             String message = "Error evaluating rule with id:" + rule.getId();

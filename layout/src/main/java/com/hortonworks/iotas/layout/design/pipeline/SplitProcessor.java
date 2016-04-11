@@ -27,7 +27,7 @@ import java.util.Collections;
 
 /**
  * - output streams list
- *      - containing schema, stream id.
+ * - containing schema, stream id.
  * - Splitter jar
  * - Splitter class to be loaded from jar using proxy class loader
  * - Add centralized jar storage utility so that any component can use those jars
@@ -36,16 +36,13 @@ import java.util.Collections;
 public class SplitProcessor extends RulesProcessor {
 
     public SplitProcessor(SplitAction splitAction) {
-        final TrueRule trueRule = new TrueRule();
-        trueRule.setActions(Collections.<Action>singletonList(splitAction));
-        setRules(Collections.<Rule>singletonList(trueRule));
-    }
-
-    static class TrueRule extends Rule {
-        public TrueRule() {
-            setName("true-rule");
+        final Rule rule = new Rule() {{
+            setName("split-true-rule");
             setId(System.currentTimeMillis());
-        }
+        }};
+
+        rule.setActions(Collections.<Action>singletonList(splitAction));
+        setRules(Collections.singletonList(rule));
     }
 
 }
