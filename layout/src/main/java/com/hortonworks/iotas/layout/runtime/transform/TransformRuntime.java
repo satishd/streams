@@ -8,7 +8,8 @@ import java.util.List;
 /**
  * Abstraction for transformations on IotasEvent
  */
-public interface Transform extends Serializable {
+public interface TransformRuntime extends Serializable {
+
     /**
      * Transforms an input {@link IotasEvent} and generates zero, one or
      * more events as a result.

@@ -26,8 +26,23 @@ import com.hortonworks.iotas.layout.design.rule.action.Action;
 public class JoinAction extends Action {
 
     //todo do we really any other configuration?
+    // yes, joiner class needed.
+    private String jarId;
+    private String joinerClassName;
 
-    public JoinAction() {
+    private JoinAction() {
     }
 
+    public JoinAction(String jarId, String joinerClassName) {
+        this.jarId = jarId;
+        this.joinerClassName = joinerClassName;
+    }
+
+    public String getJarId() {
+        return jarId;
+    }
+
+    public String getJoinerClassName() {
+        return joinerClassName;
+    }
 }

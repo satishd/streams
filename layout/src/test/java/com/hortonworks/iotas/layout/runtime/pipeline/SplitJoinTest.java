@@ -26,7 +26,6 @@ import com.hortonworks.iotas.layout.design.component.Stream;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,10 +46,10 @@ public class SplitJoinTest {
         for (String streamId : streamIds) {
             outputStreams.add(new Stream(streamId, outputSchema));
         }
-        DynamicSplitProcessorRuntime dynamicSplitProcessor = new DynamicSplitProcessorRuntime(outputStreams);
+        DefaultSplitter dynamicSplitProcessor = new DefaultSplitter(outputStreams);
 
         IotasEvent iotasEvent = createRootEvent();
-        final List<Result> results = dynamicSplitProcessor.process(iotasEvent);
+        final List<Result> results = dynamicSplitProcessor.splitEvent(iotasEvent);
         JoinProcessorRuntime joinProcessorRuntime = new JoinProcessorRuntime();
 
         joinProcessorRuntime.setOutputStream(new Stream("output", outputSchema));

@@ -2,8 +2,8 @@ package com.hortonworks.iotas.layout.runtime;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
-import com.hortonworks.iotas.layout.runtime.transform.IdentityTransform;
-import com.hortonworks.iotas.layout.runtime.transform.Transform;
+import com.hortonworks.iotas.layout.runtime.transform.IdentityTransformRuntime;
+import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +11,7 @@ import java.util.List;
 
 public class TransformActionRuntime implements ActionRuntime {
     private final String stream;
-    private final List<Transform> transforms;
+    private final List<TransformRuntime> transformRuntimes;
 
     /**
      * Creates a new {@link TransformActionRuntime}
@@ -19,23 +19,23 @@ public class TransformActionRuntime implements ActionRuntime {
      * @param stream the stream where the results are sent out
      */
     public TransformActionRuntime(String stream) {
-        this(stream, Collections.<Transform>singletonList(new IdentityTransform()));
+        this(stream, Collections.<TransformRuntime>singletonList(new IdentityTransformRuntime()));
     }
 
     /**
      * Creates a new {@link TransformActionRuntime}
      *
      * @param stream  the stream where the results are sent out
-     * @param transforms the chain of transformations to be applied (in order)
+     * @param transformRuntimes the chain of transformations to be applied (in order)
      */
-    public TransformActionRuntime(String stream, List<Transform> transforms) {
+    public TransformActionRuntime(String stream, List<TransformRuntime> transformRuntimes) {
         this.stream = stream;
-        this.transforms = transforms;
+        this.transformRuntimes = transformRuntimes;
     }
 
     /**
      * {@inheritDoc}
-     * Recursively applies the list of {@link Transform} (s) associated with this
+     * Recursively applies the list of {@link TransformRuntime} (s) associated with this
      * TransformAction object and returns the {@link Result}
      */
     @Override
@@ -54,12 +54,16 @@ public class TransformActionRuntime implements ActionRuntime {
      * applies the i th transform and recursively invokes the method to apply
      * the rest of the transformations in the chain.
      */
-    private List<IotasEvent> doTransform(IotasEvent input, int i) {
-        if (i >= transforms.size()) {
-            return Collections.singletonList(input);
+    private List<IotasEvent> doTransform(IotasEvent inputEvent, int i) {
+        if (i >= transformRuntimes.size()) {
+            return Collections.singletonList(inputEvent);
         }
         List<IotasEvent> transformed = new ArrayList<>();
-        for (IotasEvent event : transforms.get(i).execute(input)) {
+        final List<IotasEvent> iotasEvents = transformRuntimes.get(i).execute(inputEvent);
+        //todo handle split/join events here.
+        // add empty event when it returns null or empty collection
+        // update total-count iotasEvents size is > 1
+        for (IotasEvent event : iotasEvents) {
             transformed.addAll(doTransform(event, i + 1));
         }
         return transformed;
@@ -74,7 +78,7 @@ public class TransformActionRuntime implements ActionRuntime {
     public String toString() {
         return "TransformAction{" +
                 "stream='" + stream + '\'' +
-                ", transforms=" + transforms +
+                ", transforms=" + transformRuntimes +
                 '}';
     }
 }
