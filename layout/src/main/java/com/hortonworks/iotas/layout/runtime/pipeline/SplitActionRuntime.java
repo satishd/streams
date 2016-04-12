@@ -49,11 +49,15 @@ public class SplitActionRuntime implements ActionRuntime {
     public void prepare() {
         final String jarId = splitAction.getJarId();
         final String splitterClassName = splitAction.getSplitterClassName();
-        ProxyUtil<Splitter> proxyUtil = new ProxyUtil<>(Splitter.class, this.getClass().getClassLoader());
-        try {
-            splitter = proxyUtil.loadClassFromJar(jarId, splitterClassName);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
+        if (jarId != null && splitterClassName != null) {
+            ProxyUtil<Splitter> proxyUtil = new ProxyUtil<>(Splitter.class, this.getClass().getClassLoader());
+            try {
+                splitter = proxyUtil.loadClassFromJar(jarId, splitterClassName);
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
+        } else {
+            splitter = new DefaultSplitter(splitAction.getOutputStreams());
         }
     }
 

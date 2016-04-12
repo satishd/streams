@@ -26,6 +26,7 @@ import com.hortonworks.iotas.layout.design.component.Stream;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,26 +43,28 @@ public class SplitJoinTest {
     @Test
     public void testSplitJoinProcessors() throws Exception {
         String[] streamIds = {"stream-1", "stream-2", "stream-3"};
-        List<Stream> outputStreams = new ArrayList<>();
-        for (String streamId : streamIds) {
-            outputStreams.add(new Stream(streamId, outputSchema));
-        }
-        DefaultSplitter dynamicSplitProcessor = new DefaultSplitter(outputStreams);
+
+        final SplitAction splitAction = new SplitAction();
+        splitAction.setOutputStreams(Arrays.asList(streamIds));
+        SplitActionRuntime defaultSplitActionRuntime = new SplitActionRuntime(splitAction);
+        defaultSplitActionRuntime.prepare();
 
         IotasEvent iotasEvent = createRootEvent();
-        final List<Result> results = dynamicSplitProcessor.splitEvent(iotasEvent);
-        JoinProcessorRuntime joinProcessorRuntime = new JoinProcessorRuntime();
+        final List<Result> results = defaultSplitActionRuntime.execute(iotasEvent);
 
-        joinProcessorRuntime.setOutputStream(new Stream("output", outputSchema));
-
-        for (Result result : results) {
-            joinProcessorRuntime.addIncomingStream(result.stream);
-        }
+        JoinActionRuntime joinActionRuntime = new JoinActionRuntime("output", new JoinAction(null , null));
+//        JoinProcessorRuntime joinProcessorRuntime = new JoinProcessorRuntime();
+//
+//        joinProcessorRuntime.setOutputStream(new Stream("output", outputSchema));
+//
+//        for (Result result : results) {
+//            joinProcessorRuntime.addIncomingStream(result.stream);
+//        }
 
         List<Result> effectiveResult = null;
         for (Result result : results) {
             for (IotasEvent event : result.events) {
-                List<Result> processedResult = joinProcessorRuntime.process(event);
+                List<Result> processedResult = joinActionRuntime.execute(event);
                 if(processedResult != null ) {
                     effectiveResult = processedResult;
                 }
@@ -75,6 +78,8 @@ public class SplitJoinTest {
     private IotasEvent createRootEvent() {
         Map<String, Object> fieldValues = new HashMap<String, Object>(){{put("foo", "foo-"+System.currentTimeMillis()); put("bar", "bar-"+System.currentTimeMillis());}};
 
-        return new IotasEventImpl(fieldValues, "ds-1", UUID.randomUUID().toString(), new HashMap<String, Object>(), "source-stream");
+        final HashMap<String, Object> header = new HashMap<>();
+        header.put(SplitActionRuntime.SPLIT_GROUP_ID, UUID.randomUUID().toString());
+        return new IotasEventImpl(fieldValues, "ds-1", UUID.randomUUID().toString(), header, "source-stream");
     }
 }

@@ -44,11 +44,11 @@ public class JoinActionRuntime implements ActionRuntime {
 
     public void prepare() {
         final String jarId = joinAction.getJarId();
-        final String splitterClassName = joinAction.getJoinerClassName();
-        if(jarId != null || splitterClassName != null) {
+        final String joinerClassName = joinAction.getJoinerClassName();
+        if(jarId != null && joinerClassName != null) {
             ProxyUtil<Joiner> proxyUtil = new ProxyUtil<>(Joiner.class, this.getClass().getClassLoader());
             try {
-                joiner = proxyUtil.loadClassFromJar(jarId, splitterClassName);
+                joiner = proxyUtil.loadClassFromJar(jarId, joinerClassName);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
