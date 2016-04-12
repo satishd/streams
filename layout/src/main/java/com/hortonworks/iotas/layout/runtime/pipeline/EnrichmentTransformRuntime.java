@@ -19,11 +19,9 @@
 package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
-import com.hortonworks.iotas.common.Schema;
 import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Enrichment adds an extra enriched message of original message's fields or already enriched fields.
@@ -31,20 +29,22 @@ import java.util.concurrent.TimeUnit;
 public class EnrichmentTransformRuntime<K, V> implements TransformRuntime {
 
     private final EnrichmentTransform<K, V> enrichmentTransform;
-    private CachedDataProvider<K, V> cachedActionDataProvider;
+    private CachedDataProvider<K, V> cachedDataProvider;
 
     public EnrichmentTransformRuntime(EnrichmentTransform<K, V> enrichmentTransform) {
         this.enrichmentTransform = enrichmentTransform;
     }
 
     public void prepare() {
-        cachedActionDataProvider = new CachedDataProvider<>(enrichmentTransform.getDataProvider(), enrichmentTransform.getMaxCacheSize(),
+        cachedDataProvider = new CachedDataProvider<>(enrichmentTransform.getDataProvider(), enrichmentTransform.getMaxCacheSize(),
                 enrichmentTransform.getEntryExpirationInterval(), enrichmentTransform.getEntryRefreshInterval());
-        cachedActionDataProvider.prepare();
+        cachedDataProvider.prepare();
     }
 
     @Override
     public List<IotasEvent> execute(IotasEvent iotasEvent) {
+        //todo
         return null;
     }
+
 }

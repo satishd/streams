@@ -21,7 +21,6 @@ package com.hortonworks.iotas.layout.design.pipeline;
 import com.hortonworks.iotas.layout.design.component.RulesProcessor;
 import com.hortonworks.iotas.layout.design.rule.Rule;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
-import com.hortonworks.iotas.layout.runtime.pipeline.JoinAction;
 
 import java.util.Collections;
 
@@ -32,16 +31,13 @@ import java.util.Collections;
 public class JoinProcessor extends RulesProcessor {
 
     public JoinProcessor(JoinAction joinAction) {
-        final TrueRule trueRule = new TrueRule();
-        trueRule.setActions(Collections.<Action>singletonList(joinAction));
-        setRules(Collections.<Rule>singletonList(trueRule));
-    }
-
-    static class TrueRule extends Rule {
-        public TrueRule() {
-            setName("true-rule");
+        final Rule rule = new Rule() {{
+            setName("join-true-rule");
             setId(System.currentTimeMillis());
-        }
+        }};
+
+        rule.setActions(Collections.<Action>singletonList(joinAction));
+        setRules(Collections.singletonList(rule));
     }
 
 }

@@ -16,17 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipeline;
+package com.hortonworks.iotas.layout.design.pipeline;
 
-import com.hortonworks.iotas.common.IotasEvent;
-
-import java.util.List;
+import com.hortonworks.iotas.layout.design.rule.action.Action;
 
 /**
+ * {@link Action} configuration for splitting the events.
  *
  */
-public interface PipelineAction {
+public class SplitAction extends Action {
+    private String jarId;
+    private String splitterClassName;
 
-    public List<IotasEvent> execute(IotasEvent iotasEvent);
+    public SplitAction() {
+    }
 
+    public String getJarId() {
+        return jarId;
+    }
+
+    public void setJarId(String jarId) {
+        this.jarId = jarId;
+    }
+
+    public String getSplitterClassName() {
+        return splitterClassName;
+    }
+
+    public void setSplitterClassName(String splitterClassName) {
+        this.splitterClassName = splitterClassName;
+    }
 }

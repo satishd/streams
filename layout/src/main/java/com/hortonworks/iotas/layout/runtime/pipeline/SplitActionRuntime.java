@@ -20,6 +20,7 @@ package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
+import com.hortonworks.iotas.layout.design.pipeline.SplitAction;
 import com.hortonworks.iotas.layout.runtime.ActionRuntime;
 import com.hortonworks.iotas.util.ProxyUtil;
 import org.slf4j.Logger;
@@ -38,9 +39,8 @@ public class SplitActionRuntime implements ActionRuntime {
     /**
      * Defined these constants for event headers to recognize whether an event is part of the split/join.
      * All the events created as part of split/stage/join will contain these headers.
-     * Other way to do it is have new events like GroupRootEvent and PartitionEvent, avoiding that approach for now to
-     * have a simple approach. Any Stage processor can not have split action in them, that means there is no nested
-     * split/join support for now.
+     * Other way to do it is have new events like GroupRootEvent and PartitionEvent, avoiding that for now to
+     * have a simple approach. Any Stage processor can not have split action in them.
      */
     public static final String SPLIT_GROUP_ID = "com.hortonworks.iotas.split.group_id";
     public static final String SPLIT_PARTITION_ID = "com.hortonworks.iotas.split.partition_id";
@@ -64,19 +64,16 @@ public class SplitActionRuntime implements ActionRuntime {
                 throw new RuntimeException(e.getMessage(), e);
             }
         } else {
-            splitter = new DefaultSplitter(splitAction.getOutputStreams());
+            splitter = new DefaultSplitter();
         }
     }
 
     @Override
     public List<Result> execute(IotasEvent input) {
         // based on split-action configuration, generate events for respective streams
-        final List<Result> results = splitter.splitEvent(input);
-        //todo add groupId and no of partitions etc as part of headers before they are sent from here.
-        // above should be done by splitEvent method and this action does not add any of those values as they are
-        // specific to the split logic.
+        final List<Result> results = splitter.splitEvent(input, splitAction.getOutputStreams());
 
-        // check whether the split event has all the required split info.
+        // check whether the split event has all the required split/join info.
         for (Result result : results) {
             for (IotasEvent event : result.events) {
                 checkGroupIdPartitionId(event);

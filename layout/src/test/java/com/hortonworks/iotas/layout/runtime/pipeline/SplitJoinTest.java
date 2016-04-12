@@ -21,11 +21,10 @@ package com.hortonworks.iotas.layout.runtime.pipeline;
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
 import com.hortonworks.iotas.common.Result;
-import com.hortonworks.iotas.common.Schema;
-import com.hortonworks.iotas.layout.design.component.Stream;
+import com.hortonworks.iotas.layout.design.pipeline.JoinAction;
+import com.hortonworks.iotas.layout.design.pipeline.SplitAction;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,9 +36,6 @@ import java.util.UUID;
  * Tests related to split/join processors.
  */
 public class SplitJoinTest {
-
-    private static Schema outputSchema = Schema.of(new Schema.Field("foo", Schema.Type.STRING),
-            new Schema.Field("bar", Schema.Type.STRING));
 
     @Test
     public void testSplitJoinProcessors() throws Exception {
@@ -53,14 +49,9 @@ public class SplitJoinTest {
         IotasEvent iotasEvent = createRootEvent();
         final List<Result> results = splitActionRuntime.execute(iotasEvent);
 
-        JoinActionRuntime joinActionRuntime = new JoinActionRuntime("output", new JoinAction(null , null));
-//        JoinProcessorRuntime joinProcessorRuntime = new JoinProcessorRuntime();
-//
-//        joinProcessorRuntime.setOutputStream(new Stream("output", outputSchema));
-//
-//        for (Result result : results) {
-//            joinProcessorRuntime.addIncomingStream(result.stream);
-//        }
+        final JoinAction joinAction = new JoinAction(null, null);
+        joinAction.setOutputStreams(Collections.singletonList("output-stream"));
+        JoinActionRuntime joinActionRuntime = new JoinActionRuntime(joinAction);
 
         List<Result> effectiveResult = null;
         for (Result result : results) {
