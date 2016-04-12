@@ -19,6 +19,7 @@
 package com.hortonworks.iotas.layout.design.pipeline;
 
 import com.hortonworks.iotas.layout.design.rule.action.Action;
+import com.hortonworks.iotas.layout.design.transform.Transform;
 
 import java.util.List;
 
@@ -36,5 +37,12 @@ public class StageAction extends Action {
 
     public List<Transform> getTransforms() {
         return transforms;
+    }
+
+    @Override
+    public String toString() {
+        return "StageAction{" +
+                "transforms=" + transforms +
+                '}'+super.toString();
     }
 }

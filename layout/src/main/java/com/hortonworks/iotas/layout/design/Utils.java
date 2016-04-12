@@ -16,42 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.design.pipeline;
+package com.hortonworks.iotas.layout.design;
 
+import com.hortonworks.iotas.layout.design.rule.Rule;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 
+import java.util.Collections;
+
 /**
- * {@link Action} configuration for splitting the events.
  *
  */
-public class SplitAction extends Action {
-    private String jarId;
-    private String splitterClassName;
+public class Utils {
 
-    public SplitAction() {
+    private Utils() {
     }
 
-    public String getJarId() {
-        return jarId;
-    }
+    /**
+     * Returns a rule with no condition(which is equivalent to true) with the given action.
+     *
+     * @param action Action to be set on the rule
+     */
+    public static Rule createTrueRule(final Action action) {
+        Rule rule = new Rule() {{
+            setName(action.getName()+"-rule");
+            setId(System.currentTimeMillis());
+        }};
 
-    public void setJarId(String jarId) {
-        this.jarId = jarId;
-    }
-
-    public String getSplitterClassName() {
-        return splitterClassName;
-    }
-
-    public void setSplitterClassName(String splitterClassName) {
-        this.splitterClassName = splitterClassName;
-    }
-
-    @Override
-    public String toString() {
-        return "SplitAction{" +
-                "jarId='" + jarId + '\'' +
-                ", splitterClassName='" + splitterClassName + '\'' +
-                '}'+super.toString();
+        rule.setActions(Collections.singletonList(action));
+        return rule;
     }
 }

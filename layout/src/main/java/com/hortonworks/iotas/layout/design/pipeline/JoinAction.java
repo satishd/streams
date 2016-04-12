@@ -46,4 +46,12 @@ public class JoinAction extends Action {
     public String getJoinerClassName() {
         return joinerClassName;
     }
+
+    @Override
+    public String toString() {
+        return "JoinAction{" +
+                "jarId='" + jarId + '\'' +
+                ", joinerClassName='" + joinerClassName + '\'' +
+                '}'+super.toString();
+    }
 }

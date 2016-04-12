@@ -18,9 +18,8 @@
  */
 package com.hortonworks.iotas.layout.design.pipeline;
 
+import com.hortonworks.iotas.layout.design.Utils;
 import com.hortonworks.iotas.layout.design.component.RulesProcessor;
-import com.hortonworks.iotas.layout.design.rule.Rule;
-import com.hortonworks.iotas.layout.design.rule.action.Action;
 
 import java.util.Collections;
 
@@ -30,14 +29,15 @@ import java.util.Collections;
  */
 public class SplitProcessor extends RulesProcessor {
 
-    public SplitProcessor(SplitAction splitAction) {
-        final Rule rule = new Rule() {{
-            setName("split-true-rule");
-            setId(System.currentTimeMillis());
-        }};
-
-        rule.setActions(Collections.<Action>singletonList(splitAction));
-        setRules(Collections.singletonList(rule));
+    public SplitProcessor() {
     }
 
+    public SplitProcessor(SplitAction splitAction) {
+        setRules(Collections.singletonList(Utils.createTrueRule(splitAction)));
+    }
+
+    @Override
+    public String toString() {
+        return "SplitProcessor{}"+super.toString();
+    }
 }

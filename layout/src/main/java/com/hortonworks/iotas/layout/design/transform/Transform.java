@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.design.pipeline;
+package com.hortonworks.iotas.layout.design.transform;
 
 import java.io.Serializable;
 

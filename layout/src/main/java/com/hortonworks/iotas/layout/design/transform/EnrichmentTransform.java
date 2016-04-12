@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipeline;
+package com.hortonworks.iotas.layout.design.transform;
 
-import com.hortonworks.iotas.common.Schema;
-import com.hortonworks.iotas.layout.design.pipeline.Transform;
+import com.hortonworks.iotas.layout.design.transform.Transform;
+import com.hortonworks.iotas.layout.runtime.pipeline.DataProvider;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,11 +30,13 @@ import java.util.concurrent.TimeUnit;
  * of a rule based processor.
  *
  */
-public class EnrichmentTransform<K, V> extends Transform {
+public class EnrichmentTransform extends Transform {
 
     public static final long DEFAULT_MAX_CACHE_SIZE = 1000;
     public static final long DEFAULT_ENTRY_EXPIRATION_INTERVAL = 60 * 5 * 1000;
     public static final long DEFAULT_ENTRY_REFRESH_INTERVAL = 60 * 5 * 1000;
+
+    public static final String ENRICHMENTS_FIELD_NAME="__enrichments";
 
     /**
      * original fields to be enriched.
@@ -97,5 +99,16 @@ public class EnrichmentTransform<K, V> extends Transform {
 
     public long getEntryRefreshInterval() {
         return entryRefreshInterval;
+    }
+
+    @Override
+    public String toString() {
+        return "EnrichmentTransform{" +
+                "fieldsToBeEnriched=" + fieldsToBeEnriched +
+                ", dataProvider=" + dataProvider +
+                ", maxCacheSize=" + maxCacheSize +
+                ", entryExpirationInterval=" + entryExpirationInterval +
+                ", entryRefreshInterval=" + entryRefreshInterval +
+                '}';
     }
 }

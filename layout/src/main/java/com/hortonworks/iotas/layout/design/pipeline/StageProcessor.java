@@ -18,10 +18,9 @@
  */
 package com.hortonworks.iotas.layout.design.pipeline;
 
+import com.hortonworks.iotas.layout.design.Utils;
 import com.hortonworks.iotas.layout.design.component.RulesProcessor;
-import com.hortonworks.iotas.layout.design.rule.Rule;
-import com.hortonworks.iotas.layout.design.rule.action.Action;
-import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
+import com.hortonworks.iotas.layout.design.transform.Transform;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,14 +30,15 @@ import java.util.List;
  */
 public class StageProcessor extends RulesProcessor {
 
-    public StageProcessor(List<Transform> transforms) {
-        final Rule rule = new Rule() {{
-            setName("split-true-rule");
-            setId(System.currentTimeMillis());
-        }};
-
-        rule.setActions(Collections.<Action>singletonList(new StageAction(transforms)));
-        setRules(Collections.singletonList(rule));
+    public StageProcessor() {
     }
 
+    public StageProcessor(List<Transform> transforms) {
+        setRules(Collections.singletonList(Utils.createTrueRule(new StageAction(transforms))));
+    }
+
+    @Override
+    public String toString() {
+        return "StageProcessor{}"+super.toString();
+    }
 }

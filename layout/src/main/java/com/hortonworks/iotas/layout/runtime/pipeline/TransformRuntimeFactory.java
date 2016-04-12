@@ -18,7 +18,7 @@
  */
 package com.hortonworks.iotas.layout.runtime.pipeline;
 
-import com.hortonworks.iotas.layout.design.pipeline.Transform;
+import com.hortonworks.iotas.layout.design.transform.Transform;
 import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Factory to create {@link com.hortonworks.iotas.layout.runtime.transform.TransformRuntime} instances of a given {@link com.hortonworks.iotas.layout.design.pipeline.Transform}
+ * Factory to create {@link com.hortonworks.iotas.layout.runtime.transform.TransformRuntime} instances of a given {@link Transform}
  * todo change this class name
  */
 public class TransformRuntimeFactory {

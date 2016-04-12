@@ -18,9 +18,8 @@
  */
 package com.hortonworks.iotas.layout.design.pipeline;
 
+import com.hortonworks.iotas.layout.design.Utils;
 import com.hortonworks.iotas.layout.design.component.RulesProcessor;
-import com.hortonworks.iotas.layout.design.rule.Rule;
-import com.hortonworks.iotas.layout.design.rule.action.Action;
 
 import java.util.Collections;
 
@@ -30,14 +29,15 @@ import java.util.Collections;
  */
 public class JoinProcessor extends RulesProcessor {
 
-    public JoinProcessor(JoinAction joinAction) {
-        final Rule rule = new Rule() {{
-            setName("join-true-rule");
-            setId(System.currentTimeMillis());
-        }};
-
-        rule.setActions(Collections.<Action>singletonList(joinAction));
-        setRules(Collections.singletonList(rule));
+    public JoinProcessor() {
     }
 
+    public JoinProcessor(JoinAction joinAction) {
+        setRules(Collections.singletonList(Utils.createTrueRule(joinAction)));
+    }
+
+    @Override
+    public String toString() {
+        return "JoinProcessor{}"+super.toString();
+    }
 }

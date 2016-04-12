@@ -20,8 +20,9 @@ package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
+import com.hortonworks.iotas.layout.design.transform.EnrichmentTransform;
 import com.hortonworks.iotas.layout.design.pipeline.StageAction;
-import com.hortonworks.iotas.layout.design.pipeline.Transform;
+import com.hortonworks.iotas.layout.design.transform.Transform;
 import com.hortonworks.iotas.layout.runtime.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.TransformActionRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
