@@ -33,9 +33,9 @@ import java.util.UUID;
  */
 public class DefaultSplitter implements Splitter {
 
-    private final List<Stream> outputStreams;
+    private final List<String> outputStreams;
 
-    public DefaultSplitter(List<Stream> outputStreams) {
+    public DefaultSplitter(List<String> outputStreams) {
         this.outputStreams = outputStreams;
     }
 
@@ -44,9 +44,9 @@ public class DefaultSplitter implements Splitter {
         List<Result> results = new ArrayList<>();
         String groupId = getGroupId(iotasEvent);
         int curPartNo = 0;
-        for (Stream stream : outputStreams) {
-            results.add(new Result(stream.getId(), Collections.singletonList((IotasEvent)
-                    new PartitionedEvent(iotasEvent, stream.getId(), groupId, ++curPartNo))));
+        for (String stream : outputStreams) {
+            results.add(new Result(stream, Collections.singletonList((IotasEvent)
+                    new PartitionedEvent(iotasEvent, stream, groupId, ++curPartNo))));
         }
 //        results.add(new Result(ROOT_MESSAGE_STREAM, Collections.singletonList((IotasEvent) new GroupRootEvent(iotasEvent, groupId, curPartNo))));
         return results;

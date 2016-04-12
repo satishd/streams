@@ -62,7 +62,11 @@ public class TransformActionRuntime implements ActionRuntime {
         final List<IotasEvent> iotasEvents = transformRuntimes.get(i).execute(inputEvent);
         //todo handle split/join events here.
         // add empty event when it returns null or empty collection
-        // update total-count iotasEvents size is > 1
+        // currently, we can not handle splitting of the partial events in to more partial events.
+        // set a constraint that partial event can not be split again. throw an error if it does
+        // todo we can solve this when we can have system level join stream form each stage processor to join processor.
+        // which will send total no of those events so that join can wait.
+
         for (IotasEvent event : iotasEvents) {
             transformed.addAll(doTransform(event, i + 1));
         }
