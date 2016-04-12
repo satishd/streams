@@ -81,24 +81,24 @@ public class JoinActionRuntime implements ActionRuntime {
     }
 
     protected EventGroup groupEvents(IotasEvent iotasEvent) {
-        EventGroup eventGroup = null;
-        if (iotasEvent instanceof GroupRootEvent) { // todo use header instead of a separate event class
-            GroupRootEvent groupRootEvent = (GroupRootEvent) iotasEvent;
-            eventGroup = getGroupedEvents(groupRootEvent.groupId);
-            eventGroup.setGroupRootEvent(groupRootEvent);
-        } else if (iotasEvent instanceof PartitionedEvent) { // todo use header instead of a separate event class
-            PartitionedEvent partitionedEvent = (PartitionedEvent) iotasEvent;
-            eventGroup = getGroupedEvents(partitionedEvent.groupId);
-            eventGroup.addPartitionEvent(partitionedEvent);
+
+        final Map<String, Object> header = iotasEvent.getHeader();
+        if(header!= null && header.containsKey(SplitActionRuntime.SPLIT_GROUP_ID)) {
+            final String groupId = (String) header.get(SplitActionRuntime.SPLIT_GROUP_ID);
+            final String dataSourceId = iotasEvent.getDataSourceId();
+            final EventGroup eventGroup = getEventGroup(groupId, dataSourceId);
+            eventGroup.addPartitionEvent(iotasEvent);
+
+            return eventGroup;
         }
 
-        return eventGroup;
+        return null;
     }
 
-    private EventGroup getGroupedEvents(String groupId) {
+    private EventGroup getEventGroup(String groupId, String dataSourceId) {
         EventGroup eventGroup = groupedEvents.get(groupId);
         if (eventGroup == null) {
-            eventGroup = new EventGroup();
+            eventGroup = new EventGroup(groupId, dataSourceId);
             groupedEvents.put(groupId, eventGroup);
         }
         return eventGroup;

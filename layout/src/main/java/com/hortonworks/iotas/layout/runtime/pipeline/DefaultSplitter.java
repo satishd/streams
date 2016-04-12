@@ -19,17 +19,18 @@
 package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
+import com.hortonworks.iotas.common.IotasEventImpl;
 import com.hortonworks.iotas.common.Result;
-import com.hortonworks.iotas.layout.design.component.Stream;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * This class broadcasts the received event to all the output streams. This can be extended to customize split logic.
- *
  */
 public class DefaultSplitter implements Splitter {
 
@@ -44,12 +45,26 @@ public class DefaultSplitter implements Splitter {
         List<Result> results = new ArrayList<>();
         String groupId = getGroupId(iotasEvent);
         int curPartNo = 0;
+        int totalParts = outputStreams.size();
         for (String stream : outputStreams) {
-            results.add(new Result(stream, Collections.singletonList((IotasEvent)
-                    new PartitionedEvent(iotasEvent, stream, groupId, ++curPartNo))));
+            IotasEvent partitionedEvent = createPartitionEvent(iotasEvent, groupId, ++curPartNo, stream, totalParts);
+            results.add(new Result(stream, Collections.singletonList(partitionedEvent)));
         }
-//        results.add(new Result(ROOT_MESSAGE_STREAM, Collections.singletonList((IotasEvent) new GroupRootEvent(iotasEvent, groupId, curPartNo))));
+
         return results;
+    }
+
+    private IotasEvent createPartitionEvent(IotasEvent iotasEvent, String groupId, int partNo, String stream, int totalParts) {
+        Map<String, Object> headers = new HashMap<>();
+        if (iotasEvent.getHeader() != null) {
+            headers.putAll(iotasEvent.getHeader());
+        }
+        headers.put(SplitActionRuntime.SPLIT_GROUP_ID, groupId);
+        headers.put(SplitActionRuntime.SPLIT_PARTITION_ID, partNo);
+        headers.put(SplitActionRuntime.SPLIT_TOTAL_PARTITIONS_ID, totalParts);
+        IotasEventImpl partitionEvent = new IotasEventImpl(iotasEvent.getFieldsAndValues(), iotasEvent.getDataSourceId(),
+                UUID.randomUUID().toString(), headers, stream, iotasEvent.getAuxiliaryFieldsAndValues());
+        return partitionEvent;
     }
 
     /**

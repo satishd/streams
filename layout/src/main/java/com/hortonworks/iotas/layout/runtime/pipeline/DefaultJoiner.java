@@ -21,6 +21,7 @@ package com.hortonworks.iotas.layout.runtime.pipeline;
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -41,7 +42,7 @@ public class DefaultJoiner implements Joiner {
     public IotasEvent join(EventGroup eventGroup) {
         Map<String, Object> fieldValues = new HashMap<>();
         Map<String, Object> auxiliaryFieldValues = new HashMap<>();
-        for (PartitionedEvent subEvent : eventGroup.getPartitionedEvents()) {
+        for (IotasEvent subEvent : eventGroup.getPartitionedEvents()) {
             if(subEvent.getAuxiliaryFieldsAndValues() != null) {
                 auxiliaryFieldValues.putAll(subEvent.getAuxiliaryFieldsAndValues());
             }
@@ -50,7 +51,7 @@ public class DefaultJoiner implements Joiner {
             }
         }
 
-        return new IotasEventImpl(fieldValues, eventGroup.getGroupRootEvent().getDataSourceId(),
-                UUID.randomUUID().toString(), eventGroup.getGroupRootEvent().getHeader(), outputStream, auxiliaryFieldValues);
+        return new IotasEventImpl(fieldValues, eventGroup.getDataSourceId(),
+                UUID.randomUUID().toString(), Collections.<String, Object>emptyMap(), outputStream, auxiliaryFieldValues);
     }
 }
