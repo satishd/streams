@@ -21,37 +21,79 @@ package com.hortonworks.iotas.layout.runtime.pipeline;
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
 
+import java.util.Map;
+
 /**
  * Partitioned event sent by split processor. It contains {@code groupId} and {@code partNo} of the split event.
  */
-public class PartitionedEvent extends IotasEventImpl {
+public class PartitionedEvent implements IotasEvent {
 
+    private final IotasEvent iotasEvent;
+    private final String streamId;
     protected String groupId;
     protected int partNo;
 
     public PartitionedEvent(IotasEvent iotasEvent, String streamId, String groupId, int partNo) {
-        super(iotasEvent.getFieldsAndValues(), iotasEvent.getDataSourceId(), iotasEvent.getId(), iotasEvent.getHeader(), streamId, iotasEvent.getAuxiliaryFieldsAndValues());
+        this.iotasEvent = iotasEvent;
+        this.streamId = streamId;
         this.groupId = groupId;
         this.partNo = partNo;
+    }
+
+    @Override
+    public Map<String, Object> getFieldsAndValues() {
+        return iotasEvent.getFieldsAndValues();
+    }
+
+    @Override
+    public Map<String, Object> getAuxiliaryFieldsAndValues() {
+        return iotasEvent.getAuxiliaryFieldsAndValues();
+    }
+
+    @Override
+    public void addAuxiliaryFieldAndValue(String field, Object value) {
+        iotasEvent.addAuxiliaryFieldAndValue(field, value);
+    }
+
+    @Override
+    public Map<String, Object> getHeader() {
+        return iotasEvent.getHeader();
+    }
+
+    @Override
+    public String getId() {
+        return iotasEvent.getId();
+    }
+
+    @Override
+    public String getDataSourceId() {
+        return iotasEvent.getDataSourceId();
+    }
+
+    @Override
+    public String getSourceStream() {
+        return streamId;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PartitionedEvent)) return false;
-        if (!super.equals(o)) return false;
 
         PartitionedEvent that = (PartitionedEvent) o;
 
         if (partNo != that.partNo) return false;
-        return !(groupId != null ? !groupId.equals(that.groupId) : that.groupId != null);
+        if (!iotasEvent.equals(that.iotasEvent)) return false;
+        if (!streamId.equals(that.streamId)) return false;
+        return groupId.equals(that.groupId);
 
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (groupId != null ? groupId.hashCode() : 0);
+        int result = iotasEvent.hashCode();
+        result = 31 * result + streamId.hashCode();
+        result = 31 * result + groupId.hashCode();
         result = 31 * result + partNo;
         return result;
     }

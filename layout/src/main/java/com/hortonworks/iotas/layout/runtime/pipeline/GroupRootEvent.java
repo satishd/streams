@@ -19,24 +19,58 @@
 package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
-import com.hortonworks.iotas.common.IotasEventImpl;
 
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
  */
-public class GroupRootEvent extends IotasEventImpl {
+public class GroupRootEvent implements IotasEvent {
 
+    private final IotasEvent iotasEvent;
     protected String groupId;
     protected int noOfMessages;
+    private final String sourceStreamId;
 
-    public GroupRootEvent(IotasEvent iotasEvent, String groupId, int noOfMessages) {
-        super(iotasEvent.getFieldsAndValues(), iotasEvent.getDataSourceId(), iotasEvent.getId(), iotasEvent.getHeader(), SplitProcessorRuntime.ROOT_MESSAGE_STREAM);
+    public GroupRootEvent(IotasEvent iotasEvent, String groupId, int noOfMessages, String sourceStreamId) {
+        this.iotasEvent = iotasEvent;
         this.groupId = groupId;
         this.noOfMessages = noOfMessages;
+        this.sourceStreamId = sourceStreamId;
     }
 
+    @Override
+    public Map<String, Object> getFieldsAndValues() {
+        return iotasEvent.getFieldsAndValues();
+    }
 
+    @Override
+    public Map<String, Object> getAuxiliaryFieldsAndValues() {
+        return iotasEvent.getAuxiliaryFieldsAndValues();
+    }
+
+    @Override
+    public void addAuxiliaryFieldAndValue(String field, Object value) {
+        iotasEvent.addAuxiliaryFieldAndValue(field, value);
+    }
+
+    @Override
+    public Map<String, Object> getHeader() {
+        return iotasEvent.getHeader();
+    }
+
+    @Override
+    public String getId() {
+        return iotasEvent.getId();
+    }
+
+    @Override
+    public String getDataSourceId() {
+        return iotasEvent.getDataSourceId();
+    }
+
+    @Override
+    public String getSourceStream() {
+        return sourceStreamId;
+    }
 }

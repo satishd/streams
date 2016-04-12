@@ -18,6 +18,8 @@
  */
 package com.hortonworks.iotas.layout.runtime.pipeline;
 
+import com.hortonworks.iotas.common.IotasEvent;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,26 +28,34 @@ import java.util.Map;
  *
  */
 public class EventGroup {
-    private Map<Integer, PartitionedEvent> partitionedEvents = new HashMap<>();
-    private GroupRootEvent groupRootEvent;
+    private final Map<Integer, IotasEvent> partitionedEvents = new HashMap<>();
+    private final String groupId;
+    private final String dataSourceId;
 
-    public void addPartitionEvent(PartitionedEvent partitionedEvent) {
-        partitionedEvents.put(partitionedEvent.partNo, partitionedEvent);
+    private int totalPartitionEvents = -1;
+
+    public EventGroup(String groupId, String dataSourceId) {
+        this.groupId = groupId;
+        this.dataSourceId = dataSourceId;
+    }
+
+    public void addPartitionEvent(IotasEvent partitionedEvent) {
+        final Map<String, Object> header = partitionedEvent.getHeader();
+        if(header == null || !header.containsKey(SplitActionRuntime.SPLIT_PARTITION_ID)) {
+            throw new IllegalArgumentException("Received event is not of partition event as it doe not contain header  with name: "+SplitActionRuntime.SPLIT_PARTITION_ID);
+        }
+        partitionedEvents.put((Integer) header.get(SplitActionRuntime.SPLIT_PARTITION_ID), partitionedEvent);
     }
 
     public boolean isComplete() {
-        return groupRootEvent != null && partitionedEvents.size() == groupRootEvent.noOfMessages;
+        return partitionedEvents.size() == totalPartitionEvents;
     }
 
-    public void setGroupRootEvent(GroupRootEvent groupRootEvent) {
-        this.groupRootEvent = groupRootEvent;
+    public String getDataSourceId() {
+        return dataSourceId;
     }
 
-    public GroupRootEvent getGroupRootEvent() {
-        return groupRootEvent;
-    }
-
-    public Iterable<PartitionedEvent> getPartitionedEvents() {
+    public Iterable<IotasEvent> getPartitionedEvents() {
         return Collections.unmodifiableCollection(partitionedEvents.values());
     }
 }

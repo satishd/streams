@@ -35,6 +35,13 @@ public class SplitActionRuntime implements ActionRuntime {
 
     private static final Logger log = LoggerFactory.getLogger(SplitActionRuntime.class);
 
+    /**
+     * Defined these constants for event headers to recognize whether an event is part of the split/join.
+     * All the events created as part of split/stage/join will contain these headers.
+     * Other way to do it is have new events like GroupRootEvent and PartitionEvent, avoiding that approach for now to
+     * have a simple approach. Any Stage processor can not have split action in them, that means there is no nested
+     * split/join support for now.
+     */
     public static final String SPLIT_GROUP_ID = "com.hortonworks.iotas.split.group_id";
     public static final String SPLIT_PARTITION_ID = "com.hortonworks.iotas.split.partition_id";
     public static final String SPLIT_TOTAL_PARTITIONS_ID = "com.hortonworks.iotas.split.partition.total.count";

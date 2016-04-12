@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,15 +43,15 @@ public class SplitJoinTest {
 
     @Test
     public void testSplitJoinProcessors() throws Exception {
-        String[] streamIds = {"stream-1", "stream-2", "stream-3"};
+        String[] outputStreams = {"stream-1", "stream-2", "stream-3"};
 
         final SplitAction splitAction = new SplitAction();
-        splitAction.setOutputStreams(Arrays.asList(streamIds));
-        SplitActionRuntime defaultSplitActionRuntime = new SplitActionRuntime(splitAction);
-        defaultSplitActionRuntime.prepare();
+        splitAction.setOutputStreams(Arrays.asList(outputStreams));
+        SplitActionRuntime splitActionRuntime = new SplitActionRuntime(splitAction);
+        splitActionRuntime.prepare();
 
         IotasEvent iotasEvent = createRootEvent();
-        final List<Result> results = defaultSplitActionRuntime.execute(iotasEvent);
+        final List<Result> results = splitActionRuntime.execute(iotasEvent);
 
         JoinActionRuntime joinActionRuntime = new JoinActionRuntime("output", new JoinAction(null , null));
 //        JoinProcessorRuntime joinProcessorRuntime = new JoinProcessorRuntime();
@@ -78,8 +79,6 @@ public class SplitJoinTest {
     private IotasEvent createRootEvent() {
         Map<String, Object> fieldValues = new HashMap<String, Object>(){{put("foo", "foo-"+System.currentTimeMillis()); put("bar", "bar-"+System.currentTimeMillis());}};
 
-        final HashMap<String, Object> header = new HashMap<>();
-        header.put(SplitActionRuntime.SPLIT_GROUP_ID, UUID.randomUUID().toString());
-        return new IotasEventImpl(fieldValues, "ds-1", UUID.randomUUID().toString(), header, "source-stream");
+        return new IotasEventImpl(fieldValues, "ds-1", UUID.randomUUID().toString(), Collections.<String, Object>emptyMap(), "source-stream");
     }
 }
