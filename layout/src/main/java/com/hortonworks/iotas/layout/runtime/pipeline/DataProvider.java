@@ -19,7 +19,7 @@
 package com.hortonworks.iotas.layout.runtime.pipeline;
 
 /**
- * Data provider for {@link Transform} which can be used for lookups.
+ * Data provider for {@link com.hortonworks.iotas.layout.design.pipeline.Transform} which can be used for lookups.
  */
 public interface DataProvider<K, V> {
 

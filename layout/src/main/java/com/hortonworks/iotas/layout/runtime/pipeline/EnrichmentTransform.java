@@ -21,6 +21,7 @@ package com.hortonworks.iotas.layout.runtime.pipeline;
 import com.hortonworks.iotas.common.Schema;
 import com.hortonworks.iotas.layout.design.pipeline.Transform;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -38,17 +39,12 @@ public class EnrichmentTransform<K, V> extends Transform {
     /**
      * original fields to be enriched.
      */
-    private final List<Schema.Field> fieldsToBeEnriched;
-
-    /**
-     * enriched field's with name and type.
-     */
-    private final Schema.Field outputField;
+    private final List<String> fieldsToBeEnriched;
 
     /**
      * Used for lookups of enrich field values.
      */
-    private final DataProvider<K, V> dataProvider;
+    private final DataProvider<Object, Object> dataProvider;
 
     /**
      * maximum size of the cache
@@ -65,10 +61,9 @@ public class EnrichmentTransform<K, V> extends Transform {
      */
     private long entryRefreshInterval = DEFAULT_ENTRY_REFRESH_INTERVAL;
 
-    public EnrichmentTransform(String name, List<Schema.Field> fieldsToBeEnriched, Schema.Field outputField, DataProvider<K, V> dataProvider) {
+    public EnrichmentTransform(String name, List<String> fieldsToBeEnriched, DataProvider<Object, Object> dataProvider) {
         super(name);
         this.fieldsToBeEnriched = fieldsToBeEnriched;
-        this.outputField = outputField;
         this.dataProvider = dataProvider;
     }
 
@@ -84,15 +79,11 @@ public class EnrichmentTransform<K, V> extends Transform {
         this.entryRefreshInterval = timeUnit.convert(refreshInterval, TimeUnit.SECONDS);
     }
 
-    public List<Schema.Field> getFieldsToBeEnriched() {
-        return fieldsToBeEnriched;
+    public List<String> getFieldsToBeEnriched() {
+        return Collections.unmodifiableList(fieldsToBeEnriched);
     }
 
-    public Schema.Field getOutputField() {
-        return outputField;
-    }
-
-    public DataProvider<K, V> getDataProvider() {
+    public DataProvider<Object, Object> getDataProvider() {
         return dataProvider;
     }
 

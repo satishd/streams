@@ -19,32 +19,52 @@
 package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
+import com.hortonworks.iotas.common.Schema;
 import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Enrichment adds an extra enriched message of original message's fields or already enriched fields.
  */
-public class EnrichmentTransformRuntime<K, V> implements TransformRuntime {
+public class EnrichmentTransformRuntime implements TransformRuntime {
+    private static final Logger log = LoggerFactory.getLogger(EnrichmentTransformRuntime.class);
 
-    private final EnrichmentTransform<K, V> enrichmentTransform;
-    private CachedDataProvider<K, V> cachedDataProvider;
+    private final EnrichmentTransform enrichmentTransform;
 
-    public EnrichmentTransformRuntime(EnrichmentTransform<K, V> enrichmentTransform) {
+    private CachedDataProvider<Object, Object> cachedDataProvider;
+
+    public EnrichmentTransformRuntime(EnrichmentTransform enrichmentTransform) {
         this.enrichmentTransform = enrichmentTransform;
     }
 
     public void prepare() {
-        cachedDataProvider = new CachedDataProvider<>(enrichmentTransform.getDataProvider(), enrichmentTransform.getMaxCacheSize(),
+        cachedDataProvider = new CachedDataProvider<Object, Object>(enrichmentTransform.getDataProvider(), enrichmentTransform.getMaxCacheSize(),
                 enrichmentTransform.getEntryExpirationInterval(), enrichmentTransform.getEntryRefreshInterval());
         cachedDataProvider.prepare();
     }
 
     @Override
     public List<IotasEvent> execute(IotasEvent iotasEvent) {
-        //todo
-        return null;
+        List<String> fieldsToBeEnriched = enrichmentTransform.getFieldsToBeEnriched();
+        Map<String, Object> fieldsAndValues = iotasEvent.getFieldsAndValues();
+        Map<String, Object> auxiliaryFieldsAndValues = iotasEvent.getAuxiliaryFieldsAndValues();
+        for (String fieldName : fieldsToBeEnriched) {
+            Object value = fieldsAndValues.get(fieldName);
+            if(value != null) {
+                Object enrichedValue = cachedDataProvider.get(value);
+                log.debug("Enriched value [{}] for key [{}] with value [{}]", enrichedValue, fieldName, value);
+                auxiliaryFieldsAndValues.put(fieldName, enrichedValue);
+            } else {
+                log.warn("Value in input event for key [{}] is null", fieldName);
+            }
+
+        }
+        return Collections.singletonList(iotasEvent);
     }
 
 }
