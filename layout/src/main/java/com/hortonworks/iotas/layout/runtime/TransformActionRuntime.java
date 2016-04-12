@@ -13,6 +13,11 @@ public class TransformActionRuntime implements ActionRuntime {
     private final String stream;
     private final List<TransformRuntime> transformRuntimes;
 
+    protected TransformActionRuntime(List<TransformRuntime> transformRuntimes) {
+        this.transformRuntimes = transformRuntimes;
+        this.stream = null;
+    }
+
     /**
      * Creates a new {@link TransformActionRuntime}
      *
@@ -46,7 +51,7 @@ public class TransformActionRuntime implements ActionRuntime {
     /*
      * applies the transformation chain to the input and returns the transformed events
      */
-    private List<IotasEvent> doTransform(IotasEvent input) {
+    protected List<IotasEvent> doTransform(IotasEvent input) {
         return doTransform(input, 0);
     }
 
@@ -64,7 +69,7 @@ public class TransformActionRuntime implements ActionRuntime {
         // add empty event when it returns null or empty collection
         // currently, we can not handle splitting of the partial events in to more partial events.
         // set a constraint that partial event can not be split again. throw an error if it does
-        // todo we can solve this when we can have system level join stream form each stage processor to join processor.
+        // todo we can solve this when we can have system level join stream from each stage processor to join processor.
         // which will send total no of those events so that join can wait.
 
         for (IotasEvent event : iotasEvents) {

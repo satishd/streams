@@ -16,33 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipeline;
+package com.hortonworks.iotas.layout.design.pipeline;
 
-import com.hortonworks.iotas.layout.design.rule.action.Action;
+import java.io.Serializable;
 
 /**
+ * Design time component of a basic transform.
  *
  */
-public class JoinAction extends Action {
+public class Transform implements Serializable {
 
-    //todo do we really any other configuration?
-    // yes, joiner class needed.
-    private String jarId;
-    private String joinerClassName;
+    private final String name;
 
-    private JoinAction() {
+    public Transform(String name) {
+        this.name = name;
     }
 
-    public JoinAction(String jarId, String joinerClassName) {
-        this.jarId = jarId;
-        this.joinerClassName = joinerClassName;
-    }
-
-    public String getJarId() {
-        return jarId;
-    }
-
-    public String getJoinerClassName() {
-        return joinerClassName;
+    public String getName() {
+        return name;
     }
 }

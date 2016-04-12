@@ -20,25 +20,25 @@ package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
+import com.hortonworks.iotas.layout.design.pipeline.JoinAction;
 import com.hortonworks.iotas.layout.runtime.ActionRuntime;
 import com.hortonworks.iotas.util.ProxyUtil;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * {@link ActionRuntime} implementation for {@link JoinAction}
  */
 public class JoinActionRuntime implements ActionRuntime {
     private Map<String, EventGroup> groupedEvents = new HashMap<>();
-    private String outputStream;
     private final JoinAction joinAction;
     private Joiner joiner;
 
-    public JoinActionRuntime(String outputStream, JoinAction joinAction) {
-        this.outputStream = outputStream;
+    public JoinActionRuntime(JoinAction joinAction) {
         this.joinAction = joinAction;
     }
 
@@ -53,7 +53,7 @@ public class JoinActionRuntime implements ActionRuntime {
                 throw new RuntimeException(e.getMessage(), e);
             }
         } else {
-            joiner = new DefaultJoiner(outputStream);
+            joiner = new DefaultJoiner(joinAction.getOutputStreams().get(0));
         }
     }
 
@@ -64,7 +64,7 @@ public class JoinActionRuntime implements ActionRuntime {
 
         // join them if group is complete
         if (eventGroup != null && eventGroup.isComplete()) {
-            return Collections.singletonList(joinEvents(eventGroup));
+            return joinEvents(eventGroup);
         }
 
         return null;
@@ -75,9 +75,16 @@ public class JoinActionRuntime implements ActionRuntime {
      *
      * @param eventGroup
      */
-    protected Result joinEvents(EventGroup eventGroup) {
+    protected List<Result> joinEvents(EventGroup eventGroup) {
         IotasEvent joinedEvent = joiner.join(eventGroup);
-        return new Result(outputStream, Collections.singletonList(joinedEvent));
+
+        List<Result> results = new ArrayList<>();
+        final List<IotasEvent> events = Collections.singletonList(joinedEvent);
+        for (String stream : joinAction.getOutputStreams()) {
+            results.add(new Result(stream, events));
+        }
+
+        return results;
     }
 
     protected EventGroup groupEvents(IotasEvent iotasEvent) {
@@ -106,6 +113,6 @@ public class JoinActionRuntime implements ActionRuntime {
 
     @Override
     public List<String> getOutputStreams() {
-        return null;
+        return joinAction.getOutputStreams();
     }
 }

@@ -16,33 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipeline;
+package com.hortonworks.iotas.layout.design.pipeline;
 
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 
 /**
+ * {@link} Action configuration for for joining the events.
  *
  */
-public class SplitAction extends Action {
-    private String jarId;
-    private String splitterClassName;
+public class JoinAction extends Action {
 
-    public SplitAction() {
+    //todo do we really any other configuration?
+    // yes, joiner class needed.
+    private String jarId;
+    private String joinerClassName;
+
+    private JoinAction() {
+    }
+
+    public JoinAction(String jarId, String joinerClassName) {
+        this.jarId = jarId;
+        this.joinerClassName = joinerClassName;
     }
 
     public String getJarId() {
         return jarId;
     }
 
-    public void setJarId(String jarId) {
-        this.jarId = jarId;
-    }
-
-    public String getSplitterClassName() {
-        return splitterClassName;
-    }
-
-    public void setSplitterClassName(String splitterClassName) {
-        this.splitterClassName = splitterClassName;
+    public String getJoinerClassName() {
+        return joinerClassName;
     }
 }

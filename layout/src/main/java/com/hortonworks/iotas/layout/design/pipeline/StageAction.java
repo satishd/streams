@@ -16,24 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipeline;
+package com.hortonworks.iotas.layout.design.pipeline;
+
+import com.hortonworks.iotas.layout.design.rule.action.Action;
 
 import java.util.List;
 
 /**
+ * {@link Action} for stage processor which is invoked by split or stage processors.
  *
  */
-public class Stage {
-    public final String name;
-    public final List<PipelineAction> pipelineActions;
-    public final Stage nextStage;
+public class StageAction extends Action {
 
-    // can have error handler which is kind of sink of errors generated from this stage
+    private final List<Transform> transforms;
 
-    public Stage(String name, List<PipelineAction> pipelineActions, Stage nextStage) {
-        this.name = name;
-        this.pipelineActions = pipelineActions;
-        this.nextStage = nextStage;
+    public StageAction(List<Transform> transforms) {
+        this.transforms = transforms;
     }
 
+    public List<Transform> getTransforms() {
+        return transforms;
+    }
 }

@@ -19,23 +19,21 @@
 package com.hortonworks.iotas.layout.runtime.pipeline;
 
 import com.hortonworks.iotas.common.Schema;
+import com.hortonworks.iotas.layout.design.pipeline.Transform;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * This class can be used to configure enrichment transform which can be used in any {@link com.hortonworks.iotas.layout.design.rule.action.Action}
+ * of a rule based processor.
  *
  */
-public class EnrichmentTransform<K, V> {
+public class EnrichmentTransform<K, V> extends Transform {
 
     public static final long DEFAULT_MAX_CACHE_SIZE = 1000;
     public static final long DEFAULT_ENTRY_EXPIRATION_INTERVAL = 60 * 5 * 1000;
     public static final long DEFAULT_ENTRY_REFRESH_INTERVAL = 60 * 5 * 1000;
-
-    /**
-     * Name of the enrichment
-     */
-    private final String name;
 
     /**
      * original fields to be enriched.
@@ -68,7 +66,7 @@ public class EnrichmentTransform<K, V> {
     private long entryRefreshInterval = DEFAULT_ENTRY_REFRESH_INTERVAL;
 
     public EnrichmentTransform(String name, List<Schema.Field> fieldsToBeEnriched, Schema.Field outputField, DataProvider<K, V> dataProvider) {
-        this.name = name;
+        super(name);
         this.fieldsToBeEnriched = fieldsToBeEnriched;
         this.outputField = outputField;
         this.dataProvider = dataProvider;
@@ -84,10 +82,6 @@ public class EnrichmentTransform<K, V> {
 
     public void withEntryRefreshInterval(long refreshInterval, TimeUnit timeUnit) {
         this.entryRefreshInterval = timeUnit.convert(refreshInterval, TimeUnit.SECONDS);
-    }
-
-    public String getName() {
-        return name;
     }
 
     public List<Schema.Field> getFieldsToBeEnriched() {

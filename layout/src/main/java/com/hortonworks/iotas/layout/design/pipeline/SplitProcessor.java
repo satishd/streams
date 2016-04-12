@@ -21,17 +21,12 @@ package com.hortonworks.iotas.layout.design.pipeline;
 import com.hortonworks.iotas.layout.design.component.RulesProcessor;
 import com.hortonworks.iotas.layout.design.rule.Rule;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
-import com.hortonworks.iotas.layout.runtime.pipeline.SplitAction;
 
 import java.util.Collections;
 
 /**
- * - output streams list
- * - containing schema, stream id.
- * - Splitter jar
- * - Splitter class to be loaded from jar using proxy class loader
- * - Add centralized jar storage utility so that any component can use those jars
- * todo - Use RulesProcessor as the only action with Split
+ * Splits the receiving input event and send those events based on the given {@link SplitAction} configuration.
+ *
  */
 public class SplitProcessor extends RulesProcessor {
 

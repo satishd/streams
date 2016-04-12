@@ -20,29 +20,25 @@ package com.hortonworks.iotas.layout.design.pipeline;
 
 import com.hortonworks.iotas.layout.design.component.RulesProcessor;
 import com.hortonworks.iotas.layout.design.rule.Rule;
+import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
 
 import java.util.Collections;
 import java.util.List;
 
 /**
- * - Stage has list of transforms to be applied and send the out put to given stream.
- * - output streams list
- *      - containing schema, stream id.
+ * Stage has a list of transforms to be applied and send the out put to given stream.
  */
 public class StageProcessor extends RulesProcessor {
 
-    public StageProcessor(List<TransformRuntime> transformRuntimes) {
-        final TrueRule trueRule = new TrueRule();
-//        trueRule.setActions(Collections.<Action>singletonList(new TransformAction("" , transforms)));
-        setRules(Collections.<Rule>singletonList(trueRule));
-    }
-
-    static class TrueRule extends Rule {
-        public TrueRule() {
-            setName("true-rule");
+    public StageProcessor(List<Transform> transforms) {
+        final Rule rule = new Rule() {{
+            setName("split-true-rule");
             setId(System.currentTimeMillis());
-        }
+        }};
+
+        rule.setActions(Collections.<Action>singletonList(new StageAction(transforms)));
+        setRules(Collections.singletonList(rule));
     }
 
 }

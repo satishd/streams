@@ -34,20 +34,17 @@ import java.util.UUID;
  */
 public class DefaultSplitter implements Splitter {
 
-    private final List<String> outputStreams;
-
-    public DefaultSplitter(List<String> outputStreams) {
-        this.outputStreams = outputStreams;
+    public DefaultSplitter() {
     }
 
     @Override
-    public List<Result> splitEvent(IotasEvent iotasEvent) {
+    public List<Result> splitEvent(IotasEvent inputEvent, List<String> outputStreams) {
         List<Result> results = new ArrayList<>();
-        String groupId = getGroupId(iotasEvent);
+        String groupId = getGroupId(inputEvent);
         int curPartNo = 0;
         int totalParts = outputStreams.size();
         for (String stream : outputStreams) {
-            IotasEvent partitionedEvent = createPartitionEvent(iotasEvent, groupId, ++curPartNo, stream, totalParts);
+            IotasEvent partitionedEvent = createPartitionEvent(inputEvent, groupId, ++curPartNo, stream, totalParts);
             results.add(new Result(stream, Collections.singletonList(partitionedEvent)));
         }
 

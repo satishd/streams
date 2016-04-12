@@ -1,6 +1,7 @@
 package com.hortonworks.iotas.layout.runtime.transform;
 
 import com.hortonworks.iotas.common.IotasEvent;
+import com.hortonworks.iotas.layout.design.pipeline.Transform;
 
 import java.io.Serializable;
 import java.util.List;
@@ -18,4 +19,8 @@ public interface TransformRuntime extends Serializable {
      * @return the list of events generated from the transformation
      */
     List<IotasEvent> execute(IotasEvent input);
+
+    public interface Factory {
+        public TransformRuntime create(Transform transform);
+    }
 }

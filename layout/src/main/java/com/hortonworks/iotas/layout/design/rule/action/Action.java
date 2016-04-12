@@ -18,6 +18,7 @@
  */
 package com.hortonworks.iotas.layout.design.rule.action;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.hortonworks.iotas.layout.design.component.Stream;
 
 import java.io.Serializable;
@@ -32,27 +33,15 @@ import java.util.Map;
  * components, sinks, ...
  *
  */
+@JsonTypeInfo(use= JsonTypeInfo.Id.CLASS, include= JsonTypeInfo.As.PROPERTY, property="class")
 public class Action implements Serializable {
     protected String name = "default";
-    protected Map<String, Object> outputFieldsAndDefaults = new HashMap<>();
 
     /**
      * Each {@link Action} can have its own output streams to which events should be sent to.
      * todo this should be changed to to List of {@link Stream}s once Stream abstraction is integrated.
      */
     protected List<String> outputStreams;
-
-    /**
-     * The name of the output fields and the default values for them
-     * to be emitted as a part of this action.
-     */
-    public void setOutputFieldsAndDefaults(Map<String, Object> outputFieldsAndDefaults) {
-        this.outputFieldsAndDefaults = outputFieldsAndDefaults;
-    }
-
-    public Map<String, Object> getOutputFieldsAndDefaults() {
-        return outputFieldsAndDefaults;
-    }
 
     public String getName() {
         return name;
@@ -74,7 +63,6 @@ public class Action implements Serializable {
     public String toString() {
         return "Action{" +
                 "name='" + name + '\'' +
-                ", outputFieldsAndDefaults=" + outputFieldsAndDefaults +
                 ", outputStreams=" + outputStreams +
                 '}';
     }

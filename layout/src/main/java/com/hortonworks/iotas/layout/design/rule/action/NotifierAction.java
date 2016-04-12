@@ -18,6 +18,8 @@
 
 package com.hortonworks.iotas.layout.design.rule.action;
 
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * {@link Action} to send notifications.
@@ -26,11 +28,24 @@ package com.hortonworks.iotas.layout.design.rule.action;
 public class NotifierAction extends Action {
     private boolean includeMeta = false;
     private String notifierName = "dummy";
+    protected Map<String, Object> outputFieldsAndDefaults = new HashMap<>();
 
     public NotifierAction() { }
 
     public boolean isIncludeMeta() {
         return includeMeta;
+    }
+
+    /**
+     * The name of the output fields and the default values for them
+     * to be emitted as a part of this action.
+     */
+    public void setOutputFieldsAndDefaults(Map<String, Object> outputFieldsAndDefaults) {
+        this.outputFieldsAndDefaults = outputFieldsAndDefaults;
+    }
+
+    public Map<String, Object> getOutputFieldsAndDefaults() {
+        return outputFieldsAndDefaults;
     }
 
     /**
