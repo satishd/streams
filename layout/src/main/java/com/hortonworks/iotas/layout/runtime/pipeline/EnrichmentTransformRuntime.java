@@ -35,6 +35,7 @@ public class EnrichmentTransformRuntime implements TransformRuntime {
     private static final Logger log = LoggerFactory.getLogger(EnrichmentTransformRuntime.class);
 
     private final EnrichmentTransform enrichmentTransform;
+
     private CachedDataProvider<Object, Object> cachedDataProvider;
 
     public EnrichmentTransformRuntime(EnrichmentTransform enrichmentTransform) {
@@ -49,19 +50,19 @@ public class EnrichmentTransformRuntime implements TransformRuntime {
 
     @Override
     public List<IotasEvent> execute(IotasEvent iotasEvent) {
-        List<Schema.Field> fieldsToBeEnriched = enrichmentTransform.getFieldsToBeEnriched();
+        List<String> fieldsToBeEnriched = enrichmentTransform.getFieldsToBeEnriched();
         Map<String, Object> fieldsAndValues = iotasEvent.getFieldsAndValues();
         Map<String, Object> auxiliaryFieldsAndValues = iotasEvent.getAuxiliaryFieldsAndValues();
-        for (Schema.Field field : fieldsToBeEnriched) {
-            final String fieldName = field.getName();
+        for (String fieldName : fieldsToBeEnriched) {
             Object value = fieldsAndValues.get(fieldName);
-            Object enrichedValue = cachedDataProvider.get(value);
-            log.debug("Enriched value [{}] for key [{}] with value [{}]", enrichedValue, fieldName, value);
-
-            if(enrichedValue == null) {
-                log.warn("Enriched value for key [{}] with value [{}] is null", fieldName, value);
+            if(value != null) {
+                Object enrichedValue = cachedDataProvider.get(value);
+                log.debug("Enriched value [{}] for key [{}] with value [{}]", enrichedValue, fieldName, value);
+                auxiliaryFieldsAndValues.put(fieldName, enrichedValue);
+            } else {
+                log.warn("Value in input event for key [{}] is null", fieldName);
             }
-            auxiliaryFieldsAndValues.put(fieldName, enrichedValue);
+
         }
         return Collections.singletonList(iotasEvent);
     }

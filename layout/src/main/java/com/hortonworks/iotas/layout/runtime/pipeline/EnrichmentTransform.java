@@ -39,7 +39,7 @@ public class EnrichmentTransform<K, V> extends Transform {
     /**
      * original fields to be enriched.
      */
-    private final List<Schema.Field> fieldsToBeEnriched;
+    private final List<String> fieldsToBeEnriched;
 
     /**
      * Used for lookups of enrich field values.
@@ -61,7 +61,7 @@ public class EnrichmentTransform<K, V> extends Transform {
      */
     private long entryRefreshInterval = DEFAULT_ENTRY_REFRESH_INTERVAL;
 
-    public EnrichmentTransform(String name, List<Schema.Field> fieldsToBeEnriched, DataProvider<Object, Object> dataProvider) {
+    public EnrichmentTransform(String name, List<String> fieldsToBeEnriched, DataProvider<Object, Object> dataProvider) {
         super(name);
         this.fieldsToBeEnriched = fieldsToBeEnriched;
         this.dataProvider = dataProvider;
@@ -79,7 +79,7 @@ public class EnrichmentTransform<K, V> extends Transform {
         this.entryRefreshInterval = timeUnit.convert(refreshInterval, TimeUnit.SECONDS);
     }
 
-    public List<Schema.Field> getFieldsToBeEnriched() {
+    public List<String> getFieldsToBeEnriched() {
         return Collections.unmodifiableList(fieldsToBeEnriched);
     }
 

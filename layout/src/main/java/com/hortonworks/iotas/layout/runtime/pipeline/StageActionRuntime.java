@@ -39,8 +39,9 @@ public class StageActionRuntime implements ActionRuntime {
     private TransformActionRuntime transformActionRuntime;
 
     // register factories
-    // todo this can be moved to startup listener
+    // todo this can be moved to startup listener to add all supported Transforms.
     static {
+
         TransformRuntimeFactory.get().register(EnrichmentTransform.class, new TransformRuntime.Factory() {
             @Override
             public TransformRuntime create(Transform transform) {
