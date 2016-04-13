@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * Adds a fixed header to the input event
  */
-public class AddHeaderTransform implements Transform {
+public class AddHeaderTransformRuntime implements TransformRuntime {
     public static final String HEADER_FIELD_NOTIFIER_NAME = "notifierName";
     public static final String HEADER_FIELD_RULE_ID = "ruleId";
     public static final String HEADER_FIELD_DATASOURCE_IDS = "dataSourceIds";
@@ -20,7 +20,7 @@ public class AddHeaderTransform implements Transform {
 
     private final Map<String, Object> fixedHeader;
 
-    public AddHeaderTransform(Map<String, Object> header) {
+    public AddHeaderTransformRuntime(Map<String, Object> header) {
         this.fixedHeader = header;
     }
 

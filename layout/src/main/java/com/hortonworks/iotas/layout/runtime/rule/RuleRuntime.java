@@ -54,7 +54,7 @@ public class RuleRuntime implements Serializable, ProcessorRuntime {
 
     public boolean evaluate(IotasEvent input) {
         try {
-            boolean evaluates = script.evaluate(input);
+            boolean evaluates = script != null ? script.evaluate(input) : true;
             LOG.debug("Rule condition evaluated to [{}].\n\t[{}]\n\tInput[{}]", evaluates, rule, input);
             return evaluates;
         } catch (ScriptException e) {
@@ -70,20 +70,22 @@ public class RuleRuntime implements Serializable, ProcessorRuntime {
     @Override
     public List<Result> process (IotasEvent input) throws ProcessingException {
         LOG.debug("process invoked with IotasEvent {}", input);
-        List<Result> results = new ArrayList<>();
+        List<Result> allResults = new ArrayList<>();
         try {
             for (ActionRuntime action : actions) {
-                Result result = action.execute(input);
-                LOG.debug("Applied action {}, Result {}", action, result);
-                results.add(result);
+                List<Result> actionResults = action.execute(input);
+                LOG.debug("Applied action {}, Result {}", action, actionResults);
+                if(actionResults != null) {
+                    allResults.addAll(actionResults);
+                }
             }
         } catch (Exception e) {
             String message = "Error evaluating rule with id:" + rule.getId();
             LOG.error(message);
             throw new ProcessingException(message, e);
         }
-        LOG.debug("Returning results {}", results);
-        return results;
+        LOG.debug("Returning allResults {}", allResults);
+        return allResults;
     }
 
     @Override
@@ -100,8 +102,8 @@ public class RuleRuntime implements Serializable, ProcessorRuntime {
         LOG.debug("in getStreams");
         List<String> streams = new ArrayList<>();
         for(ActionRuntime action: actions) {
-            LOG.debug("Action {}, Stream {}", action, action.getStream());
-            streams.add(action.getStream());
+            LOG.debug("Action {}, Stream {}", action, action.getOutputStreams());
+            streams.addAll(action.getOutputStreams());
         }
         LOG.debug("Returning streams {}", streams);
         return streams;
