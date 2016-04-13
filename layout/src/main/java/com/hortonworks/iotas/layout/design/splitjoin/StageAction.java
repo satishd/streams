@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.design.pipeline;
+package com.hortonworks.iotas.layout.design.splitjoin;
 
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.design.transform.Transform;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -29,14 +30,17 @@ import java.util.List;
  */
 public class StageAction extends Action {
 
-    private final List<Transform> transforms;
+    private List<Transform> transforms;
+
+    public StageAction() {
+    }
 
     public StageAction(List<Transform> transforms) {
         this.transforms = transforms;
     }
 
     public List<Transform> getTransforms() {
-        return transforms;
+        return Collections.unmodifiableList(transforms);
     }
 
     @Override

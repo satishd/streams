@@ -16,29 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.design.pipeline;
+package com.hortonworks.iotas.layout.design.splitjoin;
 
 import com.hortonworks.iotas.layout.design.Utils;
 import com.hortonworks.iotas.layout.design.component.RulesProcessor;
-import com.hortonworks.iotas.layout.design.transform.Transform;
 
 import java.util.Collections;
-import java.util.List;
 
 /**
- * Stage has a list of transforms to be applied and send the out put to given stream.
+ * Joins incoming streams and generate a joined event.
+ *
  */
-public class StageProcessor extends RulesProcessor {
+public class JoinProcessor extends RulesProcessor {
 
-    public StageProcessor() {
+    public JoinProcessor() {
     }
 
-    public StageProcessor(List<Transform> transforms) {
-        setRules(Collections.singletonList(Utils.createTrueRule(new StageAction(transforms))));
+    public JoinProcessor(JoinAction joinAction) {
+        setRules(Collections.singletonList(Utils.createTrueRule(joinAction)));
     }
 
     @Override
     public String toString() {
-        return "StageProcessor{}"+super.toString();
+        return "JoinProcessor{}"+super.toString();
     }
 }

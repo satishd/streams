@@ -16,11 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipeline;
+package com.hortonworks.iotas.layout.runtime.transform;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.layout.design.transform.EnrichmentTransform;
-import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +40,6 @@ public class EnrichmentTransformRuntime implements TransformRuntime {
 
     public EnrichmentTransformRuntime(EnrichmentTransform enrichmentTransform) {
         this.enrichmentTransform = enrichmentTransform;
-    }
-
-    public void prepare() {
         cachedDataProvider = new CachedDataProvider<Object, Object>(enrichmentTransform.getDataProvider(), enrichmentTransform.getMaxCacheSize(),
                 enrichmentTransform.getEntryExpirationInterval(), enrichmentTransform.getEntryRefreshInterval());
         cachedDataProvider.prepare();
@@ -57,8 +53,9 @@ public class EnrichmentTransformRuntime implements TransformRuntime {
         Map<String, Object> enrichments = (Map<String, Object>) auxiliaryFieldsAndValues.get(EnrichmentTransform.ENRICHMENTS_FIELD_NAME);
         if (enrichments == null) {
             enrichments = new HashMap<>();
-            auxiliaryFieldsAndValues.put(EnrichmentTransform.ENRICHMENTS_FIELD_NAME, enrichments);
+            iotasEvent.addAuxiliaryFieldAndValue(EnrichmentTransform.ENRICHMENTS_FIELD_NAME, enrichments);
         }
+
         for (String fieldName : fieldsToBeEnriched) {
             Object value = fieldsAndValues.get(fieldName);
             if (value != null) {

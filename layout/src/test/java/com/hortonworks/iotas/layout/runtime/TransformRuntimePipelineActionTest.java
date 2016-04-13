@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
 import com.hortonworks.iotas.common.Result;
+import com.hortonworks.iotas.layout.design.transform.ProjectionTransform;
 import com.hortonworks.iotas.layout.runtime.transform.MergeTransformRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.ProjectionTransformRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.SubstituteTransformRuntime;
@@ -32,7 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link TransformActionRuntime}
@@ -51,7 +52,7 @@ public class TransformRuntimePipelineActionTest {
 
         IotasEvent event = new IotasEventImpl(fieldsAndValues, "dsrcid");
         TransformRuntime merge = new MergeTransformRuntime(defaults);
-        TransformRuntime projection = new ProjectionTransformRuntime(defaults.keySet());
+        TransformRuntime projection = new ProjectionTransformRuntime(new ProjectionTransform("test-projection", defaults.keySet()));
         ActionRuntime actionRuntime = new TransformActionRuntime("streamid", ImmutableList.of(merge, projection));
         List<IotasEvent> resultEvents = new ArrayList<>();
         for (Result result : actionRuntime.execute(event)) {
@@ -77,7 +78,7 @@ public class TransformRuntimePipelineActionTest {
         IotasEvent event = new IotasEventImpl(fieldsAndValues, "dsrcid");
         TransformRuntime merge = new MergeTransformRuntime(defaults);
         TransformRuntime substitute = new SubstituteTransformRuntime();
-        TransformRuntime projection = new ProjectionTransformRuntime(defaults.keySet());
+        TransformRuntime projection = new ProjectionTransformRuntime(new ProjectionTransform("test-projection", defaults.keySet()));
         ActionRuntime actionRuntime = new TransformActionRuntime("streamid", ImmutableList.of(merge, substitute, projection));
         List<IotasEvent> resultEvents = new ArrayList<>();
         for (Result result : actionRuntime.execute(event)) {

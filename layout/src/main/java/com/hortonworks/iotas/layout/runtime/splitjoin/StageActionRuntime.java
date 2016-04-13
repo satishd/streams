@@ -16,16 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipeline;
+package com.hortonworks.iotas.layout.runtime.splitjoin;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
-import com.hortonworks.iotas.layout.design.transform.EnrichmentTransform;
-import com.hortonworks.iotas.layout.design.pipeline.StageAction;
+import com.hortonworks.iotas.layout.design.rule.action.Action;
+import com.hortonworks.iotas.layout.design.splitjoin.StageAction;
 import com.hortonworks.iotas.layout.design.transform.Transform;
 import com.hortonworks.iotas.layout.runtime.ActionRuntime;
+import com.hortonworks.iotas.layout.runtime.RuntimeService;
 import com.hortonworks.iotas.layout.runtime.TransformActionRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
+import com.hortonworks.iotas.layout.runtime.transform.TransformRuntimeService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,18 +40,6 @@ public class StageActionRuntime implements ActionRuntime {
 
     private final StageAction stageAction;
     private TransformActionRuntime transformActionRuntime;
-
-    // register factories
-    // todo this can be moved to startup listener to add all supported Transforms.
-    static {
-
-        TransformRuntimeFactory.get().register(EnrichmentTransform.class, new TransformRuntime.Factory() {
-            @Override
-            public TransformRuntime create(Transform transform) {
-                return new EnrichmentTransformRuntime((EnrichmentTransform) transform);
-            }
-        });
-    }
 
     public StageActionRuntime(StageAction stageAction) {
         this.stageAction = stageAction;
@@ -67,7 +57,8 @@ public class StageActionRuntime implements ActionRuntime {
     private List<TransformRuntime> getTransformRuntimes(List<Transform> transforms) {
         List<TransformRuntime> transformRuntimes = new ArrayList<>();
         for (Transform transform : transforms) {
-            transformRuntimes.add(TransformRuntimeFactory.get().create(transform));
+            TransformRuntime transformRuntime = TransformRuntimeService.get().get(transform);
+            transformRuntimes.add(transformRuntime);
         }
 
         return transformRuntimes;
@@ -81,5 +72,12 @@ public class StageActionRuntime implements ActionRuntime {
     @Override
     public List<String> getOutputStreams() {
         return transformActionRuntime.getOutputStreams();
+    }
+
+    public static class Factory implements RuntimeService.Factory<ActionRuntime, Action> {
+        @Override
+        public ActionRuntime create(Action action) {
+            return new StageActionRuntime((StageAction) action);
+        }
     }
 }

@@ -26,7 +26,7 @@ import java.io.Serializable;
  */
 public class Transform implements Serializable {
 
-    private final String name;
+    protected final String name;
 
     public Transform(String name) {
         this.name = name;
@@ -34,5 +34,12 @@ public class Transform implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String toString() {
+        return "Transform{" +
+                "name='" + name + '\'' +
+                '}';
     }
 }

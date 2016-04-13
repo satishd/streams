@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.hortonworks.iotas.layout.runtime.pipeline;
+package com.hortonworks.iotas.layout.runtime.splitjoin;
 
 import com.hortonworks.iotas.common.IotasEvent;
 

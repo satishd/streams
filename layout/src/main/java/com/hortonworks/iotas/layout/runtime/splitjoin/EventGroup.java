@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipeline;
+package com.hortonworks.iotas.layout.runtime.splitjoin;
 
 import com.hortonworks.iotas.common.IotasEvent;
 
@@ -44,7 +44,15 @@ public class EventGroup {
         if(header == null || !header.containsKey(SplitActionRuntime.SPLIT_PARTITION_ID)) {
             throw new IllegalArgumentException("Received event is not of partition event as it doe not contain header  with name: "+SplitActionRuntime.SPLIT_PARTITION_ID);
         }
+
         partitionedEvents.put((Integer) header.get(SplitActionRuntime.SPLIT_PARTITION_ID), partitionedEvent);
+        if(header.get(SplitActionRuntime.SPLIT_TOTAL_PARTITIONS_ID) != null) {
+            int x = (Integer) header.get(SplitActionRuntime.SPLIT_TOTAL_PARTITIONS_ID);
+            if(totalPartitionEvents < x) {
+                totalPartitionEvents = x;
+            }
+        }
+
     }
 
     public boolean isComplete() {
@@ -55,7 +63,21 @@ public class EventGroup {
         return dataSourceId;
     }
 
+    public String getGroupId() {
+        return groupId;
+    }
+
     public Iterable<IotasEvent> getPartitionedEvents() {
         return Collections.unmodifiableCollection(partitionedEvents.values());
+    }
+
+    @Override
+    public String toString() {
+        return "EventGroup{" +
+                "partitionedEvents=" + partitionedEvents +
+                ", groupId='" + groupId + '\'' +
+                ", dataSourceId='" + dataSourceId + '\'' +
+                ", totalPartitionEvents=" + totalPartitionEvents +
+                '}';
     }
 }

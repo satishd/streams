@@ -1,16 +1,18 @@
 package com.hortonworks.iotas.layout.runtime.rule;
 
-import com.hortonworks.iotas.layout.design.pipeline.StageAction;
+import com.hortonworks.iotas.layout.design.splitjoin.StageAction;
 import com.hortonworks.iotas.layout.design.rule.Rule;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.design.rule.action.NotifierAction;
+import com.hortonworks.iotas.layout.design.transform.ProjectionTransform;
 import com.hortonworks.iotas.layout.runtime.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.TransformActionRuntime;
-import com.hortonworks.iotas.layout.design.pipeline.JoinAction;
-import com.hortonworks.iotas.layout.runtime.pipeline.JoinActionRuntime;
-import com.hortonworks.iotas.layout.design.pipeline.SplitAction;
-import com.hortonworks.iotas.layout.runtime.pipeline.SplitActionRuntime;
-import com.hortonworks.iotas.layout.runtime.pipeline.StageActionRuntime;
+import com.hortonworks.iotas.layout.design.splitjoin.JoinAction;
+import com.hortonworks.iotas.layout.runtime.splitjoin.JoinActionRuntime;
+import com.hortonworks.iotas.layout.design.splitjoin.SplitAction;
+import com.hortonworks.iotas.layout.runtime.splitjoin.SplitActionRuntime;
+import com.hortonworks.iotas.layout.runtime.splitjoin.StageActionRuntime;
+import com.hortonworks.iotas.layout.runtime.transform.ActionRuntimeService;
 import com.hortonworks.iotas.layout.runtime.transform.AddHeaderTransformRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.IdentityTransformRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.MergeTransformRuntime;
@@ -19,7 +21,6 @@ import com.hortonworks.iotas.layout.runtime.transform.SubstituteTransformRuntime
 import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,6 @@ public abstract class AbstractRuleRuntimeBuilder implements RuleRuntimeBuilder {
 
     protected ActionRuntime createActionRuntime(Rule rule, Action action) {
         ActionRuntime actionRuntime = null;
-        //todo create ActionRuntimeFactory to get respective runtime instances.
         if(action instanceof NotifierAction) {
             String streamId = rule.getRuleProcessorName() + "." + rule.getName() + "."
                     + rule.getId() + "." + action.getName();
@@ -48,14 +48,8 @@ public abstract class AbstractRuleRuntimeBuilder implements RuleRuntimeBuilder {
              * Add a TransformAction to perform necessary transformation for notification
              */
             actionRuntime = new TransformActionRuntime(streamId, getNotificationTransforms((NotifierAction) action, getRule().getId()));
-        } else if(action instanceof SplitAction){
-            actionRuntime = new SplitActionRuntime((SplitAction) action);
-        } else if(action instanceof JoinAction){
-            actionRuntime = new JoinActionRuntime((JoinAction) action);
-        } else if(action instanceof StageAction){
-            actionRuntime = new StageActionRuntime((StageAction) action);
         } else {
-            throw new IllegalArgumentException("Action: "+action+" is not supported");
+            return ActionRuntimeService.get().get(action);
         }
         return actionRuntime;
     }
@@ -68,7 +62,7 @@ public abstract class AbstractRuleRuntimeBuilder implements RuleRuntimeBuilder {
         if (action.getOutputFieldsAndDefaults() != null && !action.getOutputFieldsAndDefaults().isEmpty()) {
             transformRuntimes.add(new MergeTransformRuntime(action.getOutputFieldsAndDefaults()));
             transformRuntimes.add(new SubstituteTransformRuntime(action.getOutputFieldsAndDefaults().keySet()));
-            transformRuntimes.add(new ProjectionTransformRuntime(action.getOutputFieldsAndDefaults().keySet()));
+            transformRuntimes.add(new ProjectionTransformRuntime(new ProjectionTransform("projection-"+ruleId, action.getOutputFieldsAndDefaults().keySet())));
         }
 
         if (action.isIncludeMeta()) {

@@ -20,7 +20,4 @@ public interface TransformRuntime extends Serializable {
      */
     List<IotasEvent> execute(IotasEvent input);
 
-    public interface Factory {
-        public TransformRuntime create(Transform transform);
-    }
 }

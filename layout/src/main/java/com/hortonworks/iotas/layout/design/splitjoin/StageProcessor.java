@@ -16,42 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.design.pipeline;
+package com.hortonworks.iotas.layout.design.splitjoin;
 
-import com.hortonworks.iotas.layout.design.rule.action.Action;
+import com.hortonworks.iotas.layout.design.Utils;
+import com.hortonworks.iotas.layout.design.component.RulesProcessor;
+import com.hortonworks.iotas.layout.design.transform.Transform;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
- * {@link} Action configuration for for joining the events.
- *
+ * Stage has a list of transforms to be applied and send the out put to given stream.
  */
-public class JoinAction extends Action {
+public class StageProcessor extends RulesProcessor {
 
-    //todo do we really any other configuration?
-    // yes, joiner class needed.
-    private String jarId;
-    private String joinerClassName;
-
-    private JoinAction() {
+    public StageProcessor() {
     }
 
-    public JoinAction(String jarId, String joinerClassName) {
-        this.jarId = jarId;
-        this.joinerClassName = joinerClassName;
-    }
-
-    public String getJarId() {
-        return jarId;
-    }
-
-    public String getJoinerClassName() {
-        return joinerClassName;
+    public StageProcessor(List<Transform> transforms) {
+        setRules(Collections.singletonList(Utils.createTrueRule(new StageAction(transforms))));
     }
 
     @Override
     public String toString() {
-        return "JoinAction{" +
-                "jarId='" + jarId + '\'' +
-                ", joinerClassName='" + joinerClassName + '\'' +
-                '}'+super.toString();
+        return "StageProcessor{}"+super.toString();
     }
 }

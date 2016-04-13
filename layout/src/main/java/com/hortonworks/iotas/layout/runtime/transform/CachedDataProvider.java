@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipeline;
+package com.hortonworks.iotas.layout.runtime.transform;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;

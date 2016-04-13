@@ -19,6 +19,7 @@ package com.hortonworks.iotas.layout.runtime.transform;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
+import com.hortonworks.iotas.layout.design.transform.ProjectionTransform;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,18 +28,18 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Extracts some fields from the input IotasEvent.
+ * Project given fields from the input IotasEvent.
  */
 public class ProjectionTransformRuntime implements TransformRuntime {
-    private final Set<String> fields;
+    private final ProjectionTransform projectionTransform;
 
     /**
      * Selects the fields from the event matching the input fields.
      *
-     * @param fields the fields to select
+     * @param projectionTransform ProjectionTransform contains the fields to be selected
      */
-    public ProjectionTransformRuntime(Set<String> fields) {
-        this.fields = fields;
+    public ProjectionTransformRuntime(ProjectionTransform projectionTransform) {
+        this.projectionTransform = projectionTransform;
     }
 
     @Override
@@ -48,7 +49,7 @@ public class ProjectionTransformRuntime implements TransformRuntime {
 
     private List<IotasEvent> doTransform(IotasEvent input) {
         Map<String, Object> result = new HashMap<>();
-        for (String field : fields) {
+        for (String field : projectionTransform.getProjectionFields()) {
             result.put(field, input.getFieldsAndValues().get(field));
         }
         return Collections.<IotasEvent>singletonList(new IotasEventImpl(result, input.getDataSourceId()));
@@ -56,8 +57,8 @@ public class ProjectionTransformRuntime implements TransformRuntime {
 
     @Override
     public String toString() {
-        return "ProjectionTransform{" +
-                "fields=" + fields +
+        return "ProjectionTransformRuntime{" +
+                "projectionTransform=" + projectionTransform +
                 '}';
     }
 }

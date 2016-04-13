@@ -16,28 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.design.pipeline;
+package com.hortonworks.iotas.layout.design.splitjoin;
 
-import com.hortonworks.iotas.layout.design.Utils;
-import com.hortonworks.iotas.layout.design.component.RulesProcessor;
-
-import java.util.Collections;
+import com.hortonworks.iotas.layout.design.rule.action.Action;
 
 /**
- * Joins incoming streams and generate a joined event.
+ * {@link Action} configuration for splitting the events.
  *
  */
-public class JoinProcessor extends RulesProcessor {
+public class SplitAction extends Action {
+    private String jarId;
+    private String splitterClassName;
 
-    public JoinProcessor() {
+    public SplitAction() {
     }
 
-    public JoinProcessor(JoinAction joinAction) {
-        setRules(Collections.singletonList(Utils.createTrueRule(joinAction)));
+    public SplitAction(String jarId, String splitterClassName) {
+        this.jarId = jarId;
+        this.splitterClassName = splitterClassName;
+    }
+
+    public String getJarId() {
+        return jarId;
+    }
+
+    public String getSplitterClassName() {
+        return splitterClassName;
     }
 
     @Override
     public String toString() {
-        return "JoinProcessor{}"+super.toString();
+        return "SplitAction{" +
+                "jarId='" + jarId + '\'' +
+                ", splitterClassName='" + splitterClassName + '\'' +
+                '}'+super.toString();
     }
 }

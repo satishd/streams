@@ -16,28 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.design.pipeline;
+package com.hortonworks.iotas.layout.runtime.transform;
 
-import com.hortonworks.iotas.layout.design.Utils;
-import com.hortonworks.iotas.layout.design.component.RulesProcessor;
-
-import java.util.Collections;
+import com.hortonworks.iotas.layout.design.transform.Transform;
 
 /**
- * Splits the receiving input event and send those events based on the given {@link SplitAction} configuration.
- *
+ * Data provider for {@link Transform} which can be used for lookups.
  */
-public class SplitProcessor extends RulesProcessor {
+public interface DataProvider<K, V> {
 
-    public SplitProcessor() {
-    }
+    /**
+     * Prepare resources which can be used in retrieving values from data store.
+     */
+    public void prepare(); //Config config);
 
-    public SplitProcessor(SplitAction splitAction) {
-        setRules(Collections.singletonList(Utils.createTrueRule(splitAction)));
-    }
+    /**
+     * Retrieves a value for a given key from a data store.
+     *
+     * @param key
+     */
+    public V get(K key);
 
-    @Override
-    public String toString() {
-        return "SplitProcessor{}"+super.toString();
-    }
+    /**
+     * cleanup any resources held by this instance.
+     */
+    public void cleanup();
+
 }

@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.pipeline;
+package com.hortonworks.iotas.layout.runtime.splitjoin;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
-import com.hortonworks.iotas.layout.design.pipeline.JoinAction;
+import com.hortonworks.iotas.layout.design.rule.action.Action;
+import com.hortonworks.iotas.layout.design.splitjoin.JoinAction;
 import com.hortonworks.iotas.layout.runtime.ActionRuntime;
+import com.hortonworks.iotas.layout.runtime.RuntimeService;
 import com.hortonworks.iotas.util.ProxyUtil;
 
 import java.util.ArrayList;
@@ -114,5 +116,12 @@ public class JoinActionRuntime implements ActionRuntime {
     @Override
     public List<String> getOutputStreams() {
         return joinAction.getOutputStreams();
+    }
+
+    public static class Factory implements RuntimeService.Factory<ActionRuntime, Action> {
+        @Override
+        public ActionRuntime create(Action action) {
+            return new JoinActionRuntime((JoinAction) action);
+        }
     }
 }

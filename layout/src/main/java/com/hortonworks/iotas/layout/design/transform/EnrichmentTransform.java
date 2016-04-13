@@ -18,8 +18,7 @@
  */
 package com.hortonworks.iotas.layout.design.transform;
 
-import com.hortonworks.iotas.layout.design.transform.Transform;
-import com.hortonworks.iotas.layout.runtime.pipeline.DataProvider;
+import com.hortonworks.iotas.layout.runtime.transform.DataProvider;
 
 import java.util.Collections;
 import java.util.List;
