@@ -30,10 +30,10 @@ import java.util.Map;
  * merging the event's fieldsAndValues with the defaults. The
  * event's fieldsAndValues takes precedence over the defaults.
  */
-public class MergeTransform implements Transform {
+public class MergeTransformRuntime implements TransformRuntime {
     private final Map<String, ?> defaults;
 
-    public MergeTransform(Map<String, ?> defaults) {
+    public MergeTransformRuntime(Map<String, ?> defaults) {
         this.defaults = defaults;
     }
 

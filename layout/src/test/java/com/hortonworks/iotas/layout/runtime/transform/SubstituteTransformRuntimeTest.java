@@ -26,12 +26,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
- * Unit tests for {@link SubstituteTransform}
+ * Unit tests for {@link SubstituteTransformRuntime}
  */
-public class SubstituteTransformTest {
+public class SubstituteTransformRuntimeTest {
 
     @Test
     public void testSubstituteNoVars() throws Exception {
@@ -41,8 +41,8 @@ public class SubstituteTransformTest {
         fieldsAndValues.put("3", "three");
 
         IotasEvent event = new IotasEventImpl(fieldsAndValues, "dsrcid");
-        Transform transform = new SubstituteTransform();
-        List<IotasEvent> result = transform.execute(event);
+        TransformRuntime transformRuntime = new SubstituteTransformRuntime();
+        List<IotasEvent> result = transformRuntime.execute(event);
         assertEquals(1, result.size());
         assertEquals(3, result.get(0).getFieldsAndValues().size());
         assertEquals("one", result.get(0).getFieldsAndValues().get("1"));
@@ -58,8 +58,8 @@ public class SubstituteTransformTest {
         fieldsAndValues.put("3", "${1} plus ${2}");
 
         IotasEvent event = new IotasEventImpl(fieldsAndValues, "dsrcid");
-        Transform transform = new SubstituteTransform();
-        List<IotasEvent> result = transform.execute(event);
+        TransformRuntime transformRuntime = new SubstituteTransformRuntime();
+        List<IotasEvent> result = transformRuntime.execute(event);
         assertEquals(1, result.size());
         assertEquals(3, result.get(0).getFieldsAndValues().size());
         assertEquals("one", result.get(0).getFieldsAndValues().get("1"));
@@ -75,8 +75,8 @@ public class SubstituteTransformTest {
         fieldsAndValues.put("3", "${1} plus two");
 
         IotasEvent event = new IotasEventImpl(fieldsAndValues, "dsrcid");
-        Transform transform = new SubstituteTransform(Collections.singleton("3"));
-        List<IotasEvent> result = transform.execute(event);
+        TransformRuntime transformRuntime = new SubstituteTransformRuntime(Collections.singleton("3"));
+        List<IotasEvent> result = transformRuntime.execute(event);
         assertEquals(1, result.size());
         assertEquals(3, result.get(0).getFieldsAndValues().size());
         assertEquals("one", result.get(0).getFieldsAndValues().get("1"));
@@ -92,8 +92,8 @@ public class SubstituteTransformTest {
         fieldsAndValues.put("3", "${1} plus ${2}");
 
         IotasEvent event = new IotasEventImpl(fieldsAndValues, "dsrcid");
-        Transform transform = new SubstituteTransform();
-        List<IotasEvent> result = transform.execute(event);
+        TransformRuntime transformRuntime = new SubstituteTransformRuntime();
+        List<IotasEvent> result = transformRuntime.execute(event);
         assertEquals(1, result.size());
         assertEquals(3, result.get(0).getFieldsAndValues().size());
         assertEquals(1, result.get(0).getFieldsAndValues().get("1"));
@@ -109,8 +109,8 @@ public class SubstituteTransformTest {
         fieldsAndValues.put("3", "${1} plus ${2}");
 
         IotasEvent event = new IotasEventImpl(fieldsAndValues, "dsrcid");
-        Transform transform = new SubstituteTransform();
-        List<IotasEvent> result = transform.execute(event);
+        TransformRuntime transformRuntime = new SubstituteTransformRuntime();
+        List<IotasEvent> result = transformRuntime.execute(event);
         assertEquals(1, result.size());
         assertEquals(3, result.get(0).getFieldsAndValues().size());
         assertEquals("one", result.get(0).getFieldsAndValues().get("1"));
@@ -125,8 +125,8 @@ public class SubstituteTransformTest {
         fieldsAndValues.put("2", "${1} plus one");
 
         IotasEvent event = new IotasEventImpl(fieldsAndValues, "dsrcid");
-        Transform transform = new SubstituteTransform();
-        List<IotasEvent> result = transform.execute(event);
+        TransformRuntime transformRuntime = new SubstituteTransformRuntime();
+        List<IotasEvent> result = transformRuntime.execute(event);
         System.out.println(result);
         assertEquals(1, result.size());
         assertEquals(event, result.get(0));

@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,46 +6,42 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-
 package com.hortonworks.iotas.layout.design.rule.action;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.hortonworks.iotas.layout.design.component.Stream;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-/** Action that is at the end of the chain of execution. Once this action is complete, this rule will not be evaluated anymore.
- *  The actions performed by this rule will not interact directly with any other components of the rule system, e.g., other rules,
- *  components, sinks, ...
- **/
+/**
+ * Action that is at the end of the chain of execution. Once this action is complete, this rule will not be evaluated anymore.
+ * The actions performed by this rule will not interact directly with any other components of the rule system, e.g., other rules,
+ * components, sinks, ...
+ *
+ */
+@JsonTypeInfo(use= JsonTypeInfo.Id.CLASS, include= JsonTypeInfo.As.PROPERTY, property="class")
 public class Action implements Serializable {
-    private Map<String, Object> outputFieldsAndDefaults = new HashMap<>();
-    private boolean includeMeta = false;
-    private String name = "default";
-    private String notifierName = "dummy";
-
-    public Action() { }
+    protected String name = "default";
 
     /**
-     * The name of the output fields and the default values for them
-     * to be emitted as a part of this action.
+     * Each {@link Action} can have its own output streams to which events should be sent to.
+     * todo this should be changed to to List of {@link Stream}s once Stream abstraction is integrated.
      */
-    public void setOutputFieldsAndDefaults(Map<String, Object> outputFieldsAndDefaults) {
-        this.outputFieldsAndDefaults = outputFieldsAndDefaults;
-    }
-
-    public Map<String, Object> getOutputFieldsAndDefaults() {
-        return outputFieldsAndDefaults;
-    }
+    protected List<String> outputStreams;
 
     public String getName() {
         return name;
@@ -55,33 +51,19 @@ public class Action implements Serializable {
         this.name = name;
     }
 
-    public boolean isIncludeMeta() {
-        return includeMeta;
+    public List<String> getOutputStreams() {
+        return outputStreams;
     }
 
-    /**
-     * Whether to include meta data (rule-id, event-id, datasource-id) in the output
-     * IotasEvent header.
-     */
-    public void setIncludeMeta(boolean includeMeta) {
-        this.includeMeta = includeMeta;
-    }
-
-    public String getNotifierName() {
-        return notifierName;
-    }
-
-    public void setNotifierName(String notifierName) {
-        this.notifierName = notifierName;
+    public void setOutputStreams(List<String> outputStreams) {
+        this.outputStreams = outputStreams;
     }
 
     @Override
     public String toString() {
         return "Action{" +
-                "outputFieldsAndDefaults=" + outputFieldsAndDefaults +
-                ", includeMeta=" + includeMeta +
-                ", name='" + name + '\'' +
-                ", notifierName='" + notifierName + '\'' +
+                "name='" + name + '\'' +
+                ", outputStreams=" + outputStreams +
                 '}';
     }
 }
