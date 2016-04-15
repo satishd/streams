@@ -7,6 +7,7 @@ import com.hortonworks.iotas.catalog.Component;
 import com.hortonworks.iotas.catalog.DataFeed;
 import com.hortonworks.iotas.catalog.DataSet;
 import com.hortonworks.iotas.catalog.DataSource;
+import com.hortonworks.iotas.catalog.Jar;
 import com.hortonworks.iotas.catalog.ParserInfo;
 import com.hortonworks.iotas.catalog.NotifierInfo;
 import com.hortonworks.iotas.catalog.Device;
@@ -62,11 +63,10 @@ public class CatalogService {
     private static final String CLUSTER_NAMESPACE = new Cluster().getNameSpace();
     private static final String COMPONENT_NAMESPACE = new Component().getNameSpace();
     private static final String NOTIFIER_INFO_NAMESPACE = new NotifierInfo().getNameSpace();
-    private static final String TOPOLOGY_NAMESPACE = new Topology()
-            .getNameSpace();
+    private static final String TOPOLOGY_NAMESPACE = new Topology().getNameSpace();
     private static final String TAG_NAMESPACE = new Tag().getNameSpace();
     private static final String TAG_STORABLE_MAPPING_NAMESPACE = new TagStorableMapping().getNameSpace();
-
+    private static final String JAR_NAMESPACE = new Jar().getNameSpace();
 
     private StorageManager dao;
     private TopologyActions topologyActions;
@@ -805,4 +805,35 @@ public class CatalogService {
         return tagService.getEntities(tagId, true);
     }
 
+    public Collection<Jar> listJars() {
+        return dao.list(JAR_NAMESPACE);
+    }
+
+    public Collection<Jar> listJars(List<QueryParam> queryParams) {
+        return dao.find(JAR_NAMESPACE, queryParams);
+    }
+
+    public Jar getJar(Long jarId) {
+        Jar jar = new Jar();
+        jar.setId(jarId);
+        return dao.get(new StorableKey(JAR_NAMESPACE, jar.getPrimaryKey()));
+    }
+
+    public Jar removeJar(Long parserId) {
+        Jar jar = new Jar();
+        jar.setId(parserId);
+        return dao.remove(new StorableKey(PARSER_INFO_NAMESPACE, jar.getPrimaryKey()));
+    }
+
+    public Jar addJar(Jar jar) {
+        if (jar.getId() == null) {
+            jar.setId(dao.nextId(JAR_NAMESPACE));
+        }
+        if (jar.getTimestamp() == null) {
+            jar.setTimestamp(System.currentTimeMillis());
+        }
+        dao.add(jar);
+
+        return jar;
+    }
 }
