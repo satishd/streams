@@ -46,6 +46,7 @@ import com.hortonworks.iotas.webservice.catalog.DataSourceCatalogResource;
 import com.hortonworks.iotas.webservice.catalog.DataSourceFacade;
 import com.hortonworks.iotas.webservice.catalog.DataSourceWithDataFeedCatalogResource;
 import com.hortonworks.iotas.webservice.catalog.FeedCatalogResource;
+import com.hortonworks.iotas.webservice.catalog.JarCatalogResource;
 import com.hortonworks.iotas.webservice.catalog.NotifierInfoCatalogResource;
 import com.hortonworks.iotas.webservice.catalog.ParserInfoCatalogResource;
 import com.hortonworks.iotas.webservice.catalog.TagCatalogResource;
@@ -127,8 +128,7 @@ public class IotasApplication extends Application<IotasConfiguration> {
         return CacheBuilder.newBuilder().maximumSize(maxSize);
     }
 
-    private TopologyActions getTopologyActionsImpl (IotasConfiguration
-                                                           configuration) {
+    private TopologyActions getTopologyActionsImpl (IotasConfiguration configuration) {
         String className = configuration.getTopologyActionsImpl();
         // Note that iotasStormJar value needs to be changed in iotas.yaml
         // based on the location of the storm module jar of iotas project.
@@ -147,7 +147,7 @@ public class IotasApplication extends Application<IotasConfiguration> {
             throw new RuntimeException(ex);
         }
         //pass any config info that might be needed in the constructor as a map
-        Map conf = new HashMap();
+        Map<String, String> conf = new HashMap<>();
         conf.put(TopologyLayoutConstants.STORM_JAR_LOCATION_KEY, jar);
         conf.put(TopologyLayoutConstants.YAML_KEY_CATALOG_ROOT_URL, configuration.getCatalogRootUrl());
         conf.put(TopologyLayoutConstants.STORM_HOME_DIR, configuration.getStormHomeDir());
@@ -164,7 +164,7 @@ public class IotasApplication extends Application<IotasConfiguration> {
             throw new RuntimeException(ex);
         }
         //pass any config info that might be needed in the constructor as a map
-        Map conf = new HashMap();
+        Map<String, String> conf = new HashMap<>();
         conf.put(TopologyLayoutConstants.STORM_API_ROOT_URL_KEY, configuration.getStormApiRootUrl());
         topologyMetrics.init(conf);
         return topologyMetrics;
@@ -181,15 +181,15 @@ public class IotasApplication extends Application<IotasConfiguration> {
         return jarStorage;
     }
 
-
     private void registerResources(IotasConfiguration iotasConfiguration, Environment environment) throws ConfigException {
         StorageManager storageManager = getCacheBackedDao(iotasConfiguration);
         TopologyActions topologyActions = getTopologyActionsImpl(iotasConfiguration);
         TopologyMetrics topologyMetrics = getTopologyMetricsImpl(iotasConfiguration);
         JarStorage jarStorage = this.getJarStorage(iotasConfiguration);
+
         final CatalogService catalogService = new CatalogService(storageManager, topologyActions, topologyMetrics, jarStorage);
         final FeedCatalogResource feedResource = new FeedCatalogResource(catalogService);
-        final ParserInfoCatalogResource parserResource = new ParserInfoCatalogResource(catalogService, iotasConfiguration, jarStorage);
+        final ParserInfoCatalogResource parserResource = new ParserInfoCatalogResource(catalogService);
         final DataSourceCatalogResource dataSourceResource = new DataSourceCatalogResource(catalogService);
         final DataSourceWithDataFeedCatalogResource dataSourceWithDataFeedCatalogResource =
                 new DataSourceWithDataFeedCatalogResource(new DataSourceFacade(catalogService));
@@ -201,16 +201,21 @@ public class IotasApplication extends Application<IotasConfiguration> {
         final ComponentCatalogResource componentCatalogResource = new ComponentCatalogResource(catalogService);
         final TopologyEditorMetadataResource topologyEditorMetadataResource = new TopologyEditorMetadataResource(catalogService);
         final TagCatalogResource tagCatalogResource = new TagCatalogResource(catalogService);
+        final JarCatalogResource jarCatalogResource = new JarCatalogResource(catalogService);
+
         List<Object> resources = Lists.newArrayList(feedResource, parserResource, dataSourceResource, dataSourceWithDataFeedCatalogResource,
-                                                    topologyCatalogResource, clusterCatalogResource, componentCatalogResource,
-                                                    topologyEditorMetadataResource, tagCatalogResource, metricsResource);
+                topologyCatalogResource, clusterCatalogResource, componentCatalogResource,
+                topologyEditorMetadataResource, tagCatalogResource, jarCatalogResource, metricsResource);
+
         if (!iotasConfiguration.isNotificationsRestDisabled()) {
             resources.add(new NotifierInfoCatalogResource(catalogService));
             resources.add(new NotificationsResource(new NotificationServiceImpl()));
         }
+
         for(Object resource : resources) {
             environment.jersey().register(resource);
         }
+
         environment.jersey().register(MultiPartFeature.class);
         watchFiles(iotasConfiguration, catalogService);
     }
