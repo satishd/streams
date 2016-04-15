@@ -16,11 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.util;
 
-public class FileSystemJarStorageTest extends AbstractJarStorageTest {
-    @Override
-    public JarStorage getJarStorage() {
-        return new FileSystemJarStorage();
-    }
+package com.hortonworks.iotas.layout.runtime.splitjoin;
+
+import com.hortonworks.iotas.common.IotasEvent;
+
+/**
+ * Joins the received {@link EventGroup} and generates a resultant {@link IotasEvent}
+ *
+ */
+public interface Joiner {
+
+    /**
+     * Return an IotasEvent by joining the events received in {@code eventGroup}
+     *
+     * @param eventGroup received EventGroup
+     */
+    public IotasEvent join(EventGroup eventGroup);
+
 }
