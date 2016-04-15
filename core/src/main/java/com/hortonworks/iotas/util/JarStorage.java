@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.util.Map;
 
 /**
- * Interface abstracting the upload and download of parser jars for IoTaS.
+ * Interface abstracting the upload and download of jars (like parser, split/join or custom processor) for IoTaS.
  * IoTaS will provide a default file system based implementation which can be
  * swapped by another implementation using jarStorageImplementationClass
  * property in the iotas.yaml

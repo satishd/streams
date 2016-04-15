@@ -45,6 +45,7 @@ import com.hortonworks.iotas.webservice.catalog.DataSourceCatalogResource;
 import com.hortonworks.iotas.webservice.catalog.DataSourceFacade;
 import com.hortonworks.iotas.webservice.catalog.DataSourceWithDataFeedCatalogResource;
 import com.hortonworks.iotas.webservice.catalog.FeedCatalogResource;
+import com.hortonworks.iotas.webservice.catalog.JarCatalogResource;
 import com.hortonworks.iotas.webservice.catalog.NotifierInfoCatalogResource;
 import com.hortonworks.iotas.webservice.catalog.ParserInfoCatalogResource;
 import com.hortonworks.iotas.webservice.catalog.TagCatalogResource;
@@ -123,7 +124,7 @@ public class IotasApplication extends Application<IotasConfiguration> {
     }
 
     private TopologyActions getTopologyActionsImpl (IotasConfiguration
-                                                           configuration) {
+                                                            configuration) {
         String className = configuration.getTopologyActionsImpl();
         // Note that iotasStormJar value needs to be changed in iotas.yaml
         // based on the location of the storm module jar of iotas project.
@@ -198,16 +199,21 @@ public class IotasApplication extends Application<IotasConfiguration> {
         final ComponentCatalogResource componentCatalogResource = new ComponentCatalogResource(catalogService);
         final TopologyEditorMetadataResource topologyEditorMetadataResource = new TopologyEditorMetadataResource(catalogService);
         final TagCatalogResource tagCatalogResource = new TagCatalogResource(catalogService);
+
+        final JarCatalogResource jarCatalogResource = new JarCatalogResource(catalogService, iotasConfiguration, jarStorage);
+
         List<Object> resources = Lists.newArrayList(feedResource, parserResource, dataSourceResource, dataSourceWithDataFeedCatalogResource,
-                                                    topologyCatalogResource, clusterCatalogResource, componentCatalogResource,
-                                                    topologyEditorMetadataResource, tagCatalogResource, metricsResource);
+                topologyCatalogResource, clusterCatalogResource, componentCatalogResource,
+                topologyEditorMetadataResource, tagCatalogResource, jarCatalogResource, metricsResource);
         if (!iotasConfiguration.isNotificationsRestDisabled()) {
             resources.add(new NotifierInfoCatalogResource(catalogService));
             resources.add(new NotificationsResource(new NotificationServiceImpl()));
         }
+
         for(Object resource : resources) {
             environment.jersey().register(resource);
         }
+
         environment.jersey().register(MultiPartFeature.class);
         watchFiles(iotasConfiguration, catalogService);
     }
