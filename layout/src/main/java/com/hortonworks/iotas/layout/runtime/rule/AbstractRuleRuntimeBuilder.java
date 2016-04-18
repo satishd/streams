@@ -36,8 +36,7 @@ public abstract class AbstractRuleRuntimeBuilder implements RuleRuntimeBuilder {
     protected ActionRuntime createActionRuntime(Rule rule, Action action) {
         ActionRuntime actionRuntime = null;
         if(action instanceof NotifierAction) {
-            String streamId = rule.getRuleProcessorName() + "." + rule.getName() + "."
-                    + rule.getId() + "." + action.getName();
+            String streamId = rule.getOutputStreamNameForAction(action);
             /*
              * Add a TransformAction to perform necessary transformation for notification
              */

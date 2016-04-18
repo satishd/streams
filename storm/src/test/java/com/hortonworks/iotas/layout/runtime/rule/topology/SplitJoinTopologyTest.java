@@ -19,8 +19,8 @@
 package com.hortonworks.iotas.layout.runtime.rule.topology;
 
 import com.hortonworks.iotas.bolt.rules.RulesBolt;
+import com.hortonworks.iotas.layout.design.component.ComponentBuilder;
 import com.hortonworks.iotas.layout.design.component.RulesProcessor;
-import com.hortonworks.iotas.layout.design.component.RulesProcessorBuilder;
 import com.hortonworks.iotas.layout.design.splitjoin.JoinAction;
 import com.hortonworks.iotas.layout.design.splitjoin.JoinProcessor;
 import com.hortonworks.iotas.layout.design.splitjoin.SplitAction;
@@ -118,7 +118,7 @@ public class SplitJoinTopologyTest {
         return RulesBoltDependenciesFactory.ScriptType.SQL;
     }
 
-    static class SplitProcessorBuilder implements RulesProcessorBuilder {
+    static class SplitProcessorBuilder implements ComponentBuilder<RulesProcessor> {
 
         private SplitAction splitAction;
 
@@ -135,7 +135,7 @@ public class SplitJoinTopologyTest {
         }
     }
 
-    static class JoinProcessorBuilder implements RulesProcessorBuilder {
+    static class JoinProcessorBuilder implements ComponentBuilder<RulesProcessor> {
 
         @Override
         public RulesProcessor build() {
@@ -148,7 +148,7 @@ public class SplitJoinTopologyTest {
         }
     }
 
-    static class StageProcessorBuilder implements RulesProcessorBuilder {
+    static class StageProcessorBuilder implements ComponentBuilder<RulesProcessor> {
 
         public StageProcessorBuilder() {
         }
