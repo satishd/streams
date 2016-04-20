@@ -23,7 +23,7 @@ import com.hortonworks.iotas.layout.design.transform.Transform;
 /**
  * Data provider for {@link Transform} which can be used for lookups.
  */
-public interface DataProvider<K, V> {
+public interface TransformDataProvider<K, V> {
 
     /**
      * Prepare resources which can be used in retrieving values from data store.

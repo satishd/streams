@@ -26,19 +26,27 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This class creates a loadable cache for given backing {@link DataProvider} with caching configuration like maximum size, expiration interval
+ * This class creates a loadable cache for given backing {@link TransformDataProvider} with caching configuration like maximum size, expiration interval
  * and refresh interval.
  */
-public class CachedDataProvider<K, V> implements DataProvider<K, V> {
+public class CachedTransformDataProvider<K, V> implements TransformDataProvider<K, V> {
 
-    private final DataProvider<K, V> backedDataProvider;
+    private final TransformDataProvider<K, V> backedTransformDataProvider;
     private long maxCacheSize;
     private long entryExpirationInterval;
     private long refreshInterval;
     private LoadingCache<K, V> loadingCache;
 
-    public CachedDataProvider(DataProvider<K, V> backedDataProvider, long maxCacheSize, long entryExpirationInterval, long entryRefreshInterval) {
-        this.backedDataProvider = backedDataProvider;
+    /**
+     * Creates CachedDataProvider.
+     *
+     * @param backedTransformDataProvider DataProvider to be facaded with caching
+     * @param maxCacheSize maximum cache size
+     * @param entryExpirationInterval expiration interval in seconds for each entry
+     * @param entryRefreshInterval refresh interval in seconds for an entry
+     */
+    public CachedTransformDataProvider(TransformDataProvider<K, V> backedTransformDataProvider, long maxCacheSize, long entryExpirationInterval, long entryRefreshInterval) {
+        this.backedTransformDataProvider = backedTransformDataProvider;
         this.maxCacheSize = maxCacheSize;
         this.entryExpirationInterval = entryExpirationInterval;
         this.refreshInterval = entryRefreshInterval;
@@ -46,7 +54,7 @@ public class CachedDataProvider<K, V> implements DataProvider<K, V> {
 
     @Override
     public void prepare() {
-        backedDataProvider.prepare();
+        backedTransformDataProvider.prepare();
         loadingCache =
                 CacheBuilder.newBuilder()
                         .maximumSize(maxCacheSize)
@@ -55,7 +63,7 @@ public class CachedDataProvider<K, V> implements DataProvider<K, V> {
                         .build(new CacheLoader<K, V>() {
                             @Override
                             public V load(K key) throws Exception {
-                                return backedDataProvider.get(key);
+                                return backedTransformDataProvider.get(key);
                             }
                         });
 
@@ -73,7 +81,7 @@ public class CachedDataProvider<K, V> implements DataProvider<K, V> {
     @Override
     public void cleanup() {
         loadingCache.cleanUp();
-        backedDataProvider.cleanup();
+        backedTransformDataProvider.cleanup();
     }
 
 }

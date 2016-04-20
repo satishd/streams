@@ -48,14 +48,13 @@ public class RuleProcessorRuntimeDependenciesBuilder {
         if (rules != null) {
             for (Rule rule : rules) {
                 ruleRuntimeBuilder.setRule(rule);
-                RuleRuntime ruleRuntime = null;
                 if (rule.getCondition() != null) {
                     ruleRuntimeBuilder.buildExpression();
                     ruleRuntimeBuilder.buildScriptEngine();
                     ruleRuntimeBuilder.buildScript();
                 }
                 ruleRuntimeBuilder.buildActions();
-                ruleRuntime = ruleRuntimeBuilder.buildRuleRuntime();
+                RuleRuntime ruleRuntime = ruleRuntimeBuilder.buildRuleRuntime();
                 rulesRuntime.add(ruleRuntime);
                 LOG.trace("Added {}", ruleRuntime);
             }

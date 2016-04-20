@@ -93,6 +93,7 @@ public class JoinActionRuntime implements ActionRuntime {
         for (String stream : joinAction.getOutputStreams()) {
             results.add(new Result(stream, events));
         }
+        groupedEvents.invalidate(eventGroup.getGroupId());
 
         return results;
     }

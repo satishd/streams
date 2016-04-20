@@ -36,11 +36,11 @@ public class EnrichmentTransformRuntime implements TransformRuntime {
 
     private final EnrichmentTransform enrichmentTransform;
 
-    private CachedDataProvider<Object, Object> cachedDataProvider;
+    private CachedTransformDataProvider<Object, Object> cachedDataProvider;
 
     public EnrichmentTransformRuntime(EnrichmentTransform enrichmentTransform) {
         this.enrichmentTransform = enrichmentTransform;
-        cachedDataProvider = new CachedDataProvider<Object, Object>(enrichmentTransform.getDataProvider(), enrichmentTransform.getMaxCacheSize(),
+        cachedDataProvider = new CachedTransformDataProvider<>(enrichmentTransform.getTransformDataProvider(), enrichmentTransform.getMaxCacheSize(),
                 enrichmentTransform.getEntryExpirationInterval(), enrichmentTransform.getEntryRefreshInterval());
         cachedDataProvider.prepare();
     }

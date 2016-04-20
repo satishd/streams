@@ -26,7 +26,7 @@ import com.hortonworks.iotas.layout.design.splitjoin.SplitAction;
 import com.hortonworks.iotas.layout.design.splitjoin.StageAction;
 import com.hortonworks.iotas.layout.design.transform.EnrichmentTransform;
 import com.hortonworks.iotas.layout.design.transform.Transform;
-import com.hortonworks.iotas.layout.runtime.transform.DataProvider;
+import com.hortonworks.iotas.layout.runtime.transform.TransformDataProvider;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -79,8 +79,8 @@ public class SplitJoinTest {
 
         Map<Object, Object> map = new HashMap<Object, Object>(){{
             put("foo-value", enrichedValue);}};
-        DataProvider<Object, Object> dataProvider = createDataProvider(map);
-        EnrichmentTransform enrichmentTransform = new EnrichmentTransform("enricher", Collections.singletonList(enrichFieldName), dataProvider);
+        TransformDataProvider<Object, Object> transformDataProvider = createDataProvider(map);
+        EnrichmentTransform enrichmentTransform = new EnrichmentTransform("enricher", Collections.singletonList(enrichFieldName), transformDataProvider);
         StageAction stageAction = new StageAction(Collections.<Transform>singletonList(enrichmentTransform));
         stageAction.setOutputStreams(Collections.singletonList("output-stream"));
 
@@ -96,8 +96,8 @@ public class SplitJoinTest {
         }
     }
 
-    public static DataProvider<Object, Object> createDataProvider(final Map<Object, Object> map) {
-        return new DataProvider<Object, Object>() {
+    public static TransformDataProvider<Object, Object> createDataProvider(final Map<Object, Object> map) {
+        return new TransformDataProvider<Object, Object>() {
             @Override
             public void prepare() {
             }
