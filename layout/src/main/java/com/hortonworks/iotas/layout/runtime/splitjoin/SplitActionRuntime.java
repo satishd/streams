@@ -74,7 +74,7 @@ public class SplitActionRuntime implements ActionRuntime {
     @Override
     public List<Result> execute(IotasEvent input) {
         // based on split-action configuration, generate events for respective streams
-        final List<Result> results = splitter.splitEvent(input, splitAction.getOutputStreams());
+        final List<Result> results = splitter.splitEvent(input, getOutputStreams());
 
         // check whether the split event has all the required split/join info.
         for (Result result : results) {

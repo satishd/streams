@@ -90,7 +90,7 @@ public class JoinActionRuntime implements ActionRuntime {
 
         List<Result> results = new ArrayList<>();
         final List<IotasEvent> events = Collections.singletonList(joinedEvent);
-        for (String stream : joinAction.getOutputStreams()) {
+        for (String stream : getOutputStreams()) {
             results.add(new Result(stream, events));
         }
         groupedEvents.invalidate(eventGroup.getGroupId());
