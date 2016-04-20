@@ -43,20 +43,20 @@ public class RuleRuntime implements Serializable, ProcessorRuntime {
     protected static final Logger LOG = LoggerFactory.getLogger(RuleRuntime.class);
 
     protected final Rule rule;
-    protected final Script<IotasEvent, Boolean, ?> script;     // Script used to evaluate the condition
+    protected final Script<IotasEvent, IotasEvent, ?> script;     // Script used to evaluate the condition
     protected final List<ActionRuntime> actions;
 
-    RuleRuntime(Rule rule, Script<IotasEvent, Boolean, ?> script, List<ActionRuntime> actions) {
+    RuleRuntime(Rule rule, Script<IotasEvent, IotasEvent, ?> script, List<ActionRuntime> actions) {
         this.rule = rule;
         this.script = script;
         this.actions = actions;
     }
 
-    public boolean evaluate(IotasEvent input) {
+    public IotasEvent evaluate(IotasEvent input) {
         try {
-            boolean evaluates = script != null ? script.evaluate(input) : true;
-            LOG.debug("Rule condition evaluated to [{}].\n\t[{}]\n\tInput[{}]", evaluates, rule, input);
-            return evaluates;
+            IotasEvent evaluatedEvent = script != null ? script.evaluate(input) : input;
+            LOG.debug("Rule condition evaluated to [{}].\n\t[{}]\n\tInput[{}]", evaluatedEvent, rule, input);
+            return evaluatedEvent;
         } catch (ScriptException e) {
             throw new ConditionEvaluationException("Exception occurred when evaluating rule condition. " + this, e);
         }
