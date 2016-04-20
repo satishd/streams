@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -23,19 +23,19 @@ import com.hortonworks.iotas.layout.design.transform.Transform;
 /**
  * Data provider for {@link Transform} which can be used for lookups.
  */
-public interface TransformDataProvider<K, V> {
+public interface TransformDataProviderRuntime {
 
     /**
      * Prepare resources which can be used in retrieving values from data store.
      */
-    public void prepare(); //Config config);
+    public void prepare();
 
     /**
      * Retrieves a value for a given key from a data store.
      *
      * @param key
      */
-    public V get(K key);
+    public Object get(Object key);
 
     /**
      * cleanup any resources held by this instance.

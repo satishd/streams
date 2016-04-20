@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,7 +18,7 @@
  */
 package com.hortonworks.iotas.layout.design.transform;
 
-import com.hortonworks.iotas.layout.runtime.transform.TransformDataProvider;
+import com.hortonworks.iotas.layout.runtime.transform.TransformDataProviderRuntime;
 
 import java.util.Collections;
 import java.util.List;
@@ -45,7 +45,7 @@ public class EnrichmentTransform extends Transform {
     /**
      * Used for lookups to enrich given field values.
      */
-    private final TransformDataProvider<Object, Object> transformDataProvider;
+    private final TransformDataProvider transformDataProvider;
 
     /**
      * maximum size of the cache
@@ -58,11 +58,11 @@ public class EnrichmentTransform extends Transform {
     private long entryExpirationInterval = DEFAULT_ENTRY_EXPIRATION_INTERVAL;
 
     /**
-     * interval (in seconds) of an entry after which the entry should be loaded from {@link TransformDataProvider}.
+     * interval (in seconds) of an entry after which the entry should be loaded from {@link TransformDataProviderRuntime}.
      */
     private long entryRefreshInterval = DEFAULT_ENTRY_REFRESH_INTERVAL;
 
-    public EnrichmentTransform(String name, List<String> fieldsToBeEnriched, TransformDataProvider<Object, Object> transformDataProvider) {
+    public EnrichmentTransform(String name, List<String> fieldsToBeEnriched, TransformDataProvider transformDataProvider) {
         super(name);
         this.fieldsToBeEnriched = fieldsToBeEnriched;
         this.transformDataProvider = transformDataProvider;
@@ -84,7 +84,7 @@ public class EnrichmentTransform extends Transform {
     }
 
     /**
-     * @param refreshInterval interval of an entry after which the entry should be loaded from {@link TransformDataProvider}.
+     * @param refreshInterval interval of an entry after which the entry should be loaded from {@link TransformDataProviderRuntime}.
      * @param timeUnit Unit of time
      */
     public void withEntryRefreshInterval(long refreshInterval, TimeUnit timeUnit) {
@@ -95,7 +95,7 @@ public class EnrichmentTransform extends Transform {
         return Collections.unmodifiableList(fieldsToBeEnriched);
     }
 
-    public TransformDataProvider<Object, Object> getTransformDataProvider() {
+    public TransformDataProvider getTransformDataProvider() {
         return transformDataProvider;
     }
 

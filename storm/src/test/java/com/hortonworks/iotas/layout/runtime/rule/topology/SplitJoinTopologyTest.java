@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,9 +28,10 @@ import com.hortonworks.iotas.layout.design.splitjoin.SplitProcessor;
 import com.hortonworks.iotas.layout.design.splitjoin.StageAction;
 import com.hortonworks.iotas.layout.design.splitjoin.StageProcessor;
 import com.hortonworks.iotas.layout.design.transform.EnrichmentTransform;
+import com.hortonworks.iotas.layout.design.transform.InmemoryTransformDataProvider;
 import com.hortonworks.iotas.layout.design.transform.Transform;
 import com.hortonworks.iotas.layout.runtime.rule.RulesBoltDependenciesFactory;
-import com.hortonworks.iotas.layout.runtime.transform.TransformDataProvider;
+import com.hortonworks.iotas.layout.runtime.transform.TransformDataProviderRuntime;
 import org.apache.storm.Config;
 import org.apache.storm.ILocalCluster;
 import org.apache.storm.LocalCluster;
@@ -154,11 +155,11 @@ public class SplitJoinTopologyTest {
         public RulesProcessor build() {
             final String enrichFieldName = "temperature";
 
-            Map<Object, Object> map = new HashMap<>();
+            Map<Object, Object> enrichmentsData = new HashMap<>();
             for(int i=0; i< 150; i++) {
-                map.put(i, (i-32)/1.8f);
+                enrichmentsData.put(i, (i - 32) / 1.8f);
             }
-            TransformDataProvider<Object, Object> transformDataProvider = createDataProvider(map);
+            InmemoryTransformDataProvider transformDataProvider = new InmemoryTransformDataProvider(enrichmentsData);
             EnrichmentTransform enrichmentTransform = new EnrichmentTransform("enricher", Collections.singletonList(enrichFieldName), transformDataProvider);
             StageAction stageAction = new StageAction(Collections.<Transform>singletonList(enrichmentTransform));
             stageAction.setOutputStreams(Collections.singletonList(STAGE_OUTPUT_STREAM_ID));
@@ -168,24 +169,6 @@ public class SplitJoinTopologyTest {
             stageProcessor.setId(UUID.randomUUID().toString());
             return stageProcessor;
         }
-    }
-
-    public static TransformDataProvider<Object, Object> createDataProvider(final Map<Object, Object> map) {
-        return new TransformDataProvider<Object, Object>() {
-            @Override
-            public void prepare() {
-            }
-
-            @Override
-            public Object get(Object key) {
-                return map.get(key);
-            }
-
-            @Override
-            public void cleanup() {
-                map.clear();
-            }
-        };
     }
 
 }
