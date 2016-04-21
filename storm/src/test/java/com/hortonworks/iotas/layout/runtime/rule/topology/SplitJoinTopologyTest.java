@@ -31,7 +31,6 @@ import com.hortonworks.iotas.layout.design.transform.EnrichmentTransform;
 import com.hortonworks.iotas.layout.design.transform.InmemoryTransformDataProvider;
 import com.hortonworks.iotas.layout.design.transform.Transform;
 import com.hortonworks.iotas.layout.runtime.rule.RulesBoltDependenciesFactory;
-import com.hortonworks.iotas.layout.runtime.transform.TransformDataProviderRuntime;
 import org.apache.storm.Config;
 import org.apache.storm.ILocalCluster;
 import org.apache.storm.LocalCluster;
@@ -43,7 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -96,9 +94,8 @@ public class SplitJoinTopologyTest {
     }
 
     private RulesBolt createSplitBolt() {
-        List<String> splitStreams = Collections.singletonList(SPLIT_STREAM_ID);
         SplitAction splitAction = new SplitAction();
-        splitAction.setOutputStreams(splitStreams);
+        splitAction.setOutputStreams(Collections.singleton(SPLIT_STREAM_ID));
         SplitProcessorBuilder splitProcessorBuilder = new SplitProcessorBuilder(splitAction);
 
         return new RulesBolt(new RulesBoltDependenciesFactory(splitProcessorBuilder, getScriptType()));
@@ -138,7 +135,7 @@ public class SplitJoinTopologyTest {
         @Override
         public RulesProcessor build() {
             JoinAction joinAction = new JoinAction();
-            joinAction.setOutputStreams(Collections.singletonList(JOIN_OUTPUT_STREAM_ID));
+            joinAction.setOutputStreams(Collections.singleton(JOIN_OUTPUT_STREAM_ID));
             JoinProcessor joinProcessor = new JoinProcessor(joinAction);
             joinProcessor.setName("join-processor-"+System.currentTimeMillis());
             joinProcessor.setId(UUID.randomUUID().toString());
@@ -162,7 +159,7 @@ public class SplitJoinTopologyTest {
             InmemoryTransformDataProvider transformDataProvider = new InmemoryTransformDataProvider(enrichmentsData);
             EnrichmentTransform enrichmentTransform = new EnrichmentTransform("enricher", Collections.singletonList(enrichFieldName), transformDataProvider);
             StageAction stageAction = new StageAction(Collections.<Transform>singletonList(enrichmentTransform));
-            stageAction.setOutputStreams(Collections.singletonList(STAGE_OUTPUT_STREAM_ID));
+            stageAction.setOutputStreams(Collections.singleton(STAGE_OUTPUT_STREAM_ID));
 
             final StageProcessor stageProcessor = new StageProcessor(stageAction);
             stageProcessor.setName("stage-processor-" + System.currentTimeMillis());

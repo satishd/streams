@@ -22,14 +22,16 @@ import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.design.splitjoin.SplitAction;
-import com.hortonworks.iotas.layout.runtime.ActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.RuntimeService;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntimeContext;
 import com.hortonworks.iotas.util.ProxyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Runtime for {@link SplitAction}
@@ -72,6 +74,11 @@ public class SplitActionRuntime implements ActionRuntime {
     }
 
     @Override
+    public void prepare(ActionRuntimeContext actionRuntimeContext) {
+
+    }
+
+    @Override
     public List<Result> execute(IotasEvent input) {
         // based on split-action configuration, generate events for respective streams
         final List<Result> results = splitter.splitEvent(input, getOutputStreams());
@@ -101,7 +108,7 @@ public class SplitActionRuntime implements ActionRuntime {
     }
 
     @Override
-    public List<String> getOutputStreams() {
+    public Set<String> getOutputStreams() {
         return splitAction.getOutputStreams();
     }
 

@@ -23,14 +23,16 @@ import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.design.splitjoin.StageAction;
 import com.hortonworks.iotas.layout.design.transform.Transform;
-import com.hortonworks.iotas.layout.runtime.ActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.RuntimeService;
 import com.hortonworks.iotas.layout.runtime.TransformActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntimeContext;
 import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.TransformRuntimeService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * {@link ActionRuntime} of a stage processor.
@@ -51,7 +53,7 @@ public class StageActionRuntime implements ActionRuntime {
         if(stageAction.getOutputStreams().size() != 1) {
             throw new RuntimeException("Stage can only have one output stream.");
         }
-        String outputStream = stageAction.getOutputStreams().get(0);
+        String outputStream = stageAction.getOutputStreams().iterator().next();
         transformActionRuntime = new TransformActionRuntime(outputStream, getTransformRuntimes(transforms));
     }
 
@@ -66,12 +68,17 @@ public class StageActionRuntime implements ActionRuntime {
     }
 
     @Override
+    public void prepare(ActionRuntimeContext actionRuntimeContext) {
+
+    }
+
+    @Override
     public List<Result> execute(IotasEvent input) {
         return transformActionRuntime.execute(input);
     }
 
     @Override
-    public List<String> getOutputStreams() {
+    public Set<String> getOutputStreams() {
         return transformActionRuntime.getOutputStreams();
     }
 

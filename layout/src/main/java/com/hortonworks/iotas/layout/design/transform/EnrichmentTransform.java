@@ -62,6 +62,10 @@ public class EnrichmentTransform extends Transform {
      */
     private long entryRefreshInterval = DEFAULT_ENTRY_REFRESH_INTERVAL;
 
+    private EnrichmentTransform() {
+        this(null, null, null);
+    }
+
     public EnrichmentTransform(String name, List<String> fieldsToBeEnriched, TransformDataProvider transformDataProvider) {
         super(name);
         this.fieldsToBeEnriched = fieldsToBeEnriched;
@@ -119,6 +123,6 @@ public class EnrichmentTransform extends Transform {
                 ", maxCacheSize=" + maxCacheSize +
                 ", entryExpirationInterval=" + entryExpirationInterval +
                 ", entryRefreshInterval=" + entryRefreshInterval +
-                '}';
+                '}'+super.toString();
     }
 }

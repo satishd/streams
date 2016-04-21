@@ -24,14 +24,16 @@ import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.design.splitjoin.JoinAction;
-import com.hortonworks.iotas.layout.runtime.ActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.RuntimeService;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntimeContext;
 import com.hortonworks.iotas.util.ProxyUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -44,10 +46,10 @@ public class JoinActionRuntime implements ActionRuntime {
 
     public JoinActionRuntime(JoinAction joinAction) {
         this.joinAction = joinAction;
-        prepare();
     }
 
-    public void prepare() {
+    @Override
+    public void prepare(ActionRuntimeContext actionRuntimeContext) {
         final String jarId = joinAction.getJarId();
         final String joinerClassName = joinAction.getJoinerClassName();
         if (jarId != null && joinerClassName != null) {
@@ -58,13 +60,12 @@ public class JoinActionRuntime implements ActionRuntime {
                 throw new RuntimeException(e.getMessage(), e);
             }
         } else {
-            joiner = new DefaultJoiner(joinAction.getOutputStreams().get(0));
+            joiner = new DefaultJoiner(joinAction.getOutputStreams().iterator().next());
         }
 
         groupedEvents = CacheBuilder.newBuilder()
-                        .expireAfterWrite(joinAction.getGroupExpiryInterval(), TimeUnit.MILLISECONDS)
-                        .build();
-
+                .expireAfterWrite(joinAction.getGroupExpiryInterval(), TimeUnit.MILLISECONDS)
+                .build();
     }
 
     @Override
@@ -123,7 +124,7 @@ public class JoinActionRuntime implements ActionRuntime {
     }
 
     @Override
-    public List<String> getOutputStreams() {
+    public Set<String> getOutputStreams() {
         return joinAction.getOutputStreams();
     }
 

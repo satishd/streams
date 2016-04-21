@@ -22,6 +22,7 @@ import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
 import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.layout.design.transform.ProjectionTransform;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.MergeTransformRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.ProjectionTransformRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.SubstituteTransformRuntime;

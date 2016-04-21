@@ -16,22 +16,34 @@
  * limitations under the License.
  */
 
-package com.hortonworks.iotas.layout.runtime.transform;
+package com.hortonworks.iotas.layout.design.rule.action;
 
-import com.hortonworks.iotas.common.IotasEvent;
+import com.hortonworks.iotas.layout.design.transform.Transform;
 
-import java.util.Collections;
 import java.util.List;
 
-public class IdentityTransformRuntime implements TransformRuntime {
+/**
+ * {@link Action} to apply the given transformation and send them to the given output streams.
+ *
+ */
+public class TransformAction extends Action {
 
-    @Override
-    public List<IotasEvent> execute(IotasEvent input) {
-        return Collections.singletonList(input);
+    private List<Transform> transforms;
+
+    public TransformAction() { }
+
+    public TransformAction(List<Transform> transforms) {
+        this.transforms = transforms;
+    }
+
+    public List<Transform> getTransforms() {
+        return transforms;
     }
 
     @Override
     public String toString() {
-        return "IdentityTransformRuntime{}";
+        return "TransformAction{" +
+                "transforms=" + transforms +
+                '}'+super.toString();
     }
 }

@@ -1,31 +1,43 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package com.hortonworks.iotas.layout.runtime;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
+import com.hortonworks.iotas.layout.design.rule.action.Action;
+import com.hortonworks.iotas.layout.design.rule.action.TransformAction;
+import com.hortonworks.iotas.layout.design.transform.Transform;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntimeContext;
 import com.hortonworks.iotas.layout.runtime.transform.IdentityTransformRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
+import com.hortonworks.iotas.layout.runtime.transform.TransformRuntimeService;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class TransformActionRuntime implements ActionRuntime {
-    private final String stream;
+    private String stream;
     private final List<TransformRuntime> transformRuntimes;
-
-    protected TransformActionRuntime(List<TransformRuntime> transformRuntimes) {
-        this.transformRuntimes = transformRuntimes;
-        this.stream = null;
-    }
-
-    /**
-     * Creates a new {@link TransformActionRuntime}
-     *
-     * @param stream the stream where the results are sent out
-     */
-    public TransformActionRuntime(String stream) {
-        this(stream, Collections.<TransformRuntime>singletonList(new IdentityTransformRuntime()));
-    }
 
     /**
      * Creates a new {@link TransformActionRuntime}
@@ -36,6 +48,34 @@ public class TransformActionRuntime implements ActionRuntime {
     public TransformActionRuntime(String stream, List<TransformRuntime> transformRuntimes) {
         this.stream = stream;
         this.transformRuntimes = transformRuntimes;
+    }
+
+    public TransformActionRuntime(TransformAction action) {
+        this.transformRuntimes = getTransformRuntimes(action.getTransforms());
+
+        if(action.getOutputStreams() != null && !action.getOutputStreams().isEmpty()) {
+            this.stream = action.getOutputStreams().iterator().next();
+        }
+    }
+
+    private List<TransformRuntime> getTransformRuntimes(List<Transform> transforms) {
+        if(transforms == null || transforms.isEmpty()) {
+            return Collections.<TransformRuntime>singletonList(new IdentityTransformRuntime());
+        }
+        List<TransformRuntime> transformRuntimes = new ArrayList<>();
+        for (Transform transform : transforms) {
+            TransformRuntime transformRuntime = TransformRuntimeService.get().get(transform);
+            transformRuntimes.add(transformRuntime);
+        }
+
+        return transformRuntimes;
+    }
+
+    @Override
+    public void prepare(ActionRuntimeContext actionRuntimeContext) {
+        if(stream == null) {
+            stream = actionRuntimeContext.getRule().getOutputStreamNameForAction(actionRuntimeContext.getAction());
+        }
     }
 
     /**
@@ -80,8 +120,8 @@ public class TransformActionRuntime implements ActionRuntime {
     }
 
     @Override
-    public List<String> getOutputStreams() {
-        return Collections.singletonList(stream);
+    public Set<String> getOutputStreams() {
+        return Collections.singleton(stream);
     }
 
     @Override
@@ -90,5 +130,14 @@ public class TransformActionRuntime implements ActionRuntime {
                 "stream='" + stream + '\'' +
                 ", transforms=" + transformRuntimes +
                 '}';
+    }
+
+
+    public static class Factory implements RuntimeService.Factory<ActionRuntime, Action> {
+
+        @Override
+        public ActionRuntime create(Action action) {
+            return new TransformActionRuntime((TransformAction)action);
+        }
     }
 }

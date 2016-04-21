@@ -18,6 +18,7 @@
  */
 package com.hortonworks.iotas.layout.runtime.splitjoin;
 
+import com.google.common.collect.Sets;
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
 import com.hortonworks.iotas.common.Result;
@@ -27,11 +28,10 @@ import com.hortonworks.iotas.layout.design.splitjoin.StageAction;
 import com.hortonworks.iotas.layout.design.transform.EnrichmentTransform;
 import com.hortonworks.iotas.layout.design.transform.InmemoryTransformDataProvider;
 import com.hortonworks.iotas.layout.design.transform.Transform;
-import com.hortonworks.iotas.layout.runtime.transform.TransformDataProviderRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntimeContext;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +48,7 @@ public class SplitJoinTest {
         String[] outputStreams = {"stream-1", "stream-2", "stream-3"};
 
         final SplitAction splitAction = new SplitAction();
-        splitAction.setOutputStreams(Arrays.asList(outputStreams));
+        splitAction.setOutputStreams(Sets.newHashSet(outputStreams));
         SplitActionRuntime splitActionRuntime = new SplitActionRuntime(splitAction);
         splitActionRuntime.prepare();
 
@@ -56,9 +56,9 @@ public class SplitJoinTest {
         final List<Result> results = splitActionRuntime.execute(iotasEvent);
 
         final JoinAction joinAction = new JoinAction();
-        joinAction.setOutputStreams(Collections.singletonList("output-stream"));
+        joinAction.setOutputStreams(Collections.singleton("output-stream"));
         JoinActionRuntime joinActionRuntime = new JoinActionRuntime(joinAction);
-        joinActionRuntime.prepare();
+        joinActionRuntime.prepare(new ActionRuntimeContext(null, joinAction));
 
         List<Result> effectiveResult = null;
         for (Result result : results) {
@@ -83,7 +83,7 @@ public class SplitJoinTest {
         InmemoryTransformDataProvider transformDataProvider = new InmemoryTransformDataProvider(data);
         EnrichmentTransform enrichmentTransform = new EnrichmentTransform("enricher", Collections.singletonList(enrichFieldName), transformDataProvider);
         StageAction stageAction = new StageAction(Collections.<Transform>singletonList(enrichmentTransform));
-        stageAction.setOutputStreams(Collections.singletonList("output-stream"));
+        stageAction.setOutputStreams(Collections.singleton("output-stream"));
 
         StageActionRuntime stageActionRuntime = new StageActionRuntime(stageAction);
         stageActionRuntime.prepare();

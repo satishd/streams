@@ -1,14 +1,33 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package com.hortonworks.iotas.layout.runtime.rule;
 
 import com.hortonworks.iotas.layout.design.rule.Rule;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.design.rule.action.NotifierAction;
 import com.hortonworks.iotas.layout.design.transform.ProjectionTransform;
-import com.hortonworks.iotas.layout.runtime.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.TransformActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntimeContext;
 import com.hortonworks.iotas.layout.runtime.transform.ActionRuntimeService;
 import com.hortonworks.iotas.layout.runtime.transform.AddHeaderTransformRuntime;
-import com.hortonworks.iotas.layout.runtime.transform.IdentityTransformRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.MergeTransformRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.ProjectionTransformRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.SubstituteTransformRuntime;
@@ -27,49 +46,11 @@ public abstract class AbstractRuleRuntimeBuilder implements RuleRuntimeBuilder {
         List<ActionRuntime> runtimeActions = new ArrayList<>();
         Rule rule = getRule();
         for (Action action : rule.getActions()) {
-            final ActionRuntime actionRuntime = createActionRuntime(rule, action);
+            final ActionRuntime actionRuntime = ActionRuntimeService.get().get(action);
+            actionRuntime.prepare(new ActionRuntimeContext(getRule(), action));
             runtimeActions.add(actionRuntime);
         }
         actions = runtimeActions;
-    }
-
-    protected ActionRuntime createActionRuntime(Rule rule, Action action) {
-        ActionRuntime actionRuntime = null;
-        if(action instanceof NotifierAction) {
-            String streamId = rule.getOutputStreamNameForAction(action);
-            /*
-             * Add a TransformAction to perform necessary transformation for notification
-             */
-            actionRuntime = new TransformActionRuntime(streamId, getNotificationTransforms((NotifierAction) action, getRule().getId()));
-        } else {
-            return ActionRuntimeService.get().get(action);
-        }
-        return actionRuntime;
-    }
-
-    /**
-     * Returns the necessary transforms to perform based on the action.
-     */
-    private static List<TransformRuntime> getNotificationTransforms(NotifierAction action, Long ruleId) {
-        List<TransformRuntime> transformRuntimes = new ArrayList<>();
-        if (action.getOutputFieldsAndDefaults() != null && !action.getOutputFieldsAndDefaults().isEmpty()) {
-            transformRuntimes.add(new MergeTransformRuntime(action.getOutputFieldsAndDefaults()));
-            transformRuntimes.add(new SubstituteTransformRuntime(action.getOutputFieldsAndDefaults().keySet()));
-            transformRuntimes.add(new ProjectionTransformRuntime(new ProjectionTransform("projection-"+ruleId, action.getOutputFieldsAndDefaults().keySet())));
-        }
-
-        if (action.isIncludeMeta()) {
-            Map<String, Object> headers = new HashMap<>();
-            headers.put(AddHeaderTransformRuntime.HEADER_FIELD_NOTIFIER_NAME, action.getNotifierName());
-            headers.put(AddHeaderTransformRuntime.HEADER_FIELD_RULE_ID, ruleId);
-            transformRuntimes.add(new AddHeaderTransformRuntime(headers));
-        }
-
-        // default is to just forward the event
-        if(transformRuntimes.isEmpty()) {
-            transformRuntimes.add(new IdentityTransformRuntime());
-        }
-        return transformRuntimes;
     }
 
     protected abstract Rule getRule();

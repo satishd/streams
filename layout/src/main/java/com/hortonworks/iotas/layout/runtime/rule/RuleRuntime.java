@@ -21,7 +21,7 @@ package com.hortonworks.iotas.layout.runtime.rule;
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.layout.design.rule.Rule;
 import com.hortonworks.iotas.layout.design.rule.exception.ConditionEvaluationException;
-import com.hortonworks.iotas.layout.runtime.ActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.script.Script;
 import com.hortonworks.iotas.common.errors.ProcessingException;
 import com.hortonworks.iotas.processor.ProcessorRuntime;
@@ -31,8 +31,11 @@ import org.slf4j.LoggerFactory;
 import javax.script.ScriptException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.hortonworks.iotas.common.Result;
 
@@ -98,9 +101,9 @@ public class RuleRuntime implements Serializable, ProcessorRuntime {
 
     }
 
-    public List<String> getStreams() {
+    public Collection<String> getStreams() {
         LOG.debug("in getStreams");
-        List<String> streams = new ArrayList<>();
+        Set<String> streams = new HashSet<>();
         for(ActionRuntime action: actions) {
             LOG.debug("Action {}, Stream {}", action, action.getOutputStreams());
             streams.addAll(action.getOutputStreams());
