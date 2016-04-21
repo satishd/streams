@@ -33,10 +33,16 @@ public class ActionRuntimeContext {
         this.action = action;
     }
 
+    /**
+     * @return Rule for which the current Action is executed.
+     */
     public Rule getRule() {
         return rule;
     }
 
+    /**
+     * @return Current Action which is getting executed
+     */
     public Action getAction() {
         return action;
     }

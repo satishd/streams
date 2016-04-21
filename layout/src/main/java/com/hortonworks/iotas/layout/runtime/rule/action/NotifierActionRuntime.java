@@ -22,14 +22,14 @@ import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.design.rule.action.NotifierAction;
+import com.hortonworks.iotas.layout.design.transform.AddHeaderTransform;
+import com.hortonworks.iotas.layout.design.transform.MergeTransform;
 import com.hortonworks.iotas.layout.design.transform.ProjectionTransform;
+import com.hortonworks.iotas.layout.design.transform.SubstituteTransform;
+import com.hortonworks.iotas.layout.design.transform.Transform;
 import com.hortonworks.iotas.layout.runtime.RuntimeService;
 import com.hortonworks.iotas.layout.runtime.TransformActionRuntime;
 import com.hortonworks.iotas.layout.runtime.transform.AddHeaderTransformRuntime;
-import com.hortonworks.iotas.layout.runtime.transform.MergeTransformRuntime;
-import com.hortonworks.iotas.layout.runtime.transform.ProjectionTransformRuntime;
-import com.hortonworks.iotas.layout.runtime.transform.SubstituteTransformRuntime;
-import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- *
+ * {@link ActionRuntime} implementation for notifications.
  */
 public class NotifierActionRuntime implements ActionRuntime {
 
@@ -71,20 +71,20 @@ public class NotifierActionRuntime implements ActionRuntime {
     /**
      * Returns the necessary transforms to perform based on the action.
      */
-    private List<TransformRuntime> getNotificationTransforms(NotifierAction action, Long ruleId) {
-        List<TransformRuntime> transformRuntimes = new ArrayList<>();
+    private List<Transform> getNotificationTransforms(NotifierAction action, Long ruleId) {
+        List<Transform> transforms = new ArrayList<>();
         if (action.getOutputFieldsAndDefaults() != null && !action.getOutputFieldsAndDefaults().isEmpty()) {
-            transformRuntimes.add(new MergeTransformRuntime(action.getOutputFieldsAndDefaults()));
-            transformRuntimes.add(new SubstituteTransformRuntime(action.getOutputFieldsAndDefaults().keySet()));
-            transformRuntimes.add(new ProjectionTransformRuntime(new ProjectionTransform("projection-" + ruleId, action.getOutputFieldsAndDefaults().keySet())));
+            transforms.add(new MergeTransform(action.getOutputFieldsAndDefaults()));
+            transforms.add(new SubstituteTransform(action.getOutputFieldsAndDefaults().keySet()));
+            transforms.add(new ProjectionTransform("projection-" + ruleId, action.getOutputFieldsAndDefaults().keySet()));
         }
 
         Map<String, Object> headers = new HashMap<>();
         headers.put(AddHeaderTransformRuntime.HEADER_FIELD_NOTIFIER_NAME, action.getNotifierName());
         headers.put(AddHeaderTransformRuntime.HEADER_FIELD_RULE_ID, ruleId);
-        transformRuntimes.add(new AddHeaderTransformRuntime(headers));
+        transforms.add(new AddHeaderTransform(headers));
 
-        return transformRuntimes;
+        return transforms;
     }
 
     public static class Factory implements RuntimeService.Factory<ActionRuntime, Action> {

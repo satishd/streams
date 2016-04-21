@@ -18,15 +18,15 @@
 package com.hortonworks.iotas.layout.runtime;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
 import com.hortonworks.iotas.common.Result;
+import com.hortonworks.iotas.layout.design.rule.action.TransformAction;
+import com.hortonworks.iotas.layout.design.transform.MergeTransform;
 import com.hortonworks.iotas.layout.design.transform.ProjectionTransform;
+import com.hortonworks.iotas.layout.design.transform.SubstituteTransform;
 import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
-import com.hortonworks.iotas.layout.runtime.transform.MergeTransformRuntime;
-import com.hortonworks.iotas.layout.runtime.transform.ProjectionTransformRuntime;
-import com.hortonworks.iotas.layout.runtime.transform.SubstituteTransformRuntime;
-import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -52,9 +52,11 @@ public class TransformRuntimePipelineActionTest {
         defaults.put("3", "THREE");
 
         IotasEvent event = new IotasEventImpl(fieldsAndValues, "dsrcid");
-        TransformRuntime merge = new MergeTransformRuntime(defaults);
-        TransformRuntime projection = new ProjectionTransformRuntime(new ProjectionTransform("test-projection", defaults.keySet()));
-        ActionRuntime actionRuntime = new TransformActionRuntime("streamid", ImmutableList.of(merge, projection));
+        MergeTransform merge = new MergeTransform(defaults);
+        ProjectionTransform projection = new ProjectionTransform("test-projection", defaults.keySet());
+        TransformAction transformAction = new TransformAction(ImmutableList.of(merge, projection));
+        transformAction.setOutputStreams(ImmutableSet.of("streamid"));
+        ActionRuntime actionRuntime = new TransformActionRuntime(transformAction);
         List<IotasEvent> resultEvents = new ArrayList<>();
         for (Result result : actionRuntime.execute(event)) {
             resultEvents.addAll(result.events);
@@ -77,10 +79,12 @@ public class TransformRuntimePipelineActionTest {
         defaults.put("4", "${2} plus ${2}");
 
         IotasEvent event = new IotasEventImpl(fieldsAndValues, "dsrcid");
-        TransformRuntime merge = new MergeTransformRuntime(defaults);
-        TransformRuntime substitute = new SubstituteTransformRuntime();
-        TransformRuntime projection = new ProjectionTransformRuntime(new ProjectionTransform("test-projection", defaults.keySet()));
-        ActionRuntime actionRuntime = new TransformActionRuntime("streamid", ImmutableList.of(merge, substitute, projection));
+        MergeTransform merge = new MergeTransform(defaults);
+        SubstituteTransform substitute = new SubstituteTransform();
+        ProjectionTransform projection = new ProjectionTransform("test-projection", defaults.keySet());
+        TransformAction transformAction = new TransformAction(ImmutableList.of(merge, substitute, projection));
+        transformAction.setOutputStreams(ImmutableSet.of("streamid"));
+        ActionRuntime actionRuntime = new TransformActionRuntime(transformAction);
         List<IotasEvent> resultEvents = new ArrayList<>();
         for (Result result : actionRuntime.execute(event)) {
             resultEvents.addAll(result.events);

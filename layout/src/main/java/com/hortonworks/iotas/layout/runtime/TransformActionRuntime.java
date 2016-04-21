@@ -35,6 +35,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * {@link ActionRuntime} instance for applying the given chain of {@link Transform}s.
+ *
+ */
 public class TransformActionRuntime implements ActionRuntime {
     private String stream;
     private final List<TransformRuntime> transformRuntimes;
@@ -43,13 +47,18 @@ public class TransformActionRuntime implements ActionRuntime {
      * Creates a new {@link TransformActionRuntime}
      *
      * @param stream  the stream where the results are sent out
-     * @param transformRuntimes the chain of transformations to be applied (in order)
+     * @param transforms the chain of transformations to be applied (in order)
      */
-    public TransformActionRuntime(String stream, List<TransformRuntime> transformRuntimes) {
+    public TransformActionRuntime(String stream, List<Transform> transforms) {
         this.stream = stream;
-        this.transformRuntimes = transformRuntimes;
+        this.transformRuntimes = getTransformRuntimes(transforms);
     }
 
+    /**
+     * Creates a new {@link TransformActionRuntime} with the given {@code action} instance
+     *
+     * @param action
+     */
     public TransformActionRuntime(TransformAction action) {
         this.transformRuntimes = getTransformRuntimes(action.getTransforms());
 
@@ -80,8 +89,8 @@ public class TransformActionRuntime implements ActionRuntime {
 
     /**
      * {@inheritDoc}
-     * Recursively applies the list of {@link TransformRuntime} (s) associated with this
-     * TransformAction object and returns the {@link Result}
+     * Recursively applies the list of {@link TransformRuntime} (s) associated with this object and
+     * returns the {@link Result}
      */
     @Override
     public List<Result> execute(IotasEvent input) {
@@ -126,9 +135,9 @@ public class TransformActionRuntime implements ActionRuntime {
 
     @Override
     public String toString() {
-        return "TransformAction{" +
+        return "TransformActionRuntime{" +
                 "stream='" + stream + '\'' +
-                ", transforms=" + transformRuntimes +
+                ", transformRuntimes=" + transformRuntimes +
                 '}';
     }
 

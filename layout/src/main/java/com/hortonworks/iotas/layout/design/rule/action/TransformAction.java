@@ -23,7 +23,7 @@ import com.hortonworks.iotas.layout.design.transform.Transform;
 import java.util.List;
 
 /**
- * {@link Action} to apply the given transformation and send them to the given output streams.
+ * {@link Action} to apply the given transformations and send them to the given output streams.
  *
  */
 public class TransformAction extends Action {

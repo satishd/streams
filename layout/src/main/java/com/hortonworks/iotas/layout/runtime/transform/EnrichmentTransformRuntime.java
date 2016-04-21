@@ -20,7 +20,9 @@ package com.hortonworks.iotas.layout.runtime.transform;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.layout.design.transform.EnrichmentTransform;
+import com.hortonworks.iotas.layout.design.transform.Transform;
 import com.hortonworks.iotas.layout.design.transform.TransformDataProvider;
+import com.hortonworks.iotas.layout.runtime.RuntimeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,4 +74,19 @@ public class EnrichmentTransformRuntime implements TransformRuntime {
         return Collections.singletonList(iotasEvent);
     }
 
+    public static class Factory implements RuntimeService.Factory<TransformRuntime, Transform> {
+
+        @Override
+        public TransformRuntime create(Transform transform) {
+            return new EnrichmentTransformRuntime((EnrichmentTransform) transform);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "EnrichmentTransformRuntime{" +
+                "enrichmentTransform=" + enrichmentTransform +
+                ", cachedDataProvider=" + cachedDataProvider +
+                '}';
+    }
 }

@@ -19,16 +19,17 @@ package com.hortonworks.iotas.layout.runtime.transform;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
+import com.hortonworks.iotas.layout.design.transform.SubstituteTransform;
+import com.hortonworks.iotas.layout.design.transform.Transform;
+import com.hortonworks.iotas.layout.runtime.RuntimeService;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Expands template variables in the IotasEvent values by looking up the
@@ -36,19 +37,20 @@ import java.util.Set;
  */
 public class SubstituteTransformRuntime implements TransformRuntime {
     private static final Logger LOG = LoggerFactory.getLogger(SubstituteTransformRuntime.class);
-    private final Set<String> fields;
+    private final SubstituteTransform substituteTransform;
+
     /**
      * Does variable substitution for all the fields in the IotasEvent
      */
     public SubstituteTransformRuntime() {
-        this.fields = new HashSet<>();
+        this(new SubstituteTransform());
     }
 
     /**
      * Does variable substitution for the specified set of fields in the IotasEvent
      */
-    public SubstituteTransformRuntime(Set<String> fields) {
-        this.fields = fields;
+    public SubstituteTransformRuntime(SubstituteTransform substituteTransform) {
+        this.substituteTransform = substituteTransform;
     }
 
     @Override
@@ -79,11 +81,22 @@ public class SubstituteTransformRuntime implements TransformRuntime {
 
     private boolean shouldSubstitue(String key, Object value) {
         return value instanceof String
-                && (fields.isEmpty() || fields.contains(key));
+                && (substituteTransform.getFields().isEmpty() || substituteTransform.getFields().contains(key));
     }
 
     @Override
     public String toString() {
-        return "SubstituteTransform{}";
+        return "SubstituteTransformRuntime{" +
+                "substituteTransform=" + substituteTransform +
+                '}';
+    }
+
+
+    public static class Factory implements RuntimeService.Factory<TransformRuntime, Transform> {
+
+        @Override
+        public TransformRuntime create(Transform transform) {
+            return new SubstituteTransformRuntime((SubstituteTransform) transform);
+        }
     }
 }

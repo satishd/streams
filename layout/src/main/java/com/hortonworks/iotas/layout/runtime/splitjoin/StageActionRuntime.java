@@ -23,14 +23,11 @@ import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.design.splitjoin.StageAction;
 import com.hortonworks.iotas.layout.design.transform.Transform;
-import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.RuntimeService;
 import com.hortonworks.iotas.layout.runtime.TransformActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntimeContext;
-import com.hortonworks.iotas.layout.runtime.transform.TransformRuntime;
-import com.hortonworks.iotas.layout.runtime.transform.TransformRuntimeService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -54,17 +51,7 @@ public class StageActionRuntime implements ActionRuntime {
             throw new RuntimeException("Stage can only have one output stream.");
         }
         String outputStream = stageAction.getOutputStreams().iterator().next();
-        transformActionRuntime = new TransformActionRuntime(outputStream, getTransformRuntimes(transforms));
-    }
-
-    private List<TransformRuntime> getTransformRuntimes(List<Transform> transforms) {
-        List<TransformRuntime> transformRuntimes = new ArrayList<>();
-        for (Transform transform : transforms) {
-            TransformRuntime transformRuntime = TransformRuntimeService.get().get(transform);
-            transformRuntimes.add(transformRuntime);
-        }
-
-        return transformRuntimes;
+        transformActionRuntime = new TransformActionRuntime(outputStream, transforms);
     }
 
     @Override
