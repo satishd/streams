@@ -50,7 +50,8 @@ public class SplitJoinTest {
         final SplitAction splitAction = new SplitAction();
         splitAction.setOutputStreams(Sets.newHashSet(outputStreams));
         SplitActionRuntime splitActionRuntime = new SplitActionRuntime(splitAction);
-        splitActionRuntime.prepare();
+        splitActionRuntime.setActionRuntimeContext(new ActionRuntimeContext(null, splitAction));
+        splitActionRuntime.initialize(Collections.<String, Object>emptyMap());
 
         IotasEvent iotasEvent = createRootEvent();
         final List<Result> results = splitActionRuntime.execute(iotasEvent);
@@ -58,7 +59,8 @@ public class SplitJoinTest {
         final JoinAction joinAction = new JoinAction();
         joinAction.setOutputStreams(Collections.singleton("output-stream"));
         JoinActionRuntime joinActionRuntime = new JoinActionRuntime(joinAction);
-        joinActionRuntime.prepare(new ActionRuntimeContext(null, joinAction));
+        joinActionRuntime.setActionRuntimeContext(new ActionRuntimeContext(null, joinAction));
+        joinActionRuntime.initialize(Collections.<String, Object>emptyMap());
 
         List<Result> effectiveResult = null;
         for (Result result : results) {
@@ -78,15 +80,15 @@ public class SplitJoinTest {
         final String enrichFieldName = "foo";
         final String enrichedValue = "foo-enriched-value";
 
-        Map data = new HashMap(){{
-            put("foo-value", enrichedValue);}};
+        Map<Object, Object> data = new HashMap<Object, Object>(){{put("foo-value", enrichedValue);}};
         InmemoryTransformDataProvider transformDataProvider = new InmemoryTransformDataProvider(data);
         EnrichmentTransform enrichmentTransform = new EnrichmentTransform("enricher", Collections.singletonList(enrichFieldName), transformDataProvider);
         StageAction stageAction = new StageAction(Collections.<Transform>singletonList(enrichmentTransform));
         stageAction.setOutputStreams(Collections.singleton("output-stream"));
 
         StageActionRuntime stageActionRuntime = new StageActionRuntime(stageAction);
-        stageActionRuntime.prepare();
+        stageActionRuntime.setActionRuntimeContext(new ActionRuntimeContext(null, stageAction));
+        stageActionRuntime.initialize(Collections.<String, Object>emptyMap());
 
         final List<Result> results = stageActionRuntime.execute(createRootEvent());
         for (Result result : results) {

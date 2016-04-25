@@ -22,10 +22,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.hortonworks.iotas.layout.design.component.Stream;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -42,7 +40,7 @@ public class Action implements Serializable {
      * Each {@link Action} can have its own output streams to which events should be sent to.
      * todo this should be changed to to List of {@link Stream}s once Stream abstraction is integrated.
      */
-    protected Set<String> outputStreams;
+    protected Set<String> outputStreams = new HashSet<>();
 
     public String getName() {
         return name;
@@ -53,11 +51,12 @@ public class Action implements Serializable {
     }
 
     public Set<String> getOutputStreams() {
-        return outputStreams;
+        return Collections.unmodifiableSet(outputStreams);
     }
 
     public void setOutputStreams(Set<String> outputStreams) {
-        this.outputStreams = outputStreams;
+        this.outputStreams.clear();
+        this.outputStreams.addAll(outputStreams);
     }
 
     @Override

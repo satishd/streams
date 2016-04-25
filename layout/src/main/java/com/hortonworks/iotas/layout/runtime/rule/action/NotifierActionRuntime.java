@@ -22,6 +22,7 @@ import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.design.rule.action.NotifierAction;
+import com.hortonworks.iotas.layout.design.rule.action.TransformAction;
 import com.hortonworks.iotas.layout.design.transform.AddHeaderTransform;
 import com.hortonworks.iotas.layout.design.transform.MergeTransform;
 import com.hortonworks.iotas.layout.design.transform.ProjectionTransform;
@@ -41,7 +42,7 @@ import java.util.Set;
 /**
  * {@link ActionRuntime} implementation for notifications.
  */
-public class NotifierActionRuntime implements ActionRuntime {
+public class NotifierActionRuntime extends AbstractActionRuntime {
 
     private final NotifierAction notifierAction;
     private TransformActionRuntime transformActionRuntime;
@@ -52,9 +53,11 @@ public class NotifierActionRuntime implements ActionRuntime {
     }
 
     @Override
-    public void prepare(ActionRuntimeContext actionRuntimeContext) {
+    public void setActionRuntimeContext(ActionRuntimeContext actionRuntimeContext) {
         outputStream = actionRuntimeContext.getRule().getOutputStreamNameForAction(notifierAction);
-        transformActionRuntime = new TransformActionRuntime(outputStream, getNotificationTransforms(notifierAction, actionRuntimeContext.getRule().getId()));
+        transformActionRuntime = new TransformActionRuntime(
+                new TransformAction(getNotificationTransforms(notifierAction, actionRuntimeContext.getRule().getId()),
+                        Collections.singleton(outputStream)));
     }
 
     @Override
