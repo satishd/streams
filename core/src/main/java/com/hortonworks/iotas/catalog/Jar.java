@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p/>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -41,6 +41,7 @@ public class Jar extends AbstractStorable {
      * Unique Id for a jar instance. This is the primary key column.
      */
     private Long id;
+
     /**
      * Human readable name.
      * (name, version) pair is unique constraint.
@@ -99,6 +100,10 @@ public class Jar extends AbstractStorable {
         );
     }
 
+    /**
+     * @return Unique Id for a jar instance, which is the primary key column.
+     *
+     */
     public Long getId() {
         return id;
     }
@@ -107,6 +112,9 @@ public class Jar extends AbstractStorable {
         this.id = id;
     }
 
+    /**
+     * @return Human readable name.
+     */
     public String getName() {
         return name;
     }
@@ -115,6 +123,10 @@ public class Jar extends AbstractStorable {
         this.name = name;
     }
 
+    /**
+     * @return Fully qualified class name that implements a given interface. This is an optional property.
+     *
+     */
     public String getClassName() {
         return className;
     }
@@ -123,6 +135,9 @@ public class Jar extends AbstractStorable {
         this.className = className;
     }
 
+    /**
+     * @return Storage location of the jar.
+     */
     public String getStoragePath() {
         return storagePath;
     }
@@ -131,6 +146,9 @@ public class Jar extends AbstractStorable {
         this.storagePath = storagePath;
     }
 
+    /**
+     * @return version of the Jar.
+     */
     public Long getVersion() {
         return version;
     }
@@ -139,6 +157,9 @@ public class Jar extends AbstractStorable {
         this.version = version;
     }
 
+    /**
+     * @return the time at which this jar was created/updated.
+     */
     public Long getTimestamp() {
         return timestamp;
     }
@@ -147,6 +168,9 @@ public class Jar extends AbstractStorable {
         this.timestamp = timestamp;
     }
 
+    /**
+     * @return Extra information about this Jar which is represented in String format.
+     */
     public String getAuxiliaryInfo() {
         return auxiliaryInfo;
     }

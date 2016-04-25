@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p/>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -63,7 +63,7 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 
 /**
- *
+ * Catalog resource for jar resources.
  */
 @Path("/api/v1/catalog")
 @Produces(MediaType.APPLICATION_JSON)
@@ -103,10 +103,9 @@ public class JarCatalogResource {
      * Adds given resource to the configured jar-storage and adds an entry in entity storage.
      *
      * Below example describes how a jar file can be added along with metadata
-     * <p/>
-     * <code>
+     * <blockquote><pre>
      * curl -X POST -i -F file=@user-lib.jar -F "jar={\"id\":1234, \"name\":\"jar-1\",\"version\":1};type=application/json"  http://localhost:8080/api/v1/catalog/jars
-     * <p/>
+     *
      * HTTP/1.1 100 Continue
      *
      * HTTP/1.1 201 Created
@@ -115,10 +114,10 @@ public class JarCatalogResource {
      * Content-Length: 239
      *
      * {"responseCode":1000,"responseMessage":"Success","entity":{"id":1234,"name":"jar-1","className":null,"storagePath":"/tmp/test-hdfs/jar-1-ea41fe3a-12f9-45d4-ae24-818d570b8963.jar","version":1,"timestamp":1460716593157,"auxiliaryInfo":null}}
-     * </code>
+     * </pre></blockquote>
      *
      * @param inputStream actual file content as {@link InputStream}.
-     * @param contentDispositionHeader
+     * @param contentDispositionHeader {@link FormDataContentDisposition} instance of the received file
      * @param jar configuration of the jar resource {@link Jar}
      * @return
      */
@@ -131,7 +130,6 @@ public class JarCatalogResource {
                               @FormDataParam("jar") final Jar jar) {
 
         try {
-
             log.info("Received jar: [{}]", jar);
             String jarStoragePath = (StringUtils.isBlank(jar.getName()) ? "jar" : jar.getName()) + "-" + UUID.randomUUID().toString() + ".jar";
             String uploadedPath = jarStorage.uploadJar(inputStream, jarStoragePath);
