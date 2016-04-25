@@ -16,10 +16,34 @@
  * limitations under the License.
  */
 
-package com.hortonworks.iotas.layout.design.component;
+package com.hortonworks.iotas.layout.design.rule.action;
 
-import java.io.Serializable;
+import com.hortonworks.iotas.layout.design.transform.Transform;
 
-public interface RulesProcessorBuilder extends Serializable {
-    RulesProcessor build();
+import java.util.List;
+
+/**
+ * {@link Action} to apply the given transformations and send them to the given output streams.
+ *
+ */
+public class TransformAction extends Action {
+
+    private List<Transform> transforms;
+
+    public TransformAction() { }
+
+    public TransformAction(List<Transform> transforms) {
+        this.transforms = transforms;
+    }
+
+    public List<Transform> getTransforms() {
+        return transforms;
+    }
+
+    @Override
+    public String toString() {
+        return "TransformAction{" +
+                "transforms=" + transforms +
+                '}'+super.toString();
+    }
 }

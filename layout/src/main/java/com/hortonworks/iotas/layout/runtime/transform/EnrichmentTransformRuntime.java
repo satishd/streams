@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -20,6 +20,9 @@ package com.hortonworks.iotas.layout.runtime.transform;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.layout.design.transform.EnrichmentTransform;
+import com.hortonworks.iotas.layout.design.transform.Transform;
+import com.hortonworks.iotas.layout.design.transform.TransformDataProvider;
+import com.hortonworks.iotas.layout.runtime.RuntimeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +39,13 @@ public class EnrichmentTransformRuntime implements TransformRuntime {
 
     private final EnrichmentTransform enrichmentTransform;
 
-    private CachedDataProvider<Object, Object> cachedDataProvider;
+    private CachedTransformDataProviderRuntime cachedDataProvider;
 
     public EnrichmentTransformRuntime(EnrichmentTransform enrichmentTransform) {
         this.enrichmentTransform = enrichmentTransform;
-        cachedDataProvider = new CachedDataProvider<Object, Object>(enrichmentTransform.getDataProvider(), enrichmentTransform.getMaxCacheSize(),
+        final TransformDataProvider transformDataProvider = enrichmentTransform.getTransformDataProvider();
+
+        cachedDataProvider = new CachedTransformDataProviderRuntime(TransformDataProviderRuntimeService.get().get(transformDataProvider), enrichmentTransform.getMaxCacheSize(),
                 enrichmentTransform.getEntryExpirationInterval(), enrichmentTransform.getEntryRefreshInterval());
         cachedDataProvider.prepare();
     }
@@ -69,4 +74,19 @@ public class EnrichmentTransformRuntime implements TransformRuntime {
         return Collections.singletonList(iotasEvent);
     }
 
+    public static class Factory implements RuntimeService.Factory<TransformRuntime, Transform> {
+
+        @Override
+        public TransformRuntime create(Transform transform) {
+            return new EnrichmentTransformRuntime((EnrichmentTransform) transform);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "EnrichmentTransformRuntime{" +
+                "enrichmentTransform=" + enrichmentTransform +
+                ", cachedDataProvider=" + cachedDataProvider +
+                '}';
+    }
 }

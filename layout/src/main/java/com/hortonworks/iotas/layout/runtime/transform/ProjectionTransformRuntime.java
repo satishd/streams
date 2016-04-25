@@ -20,12 +20,13 @@ package com.hortonworks.iotas.layout.runtime.transform;
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
 import com.hortonworks.iotas.layout.design.transform.ProjectionTransform;
+import com.hortonworks.iotas.layout.design.transform.Transform;
+import com.hortonworks.iotas.layout.runtime.RuntimeService;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Project given fields from the input IotasEvent.
@@ -60,5 +61,14 @@ public class ProjectionTransformRuntime implements TransformRuntime {
         return "ProjectionTransformRuntime{" +
                 "projectionTransform=" + projectionTransform +
                 '}';
+    }
+
+
+    public static class Factory implements RuntimeService.Factory<TransformRuntime, Transform> {
+
+        @Override
+        public TransformRuntime create(Transform transform) {
+            return new ProjectionTransformRuntime((ProjectionTransform) transform);
+        }
     }
 }

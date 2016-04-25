@@ -20,13 +20,13 @@ package com.hortonworks.iotas.layout.design.rule;
 
 import com.hortonworks.iotas.common.Schema;
 import com.hortonworks.iotas.common.Schema.Field;
+import com.hortonworks.iotas.layout.design.component.ComponentBuilder;
 import com.hortonworks.iotas.layout.design.component.IotasSink;
 import com.hortonworks.iotas.layout.design.component.RulesProcessor;
-import com.hortonworks.iotas.layout.design.component.RulesProcessorBuilder;
 import com.hortonworks.iotas.layout.design.component.Sink;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
+import com.hortonworks.iotas.layout.design.rule.action.TransformAction;
 import com.hortonworks.iotas.layout.design.rule.condition.BinaryExpression;
-import com.hortonworks.iotas.layout.design.rule.action.NotifierAction;
 import com.hortonworks.iotas.layout.design.rule.condition.Condition;
 import com.hortonworks.iotas.layout.design.rule.condition.Expression;
 import com.hortonworks.iotas.layout.design.rule.condition.FieldExpression;
@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class RuleProcessorMockBuilder implements RulesProcessorBuilder {
+public class RuleProcessorMockBuilder implements ComponentBuilder<RulesProcessor> {
     public static final String TEMPERATURE = "temperature";
     public static final String HUMIDITY = "humidity";
     public static final String RULE_PROCESSOR = "rule_processor";
@@ -82,7 +82,7 @@ public class RuleProcessorMockBuilder implements RulesProcessorBuilder {
         return rules;
     }
 
-    private Rule buildRule(long ruleId, Condition condition, NotifierAction action) {
+    private Rule buildRule(long ruleId, Condition condition, TransformAction action) {
         Rule rule = new Rule();
         rule.setId(ruleId);
         rule.setName(RULE + "_" + ruleId);
@@ -93,9 +93,8 @@ public class RuleProcessorMockBuilder implements RulesProcessorBuilder {
         return rule;
     }
 
-    private NotifierAction buildAction(List<Sink> sinks) {
-        NotifierAction action = new NotifierAction();
-        return action;
+    private TransformAction buildAction(List<Sink> sinks) {
+        return new TransformAction();
     }
 
     private List<Sink> buildSinks() {

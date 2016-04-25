@@ -19,6 +19,7 @@ package com.hortonworks.iotas.layout.runtime.transform;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
+import com.hortonworks.iotas.layout.design.transform.MergeTransform;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -43,7 +44,7 @@ public class MergeTransformRuntimeTest {
         defaults.put("3", "THREE");
 
         IotasEvent event = new IotasEventImpl(fieldsAndValues, "dsrcid");
-        TransformRuntime transformRuntime = new MergeTransformRuntime(defaults);
+        TransformRuntime transformRuntime = new MergeTransformRuntime(new MergeTransform(defaults));
         List<IotasEvent> result = transformRuntime.execute(event);
         System.out.println(result);
         assertEquals(1, result.size());

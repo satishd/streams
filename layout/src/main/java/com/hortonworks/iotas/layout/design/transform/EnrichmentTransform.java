@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,7 +18,7 @@
  */
 package com.hortonworks.iotas.layout.design.transform;
 
-import com.hortonworks.iotas.layout.runtime.transform.DataProvider;
+import com.hortonworks.iotas.layout.runtime.transform.TransformDataProviderRuntime;
 
 import java.util.Collections;
 import java.util.List;
@@ -45,7 +45,7 @@ public class EnrichmentTransform extends Transform {
     /**
      * Used for lookups to enrich given field values.
      */
-    private final DataProvider<Object, Object> dataProvider;
+    private final TransformDataProvider transformDataProvider;
 
     /**
      * maximum size of the cache
@@ -58,14 +58,18 @@ public class EnrichmentTransform extends Transform {
     private long entryExpirationInterval = DEFAULT_ENTRY_EXPIRATION_INTERVAL;
 
     /**
-     * interval(in seconds) of an entry after which the entry should be loaded from {@link DataProvider}.
+     * interval (in seconds) of an entry after which the entry should be loaded from {@link TransformDataProviderRuntime}.
      */
     private long entryRefreshInterval = DEFAULT_ENTRY_REFRESH_INTERVAL;
 
-    public EnrichmentTransform(String name, List<String> fieldsToBeEnriched, DataProvider<Object, Object> dataProvider) {
+    private EnrichmentTransform() {
+        this(null, null, null);
+    }
+
+    public EnrichmentTransform(String name, List<String> fieldsToBeEnriched, TransformDataProvider transformDataProvider) {
         super(name);
         this.fieldsToBeEnriched = fieldsToBeEnriched;
-        this.dataProvider = dataProvider;
+        this.transformDataProvider = transformDataProvider;
     }
 
     /**
@@ -76,7 +80,7 @@ public class EnrichmentTransform extends Transform {
     }
 
     /**
-     * @param entryExpirationInterval interval (in seconds) of an entry to be evicted from cache after it is loaded.
+     * @param entryExpirationInterval interval of an entry to be evicted from cache after it is loaded.
      * @param timeUnit Unit of time
      */
     public void withEntryExpirationInterval(long entryExpirationInterval, TimeUnit timeUnit) {
@@ -84,7 +88,7 @@ public class EnrichmentTransform extends Transform {
     }
 
     /**
-     * @param refreshInterval interval(in seconds) of an entry after which the entry should be loaded from {@link DataProvider}.
+     * @param refreshInterval interval of an entry after which the entry should be loaded from {@link TransformDataProviderRuntime}.
      * @param timeUnit Unit of time
      */
     public void withEntryRefreshInterval(long refreshInterval, TimeUnit timeUnit) {
@@ -95,8 +99,8 @@ public class EnrichmentTransform extends Transform {
         return Collections.unmodifiableList(fieldsToBeEnriched);
     }
 
-    public DataProvider<Object, Object> getDataProvider() {
-        return dataProvider;
+    public TransformDataProvider getTransformDataProvider() {
+        return transformDataProvider;
     }
 
     public long getMaxCacheSize() {
@@ -115,7 +119,7 @@ public class EnrichmentTransform extends Transform {
     public String toString() {
         return "EnrichmentTransform{" +
                 "fieldsToBeEnriched=" + fieldsToBeEnriched +
-                ", dataProvider=" + dataProvider +
+                ", transformDataProvider=" + transformDataProvider +
                 ", maxCacheSize=" + maxCacheSize +
                 ", entryExpirationInterval=" + entryExpirationInterval +
                 ", entryRefreshInterval=" + entryRefreshInterval +

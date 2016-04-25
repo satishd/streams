@@ -19,6 +19,8 @@
 package com.hortonworks.iotas.layout.design.splitjoin;
 
 import com.hortonworks.iotas.layout.design.rule.action.Action;
+import com.hortonworks.iotas.layout.design.transform.EnrichmentTransform;
+import com.hortonworks.iotas.layout.design.transform.ProjectionTransform;
 import com.hortonworks.iotas.layout.design.transform.Transform;
 
 import java.util.Collections;
@@ -37,6 +39,15 @@ public class StageAction extends Action {
 
     public StageAction(List<Transform> transforms) {
         this.transforms = transforms;
+        validateSupportedTransforms(transforms);
+    }
+
+    private void validateSupportedTransforms(List<Transform> transforms) {
+        for (Transform transform : transforms) {
+            if(!(transform instanceof ProjectionTransform || transform instanceof EnrichmentTransform)) {
+                throw new IllegalArgumentException("Given transform is not supported. It should be either ProjectionTransform or EnrichmentTransform");
+            }
+        }
     }
 
     public List<Transform> getTransforms() {

@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -38,7 +39,7 @@ public class DefaultSplitter implements Splitter {
     }
 
     @Override
-    public List<Result> splitEvent(IotasEvent inputEvent, List<String> outputStreams) {
+    public List<Result> splitEvent(IotasEvent inputEvent, Set<String> outputStreams) {
         List<Result> results = new ArrayList<>();
         String groupId = getGroupId(inputEvent);
         int curPartNo = 0;

@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,7 +18,11 @@
  */
 package com.hortonworks.iotas.layout.runtime.transform;
 
+import com.hortonworks.iotas.layout.design.transform.AddHeaderTransform;
 import com.hortonworks.iotas.layout.design.transform.EnrichmentTransform;
+import com.hortonworks.iotas.layout.design.transform.MergeTransform;
+import com.hortonworks.iotas.layout.design.transform.ProjectionTransform;
+import com.hortonworks.iotas.layout.design.transform.SubstituteTransform;
 import com.hortonworks.iotas.layout.design.transform.Transform;
 import com.hortonworks.iotas.layout.runtime.RuntimeService;
 import org.slf4j.Logger;
@@ -32,21 +36,21 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@link Transform} by using respective factory
  */
 public class TransformRuntimeService extends RuntimeService<TransformRuntime, Transform> {
-    private static Logger log = LoggerFactory.getLogger(TransformRuntimeService.class);
+    private static final Logger log = LoggerFactory.getLogger(TransformRuntimeService.class);
 
     private static Map<Class<? extends Transform>, RuntimeService.Factory<TransformRuntime, Transform>> transformFactories = new ConcurrentHashMap<>();
+
     static {
         // register factories
         // todo this can be moved to startup listener to add all supported Transforms.
         // factories instance can be taken as an argument
-        transformFactories.put(EnrichmentTransform.class, new RuntimeService.Factory<TransformRuntime, Transform>() {
-            @Override
-            public TransformRuntime create(Transform transform) {
-                return new EnrichmentTransformRuntime((EnrichmentTransform) transform);
-            }
-        });
+        transformFactories.put(EnrichmentTransform.class, new EnrichmentTransformRuntime.Factory());
+        transformFactories.put(ProjectionTransform.class, new ProjectionTransformRuntime.Factory());
+        transformFactories.put(AddHeaderTransform.class, new AddHeaderTransformRuntime.Factory());
+        transformFactories.put(SubstituteTransform.class, new SubstituteTransformRuntime.Factory());
+        transformFactories.put(MergeTransform.class, new MergeTransformRuntime.Factory());
 
-        log.debug("Registered factories : [{}]", transformFactories);
+        log.info("Registered factories : [{}]", transformFactories);
     }
 
     private static TransformRuntimeService instance = new TransformRuntimeService();

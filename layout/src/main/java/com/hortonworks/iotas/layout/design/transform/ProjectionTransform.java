@@ -18,12 +18,8 @@
  */
 package com.hortonworks.iotas.layout.design.transform;
 
-import com.hortonworks.iotas.layout.runtime.transform.DataProvider;
-
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This class can be used to configure projection transform which can be used in any {@link com.hortonworks.iotas.layout.design.rule.action.Action}

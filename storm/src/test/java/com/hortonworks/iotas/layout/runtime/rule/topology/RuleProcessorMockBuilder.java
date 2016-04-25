@@ -18,27 +18,30 @@
 
 package com.hortonworks.iotas.layout.runtime.rule.topology;
 
+import com.google.common.collect.ImmutableList;
 import com.hortonworks.iotas.common.Schema;
 import com.hortonworks.iotas.common.Schema.Field;
+import com.hortonworks.iotas.layout.design.component.ComponentBuilder;
 import com.hortonworks.iotas.layout.design.component.IotasSink;
 import com.hortonworks.iotas.layout.design.component.RulesProcessor;
-import com.hortonworks.iotas.layout.design.component.RulesProcessorBuilder;
 import com.hortonworks.iotas.layout.design.component.Sink;
 import com.hortonworks.iotas.layout.design.rule.Rule;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
+import com.hortonworks.iotas.layout.design.rule.action.TransformAction;
 import com.hortonworks.iotas.layout.design.rule.condition.BinaryExpression;
-import com.hortonworks.iotas.layout.design.rule.action.NotifierAction;
 import com.hortonworks.iotas.layout.design.rule.condition.Condition;
 import com.hortonworks.iotas.layout.design.rule.condition.Expression;
 import com.hortonworks.iotas.layout.design.rule.condition.FieldExpression;
+import com.hortonworks.iotas.layout.design.rule.condition.FunctionExpression;
 import com.hortonworks.iotas.layout.design.rule.condition.Literal;
 import com.hortonworks.iotas.layout.design.rule.condition.Operator;
+import com.hortonworks.iotas.layout.design.rule.condition.Projection;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class RuleProcessorMockBuilder implements RulesProcessorBuilder {
+public class RuleProcessorMockBuilder implements ComponentBuilder<RulesProcessor> {
     public static final String TEMPERATURE = "temperature";
     public static final String HUMIDITY = "humidity";
     public static final String RULE_PROCESSOR = "rule_processor";
@@ -83,20 +86,37 @@ public class RuleProcessorMockBuilder implements RulesProcessorBuilder {
         return rules;
     }
 
-    private Rule buildRule(long ruleId, Condition condition, NotifierAction action) {
+    public static class Incr {
+        public static Integer evaluate(Integer input, Integer incr) {
+            return input + incr;
+        }
+    }
+
+    private Rule buildRule(long ruleId, Condition condition, TransformAction action) {
         Rule rule = new Rule();
         rule.setId(ruleId);
         rule.setName(RULE + "_" + ruleId);
         rule.setDescription(RULE + "_" + ruleId + "_desc");
         rule.setRuleProcessorName(RULE_PROCESSOR + "_" + ruleProcessorId);
         rule.setCondition(condition);
+        if (ruleId % 2 == 0) {
+            Projection projection = new Projection();
+            Expression humidity = new FieldExpression(Field.of("humidity", Schema.Type.INTEGER));
+            Expression deviceName = new FieldExpression(Field.of("devicename", Schema.Type.STRING));
+            Expression incr = new FunctionExpression("INCR",
+                                                     "com.hortonworks.iotas.layout.runtime.rule.topology.RuleProcessorMockBuilder$Incr",
+                                                     ImmutableList.<Expression>of(humidity, new Literal("10")));
+            Expression upper = new FunctionExpression("UPPER", ImmutableList.<Expression>of(deviceName));
+            projection.setExpressions(ImmutableList.<Expression>of(humidity, incr, upper));
+            rule.setProjection(projection);
+        }
         rule.setActions(Collections.singletonList((Action) action));
         return rule;
     }
 
-    private NotifierAction buildAction(List<Sink> sinks) {
-        NotifierAction action = new NotifierAction();
-        return action;
+    private TransformAction buildAction(List<Sink> sinks) {
+        final TransformAction transformAction = new TransformAction();
+        return transformAction;
     }
 
     private List<Sink> buildSinks() {

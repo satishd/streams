@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,8 +19,8 @@
 package com.hortonworks.iotas.layout.runtime.rule.topology;
 
 import com.hortonworks.iotas.bolt.rules.RulesBolt;
+import com.hortonworks.iotas.layout.design.component.ComponentBuilder;
 import com.hortonworks.iotas.layout.design.component.RulesProcessor;
-import com.hortonworks.iotas.layout.design.component.RulesProcessorBuilder;
 import com.hortonworks.iotas.layout.design.splitjoin.JoinAction;
 import com.hortonworks.iotas.layout.design.splitjoin.JoinProcessor;
 import com.hortonworks.iotas.layout.design.splitjoin.SplitAction;
@@ -28,9 +28,9 @@ import com.hortonworks.iotas.layout.design.splitjoin.SplitProcessor;
 import com.hortonworks.iotas.layout.design.splitjoin.StageAction;
 import com.hortonworks.iotas.layout.design.splitjoin.StageProcessor;
 import com.hortonworks.iotas.layout.design.transform.EnrichmentTransform;
+import com.hortonworks.iotas.layout.design.transform.InmemoryTransformDataProvider;
 import com.hortonworks.iotas.layout.design.transform.Transform;
 import com.hortonworks.iotas.layout.runtime.rule.RulesBoltDependenciesFactory;
-import com.hortonworks.iotas.layout.runtime.transform.DataProvider;
 import org.apache.storm.Config;
 import org.apache.storm.ILocalCluster;
 import org.apache.storm.LocalCluster;
@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -76,9 +75,6 @@ public class SplitJoinTopologyTest {
         log.info("Submitting topology: [{}]", topologyName);
         localCluster.submitTopology(topologyName, config, topology);
 
-        Thread.sleep(20*1000);
-        log.info("Killing topology: [{}]", topologyName);
-        localCluster.killTopology(topologyName);
     }
 
     protected Config getConfig() {
@@ -98,9 +94,8 @@ public class SplitJoinTopologyTest {
     }
 
     private RulesBolt createSplitBolt() {
-        List<String> splitStreams = Collections.singletonList(SPLIT_STREAM_ID);
         SplitAction splitAction = new SplitAction();
-        splitAction.setOutputStreams(splitStreams);
+        splitAction.setOutputStreams(Collections.singleton(SPLIT_STREAM_ID));
         SplitProcessorBuilder splitProcessorBuilder = new SplitProcessorBuilder(splitAction);
 
         return new RulesBolt(new RulesBoltDependenciesFactory(splitProcessorBuilder, getScriptType()));
@@ -118,7 +113,7 @@ public class SplitJoinTopologyTest {
         return RulesBoltDependenciesFactory.ScriptType.SQL;
     }
 
-    static class SplitProcessorBuilder implements RulesProcessorBuilder {
+    static class SplitProcessorBuilder implements ComponentBuilder<RulesProcessor> {
 
         private SplitAction splitAction;
 
@@ -135,12 +130,12 @@ public class SplitJoinTopologyTest {
         }
     }
 
-    static class JoinProcessorBuilder implements RulesProcessorBuilder {
+    static class JoinProcessorBuilder implements ComponentBuilder<RulesProcessor> {
 
         @Override
         public RulesProcessor build() {
             JoinAction joinAction = new JoinAction();
-            joinAction.setOutputStreams(Collections.singletonList(JOIN_OUTPUT_STREAM_ID));
+            joinAction.setOutputStreams(Collections.singleton(JOIN_OUTPUT_STREAM_ID));
             JoinProcessor joinProcessor = new JoinProcessor(joinAction);
             joinProcessor.setName("join-processor-"+System.currentTimeMillis());
             joinProcessor.setId(UUID.randomUUID().toString());
@@ -148,7 +143,7 @@ public class SplitJoinTopologyTest {
         }
     }
 
-    static class StageProcessorBuilder implements RulesProcessorBuilder {
+    static class StageProcessorBuilder implements ComponentBuilder<RulesProcessor> {
 
         public StageProcessorBuilder() {
         }
@@ -157,38 +152,20 @@ public class SplitJoinTopologyTest {
         public RulesProcessor build() {
             final String enrichFieldName = "temperature";
 
-            Map<Object, Object> map = new HashMap<>();
+            Map<Object, Object> enrichmentsData = new HashMap<>();
             for(int i=0; i< 150; i++) {
-                map.put(i, (i-32)/1.8f);
+                enrichmentsData.put(i, (i - 32) / 1.8f);
             }
-            DataProvider<Object, Object> dataProvider = createDataProvider(map);
-            EnrichmentTransform enrichmentTransform = new EnrichmentTransform("enricher", Collections.singletonList(enrichFieldName), dataProvider);
+            InmemoryTransformDataProvider transformDataProvider = new InmemoryTransformDataProvider(enrichmentsData);
+            EnrichmentTransform enrichmentTransform = new EnrichmentTransform("enricher", Collections.singletonList(enrichFieldName), transformDataProvider);
             StageAction stageAction = new StageAction(Collections.<Transform>singletonList(enrichmentTransform));
-            stageAction.setOutputStreams(Collections.singletonList(STAGE_OUTPUT_STREAM_ID));
+            stageAction.setOutputStreams(Collections.singleton(STAGE_OUTPUT_STREAM_ID));
 
             final StageProcessor stageProcessor = new StageProcessor(stageAction);
             stageProcessor.setName("stage-processor-" + System.currentTimeMillis());
             stageProcessor.setId(UUID.randomUUID().toString());
             return stageProcessor;
         }
-    }
-
-    public static DataProvider<Object, Object> createDataProvider(final Map<Object, Object> map) {
-        return new DataProvider<Object, Object>() {
-            @Override
-            public void prepare() {
-            }
-
-            @Override
-            public Object get(Object key) {
-                return map.get(key);
-            }
-
-            @Override
-            public void cleanup() {
-                map.clear();
-            }
-        };
     }
 
 }

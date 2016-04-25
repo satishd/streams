@@ -18,13 +18,9 @@
 
 package com.hortonworks.iotas.bolt.rules;
 
-import org.apache.storm.task.OutputCollector;
-import org.apache.storm.tuple.Tuple;
-import org.apache.storm.tuple.Values;
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
 import com.hortonworks.iotas.layout.runtime.processor.RuleProcessorRuntime;
-import com.hortonworks.iotas.layout.runtime.rule.RuleRuntime;
 import com.hortonworks.iotas.layout.runtime.rule.RulesBoltDependenciesFactory;
 import com.hortonworks.iotas.layout.runtime.rule.topology.RuleProcessorMockBuilder;
 import com.hortonworks.iotas.layout.runtime.rule.topology.RulesTopologyTest;
@@ -33,6 +29,9 @@ import mockit.Injectable;
 import mockit.Tested;
 import mockit.VerificationsInOrder;
 import mockit.integration.junit4.JMockit;
+import org.apache.storm.task.OutputCollector;
+import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -84,10 +83,10 @@ public abstract class RulesBoltTest extends RulesTopologyTest {
 
     private static final Values IOTAS_EVENT_MATCH_AND_NO_MATCH_TUPLE_VALUES = new Values(IOTAS_EVENT_MATCH_AND_NO_MATCH_TUPLE);
 
-    private @Tested RulesBolt rulesBolt;
-    private @Injectable OutputCollector mockOutputCollector;
-    private @Injectable Tuple mockTuple;
-    private RuleProcessorRuntime ruleProcessorRuntime;
+    protected  @Tested RulesBolt rulesBolt;
+    protected  @Injectable OutputCollector mockOutputCollector;
+    protected  @Injectable Tuple mockTuple;
+    protected RuleProcessorRuntime ruleProcessorRuntime;
 
     @Before
     public void setup() throws Exception {
@@ -152,12 +151,13 @@ public abstract class RulesBoltTest extends RulesTopologyTest {
         rulesBolt.execute(mockTuple);
 
         new VerificationsInOrder() {{
-            mockOutputCollector.emit(((RuleRuntime) ruleProcessorRuntime.getRulesRuntime().get(0)).getStreams().get(0),
+
+            mockOutputCollector.emit(ruleProcessorRuntime.getRulesRuntime().get(0).getStreams().iterator().next(),
                     mockTuple, IOTAS_EVENT_MATCHES_TUPLE_VALUES);
             times = 0;  // rule 1 does not trigger
 
             Values actualValues;
-            mockOutputCollector.emit(((RuleRuntime) ruleProcessorRuntime.getRulesRuntime().get(1)).getStreams().get(0),
+            mockOutputCollector.emit(ruleProcessorRuntime.getRulesRuntime().get(1).getStreams().iterator().next(),
                     mockTuple, actualValues = withCapture());
             times = rule2NumTimes;    // rule 2 triggers rule2NumTimes
 

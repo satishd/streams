@@ -21,7 +21,7 @@ package com.hortonworks.iotas.layout.runtime.rule;
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.layout.design.rule.Rule;
 import com.hortonworks.iotas.layout.design.rule.exception.ConditionEvaluationException;
-import com.hortonworks.iotas.layout.runtime.ActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.script.Script;
 import com.hortonworks.iotas.common.errors.ProcessingException;
 import com.hortonworks.iotas.processor.ProcessorRuntime;
@@ -31,8 +31,11 @@ import org.slf4j.LoggerFactory;
 import javax.script.ScriptException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.hortonworks.iotas.common.Result;
 
@@ -43,20 +46,20 @@ public class RuleRuntime implements Serializable, ProcessorRuntime {
     protected static final Logger LOG = LoggerFactory.getLogger(RuleRuntime.class);
 
     protected final Rule rule;
-    protected final Script<IotasEvent, Boolean, ?> script;     // Script used to evaluate the condition
+    protected final Script<IotasEvent, IotasEvent, ?> script;     // Script used to evaluate the condition
     protected final List<ActionRuntime> actions;
 
-    RuleRuntime(Rule rule, Script<IotasEvent, Boolean, ?> script, List<ActionRuntime> actions) {
+    RuleRuntime(Rule rule, Script<IotasEvent, IotasEvent, ?> script, List<ActionRuntime> actions) {
         this.rule = rule;
         this.script = script;
         this.actions = actions;
     }
 
-    public boolean evaluate(IotasEvent input) {
+    public IotasEvent evaluate(IotasEvent input) {
         try {
-            boolean evaluates = script != null ? script.evaluate(input) : true;
-            LOG.debug("Rule condition evaluated to [{}].\n\t[{}]\n\tInput[{}]", evaluates, rule, input);
-            return evaluates;
+            IotasEvent evaluatedEvent = script != null ? script.evaluate(input) : input;
+            LOG.debug("Rule condition evaluated to [{}].\n\t[{}]\n\tInput[{}]", evaluatedEvent, rule, input);
+            return evaluatedEvent;
         } catch (ScriptException e) {
             throw new ConditionEvaluationException("Exception occurred when evaluating rule condition. " + this, e);
         }
@@ -98,9 +101,9 @@ public class RuleRuntime implements Serializable, ProcessorRuntime {
 
     }
 
-    public List<String> getStreams() {
+    public Collection<String> getStreams() {
         LOG.debug("in getStreams");
-        List<String> streams = new ArrayList<>();
+        Set<String> streams = new HashSet<>();
         for(ActionRuntime action: actions) {
             LOG.debug("Action {}, Stream {}", action, action.getOutputStreams());
             streams.addAll(action.getOutputStreams());

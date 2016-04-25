@@ -19,6 +19,7 @@ package com.hortonworks.iotas.layout.runtime.transform;
 
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.IotasEventImpl;
+import com.hortonworks.iotas.layout.design.transform.SubstituteTransform;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -75,7 +76,7 @@ public class SubstituteTransformRuntimeTest {
         fieldsAndValues.put("3", "${1} plus two");
 
         IotasEvent event = new IotasEventImpl(fieldsAndValues, "dsrcid");
-        TransformRuntime transformRuntime = new SubstituteTransformRuntime(Collections.singleton("3"));
+        TransformRuntime transformRuntime = new SubstituteTransformRuntime(new SubstituteTransform(Collections.singleton("3")));
         List<IotasEvent> result = transformRuntime.execute(event);
         assertEquals(1, result.size());
         assertEquals(3, result.get(0).getFieldsAndValues().size());

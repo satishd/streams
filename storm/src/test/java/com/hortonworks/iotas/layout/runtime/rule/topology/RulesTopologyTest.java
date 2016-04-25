@@ -18,6 +18,11 @@
 
 package com.hortonworks.iotas.layout.runtime.rule.topology;
 
+import com.hortonworks.iotas.bolt.rules.RulesBolt;
+import com.hortonworks.iotas.layout.design.component.ComponentBuilder;
+import com.hortonworks.iotas.layout.design.component.RulesProcessor;
+import com.hortonworks.iotas.layout.runtime.processor.RuleProcessorRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.RulesBoltDependenciesFactory;
 import org.apache.storm.Config;
 import org.apache.storm.ILocalCluster;
 import org.apache.storm.LocalCluster;
@@ -26,11 +31,6 @@ import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.TopologyBuilder;
-import com.hortonworks.iotas.bolt.rules.RulesBolt;
-import com.hortonworks.iotas.layout.design.component.RulesProcessorBuilder;
-import com.hortonworks.iotas.layout.runtime.processor.RuleProcessorRuntime;
-import com.hortonworks.iotas.layout.runtime.rule.RuleRuntime;
-import com.hortonworks.iotas.layout.runtime.rule.RulesBoltDependenciesFactory;
 
 public abstract class RulesTopologyTest {
     protected static final String RULES_TEST_SPOUT = "RulesTestSpout";
@@ -64,10 +64,11 @@ public abstract class RulesTopologyTest {
     }
 
     protected String getStream(int i) {
-        return ((RuleRuntime) ruleProcessorRuntime.getRulesRuntime().get(i)).getStreams().get(0);
+        return ruleProcessorRuntime.getRulesRuntime().get(i).getStreams().iterator().next();
     }
 
-    protected RulesBoltDependenciesFactory createDependenciesBuilderFactory(RulesProcessorBuilder rulesProcessorBuilder, RulesBoltDependenciesFactory.ScriptType scriptType) {
+    protected RulesBoltDependenciesFactory createDependenciesBuilderFactory(ComponentBuilder<RulesProcessor> rulesProcessorBuilder,
+                                                                            RulesBoltDependenciesFactory.ScriptType scriptType) {
         rulesBoltDependenciesFactory = new RulesBoltDependenciesFactory(rulesProcessorBuilder, scriptType);
         return rulesBoltDependenciesFactory;
     }
@@ -76,7 +77,7 @@ public abstract class RulesTopologyTest {
         return new RulesBolt(dependenciesBuilder);
     }
 
-    protected RulesProcessorBuilder createRulesProcessorBuilder() {
+    protected ComponentBuilder<RulesProcessor> createRulesProcessorBuilder() {
         return new RuleProcessorMockBuilder(1,2,2);
     }
 

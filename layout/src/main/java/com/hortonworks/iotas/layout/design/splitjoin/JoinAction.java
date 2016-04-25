@@ -39,12 +39,12 @@ public class JoinAction extends Action {
     private String joinerClassName;
 
     /**
-     * Expiry interval of a single split group to be stored
+     * Expiry interval in milli seconds of a single split group to be stored
      */
     private long groupExpiryInterval = DEFAULT_EXPIRY_INTERVAL;
 
     /**
-     * Expiry interval of a partial event to be stored
+     * Expiry interval in milli seconds of a partial event to be stored for a specific split group.
      */
     private long eventExpiryInterval = DEFAULT_EXPIRY_INTERVAL;
 
@@ -73,14 +73,14 @@ public class JoinAction extends Action {
     }
 
     /**
-     * @return Expiry interval of a single split group to be stored
+     * @return Expiry interval in milli seconds of a single split group to be stored
      */
     public long getGroupExpiryInterval() {
         return groupExpiryInterval;
     }
 
     /**
-     * @return Expiry interval of a partial event to be stored for a specific split group.
+     * @return Expiry interval in milli seconds of a partial event to be stored for a specific split group.
      */
     public long getEventExpiryInterval() {
         return eventExpiryInterval;
@@ -91,7 +91,8 @@ public class JoinAction extends Action {
         return "JoinAction{" +
                 "jarId='" + jarId + '\'' +
                 ", joinerClassName='" + joinerClassName + '\'' +
-                ", expiryEntryInterval=" + groupExpiryInterval +
-                '}'+super.toString();
+                ", groupExpiryInterval=" + groupExpiryInterval +
+                ", eventExpiryInterval=" + eventExpiryInterval +
+                '}';
     }
 }

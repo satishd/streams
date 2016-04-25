@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -16,30 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.layout.runtime.transform;
+package com.hortonworks.iotas.layout.design.transform;
 
-import com.hortonworks.iotas.layout.design.transform.Transform;
+import java.util.Map;
 
 /**
- * Data provider for {@link Transform} which can be used for lookups.
+ * Adds a fixed header to the input event
  */
-public interface DataProvider<K, V> {
+public class AddHeaderTransform extends Transform {
+    private final Map<String, Object> fixedHeader;
 
-    /**
-     * Prepare resources which can be used in retrieving values from data store.
-     */
-    public void prepare(); //Config config);
+    private AddHeaderTransform() {
+        this(null);
+    }
 
-    /**
-     * Retrieves a value for a given key from a data store.
-     *
-     * @param key
-     */
-    public V get(K key);
+    public AddHeaderTransform(Map<String, Object> fixedHeader) {
+        this.fixedHeader = fixedHeader;
+    }
 
-    /**
-     * cleanup any resources held by this instance.
-     */
-    public void cleanup();
+    public Map<String, Object> getFixedHeader() {
+        return fixedHeader;
+    }
 
+    @Override
+    public String toString() {
+        return "AddHeaderTransform{" +
+                "fixedHeader=" + fixedHeader +
+                '}'+super.toString();
+    }
 }

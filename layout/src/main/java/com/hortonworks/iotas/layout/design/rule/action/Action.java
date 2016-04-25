@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Action that is at the end of the chain of execution. Once this action is complete, this rule will not be evaluated anymore.
@@ -41,7 +42,7 @@ public class Action implements Serializable {
      * Each {@link Action} can have its own output streams to which events should be sent to.
      * todo this should be changed to to List of {@link Stream}s once Stream abstraction is integrated.
      */
-    protected List<String> outputStreams;
+    protected Set<String> outputStreams;
 
     public String getName() {
         return name;
@@ -51,11 +52,11 @@ public class Action implements Serializable {
         this.name = name;
     }
 
-    public List<String> getOutputStreams() {
+    public Set<String> getOutputStreams() {
         return outputStreams;
     }
 
-    public void setOutputStreams(List<String> outputStreams) {
+    public void setOutputStreams(Set<String> outputStreams) {
         this.outputStreams = outputStreams;
     }
 

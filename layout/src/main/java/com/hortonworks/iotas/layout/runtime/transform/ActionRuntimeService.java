@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,12 +19,15 @@
 package com.hortonworks.iotas.layout.runtime.transform;
 
 import com.hortonworks.iotas.layout.design.rule.action.Action;
+import com.hortonworks.iotas.layout.design.rule.action.NotifierAction;
+import com.hortonworks.iotas.layout.design.rule.action.TransformAction;
 import com.hortonworks.iotas.layout.design.splitjoin.JoinAction;
 import com.hortonworks.iotas.layout.design.splitjoin.SplitAction;
 import com.hortonworks.iotas.layout.design.splitjoin.StageAction;
-import com.hortonworks.iotas.layout.design.transform.EnrichmentTransform;
-import com.hortonworks.iotas.layout.runtime.ActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.RuntimeService;
+import com.hortonworks.iotas.layout.runtime.TransformActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.NotifierActionRuntime;
 import com.hortonworks.iotas.layout.runtime.splitjoin.JoinActionRuntime;
 import com.hortonworks.iotas.layout.runtime.splitjoin.SplitActionRuntime;
 import com.hortonworks.iotas.layout.runtime.splitjoin.StageActionRuntime;
@@ -38,7 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Service to create {@link ActionRuntime} instances of a given {@link Action} by using respective factory
  */
 public class ActionRuntimeService extends RuntimeService<ActionRuntime, Action> {
-    private static Logger log = LoggerFactory.getLogger(ActionRuntimeService.class);
+    private static final Logger log = LoggerFactory.getLogger(ActionRuntimeService.class);
 
     private static Map<Class<? extends Action>, Factory<ActionRuntime, Action>> actionRuntimeFactories = new ConcurrentHashMap<>();
     static {
@@ -48,6 +51,8 @@ public class ActionRuntimeService extends RuntimeService<ActionRuntime, Action> 
         actionRuntimeFactories.put(SplitAction.class, new SplitActionRuntime.Factory());
         actionRuntimeFactories.put(JoinAction.class, new JoinActionRuntime.Factory());
         actionRuntimeFactories.put(StageAction.class, new StageActionRuntime.Factory());
+        actionRuntimeFactories.put(TransformAction.class, new TransformActionRuntime.Factory());
+        actionRuntimeFactories.put(NotifierAction.class, new NotifierActionRuntime.Factory());
 
         log.debug("Registered factories : [{}]", actionRuntimeFactories);
     }

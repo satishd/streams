@@ -26,15 +26,10 @@ import java.util.Map;
  *
  */
 public class NotifierAction extends Action {
-    private boolean includeMeta = false;
     private String notifierName = "dummy";
     protected Map<String, Object> outputFieldsAndDefaults = new HashMap<>();
 
     public NotifierAction() { }
-
-    public boolean isIncludeMeta() {
-        return includeMeta;
-    }
 
     /**
      * The name of the output fields and the default values for them
@@ -48,14 +43,6 @@ public class NotifierAction extends Action {
         return outputFieldsAndDefaults;
     }
 
-    /**
-     * Whether to include meta data (rule-id, event-id, datasource-id) in the output
-     * IotasEvent header.
-     */
-    public void setIncludeMeta(boolean includeMeta) {
-        this.includeMeta = includeMeta;
-    }
-
     public String getNotifierName() {
         return notifierName;
     }
@@ -67,8 +54,8 @@ public class NotifierAction extends Action {
     @Override
     public String toString() {
         return "NotifierAction{" +
-                "includeMeta=" + includeMeta +
-                ", notifierName='" + notifierName + '\'' +
+                "notifierName='" + notifierName + '\'' +
+                ", outputFieldsAndDefaults=" + outputFieldsAndDefaults +
                 '}'+super.toString();
     }
 }
