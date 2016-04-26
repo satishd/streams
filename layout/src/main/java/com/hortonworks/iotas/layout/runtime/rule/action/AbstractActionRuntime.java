@@ -42,6 +42,7 @@ public abstract class AbstractActionRuntime implements ActionRuntime {
     protected CatalogRestClient catalogRestClient;
     protected String localJarPath;
 
+
     @Override
     public void setActionRuntimeContext(ActionRuntimeContext actionRuntimeContext) {
         this.actionRuntimeContext = actionRuntimeContext;
