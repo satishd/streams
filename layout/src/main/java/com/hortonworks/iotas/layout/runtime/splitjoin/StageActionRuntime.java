@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,10 +21,12 @@ package com.hortonworks.iotas.layout.runtime.splitjoin;
 import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
+import com.hortonworks.iotas.layout.design.rule.action.TransformAction;
 import com.hortonworks.iotas.layout.design.splitjoin.StageAction;
 import com.hortonworks.iotas.layout.design.transform.Transform;
 import com.hortonworks.iotas.layout.runtime.RuntimeService;
 import com.hortonworks.iotas.layout.runtime.TransformActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.AbstractActionRuntime;
 import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntimeContext;
 
@@ -35,28 +37,27 @@ import java.util.Set;
  * {@link ActionRuntime} of a stage processor.
  *
  */
-public class StageActionRuntime implements ActionRuntime {
+public class StageActionRuntime extends AbstractActionRuntime {
 
     private final StageAction stageAction;
     private TransformActionRuntime transformActionRuntime;
 
     public StageActionRuntime(StageAction stageAction) {
         this.stageAction = stageAction;
-        prepare();
+        buildTransformActionRuntime();
     }
 
-    protected void prepare() {
+    protected void buildTransformActionRuntime() {
         final List<Transform> transforms = stageAction.getTransforms();
         if(stageAction.getOutputStreams().size() != 1) {
             throw new RuntimeException("Stage can only have one output stream.");
         }
-        String outputStream = stageAction.getOutputStreams().iterator().next();
-        transformActionRuntime = new TransformActionRuntime(outputStream, transforms);
+        transformActionRuntime = new TransformActionRuntime(new TransformAction(transforms, stageAction.getOutputStreams()));
     }
 
     @Override
-    public void prepare(ActionRuntimeContext actionRuntimeContext) {
-
+    public void setActionRuntimeContext(ActionRuntimeContext actionRuntimeContext) {
+        transformActionRuntime.setActionRuntimeContext(actionRuntimeContext);
     }
 
     @Override

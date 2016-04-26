@@ -20,6 +20,9 @@ package com.hortonworks.iotas.layout.design.rule.action;
 
 import com.hortonworks.iotas.layout.design.transform.Transform;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -28,12 +31,24 @@ import java.util.List;
  */
 public class TransformAction extends Action {
 
-    private List<Transform> transforms;
+    protected List<Transform> transforms = new ArrayList<>();
 
     public TransformAction() { }
 
     public TransformAction(List<Transform> transforms) {
-        this.transforms = transforms;
+        this(transforms, Collections.<String>emptyList());
+    }
+
+    public TransformAction(List<Transform> transforms, Collection<String> outputStreams) {
+        if(transforms == null) {
+            throw new IllegalArgumentException("transforms can not be null");
+        }
+        this.transforms.addAll(transforms);
+
+        if(outputStreams == null) {
+            throw new IllegalArgumentException("outputStreams can not be null");
+        }
+        this.outputStreams.addAll(outputStreams);
     }
 
     public List<Transform> getTransforms() {

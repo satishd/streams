@@ -18,6 +18,7 @@
 
 package com.hortonworks.iotas.layout.design.rule.action;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,11 +37,12 @@ public class NotifierAction extends Action {
      * to be emitted as a part of this action.
      */
     public void setOutputFieldsAndDefaults(Map<String, Object> outputFieldsAndDefaults) {
-        this.outputFieldsAndDefaults = outputFieldsAndDefaults;
+        this.outputFieldsAndDefaults.clear();
+        this.outputFieldsAndDefaults.putAll(outputFieldsAndDefaults);
     }
 
     public Map<String, Object> getOutputFieldsAndDefaults() {
-        return outputFieldsAndDefaults;
+        return Collections.unmodifiableMap(outputFieldsAndDefaults);
     }
 
     public String getNotifierName() {

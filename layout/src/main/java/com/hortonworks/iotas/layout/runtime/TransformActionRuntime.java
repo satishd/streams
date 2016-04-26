@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * <p>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,7 @@ import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.design.rule.action.TransformAction;
 import com.hortonworks.iotas.layout.design.transform.Transform;
+import com.hortonworks.iotas.layout.runtime.rule.action.AbstractActionRuntime;
 import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntimeContext;
 import com.hortonworks.iotas.layout.runtime.transform.IdentityTransformRuntime;
@@ -39,20 +40,9 @@ import java.util.Set;
  * {@link ActionRuntime} instance for applying the given chain of {@link Transform}s.
  *
  */
-public class TransformActionRuntime implements ActionRuntime {
+public class TransformActionRuntime extends AbstractActionRuntime {
     private String stream;
     private final List<TransformRuntime> transformRuntimes;
-
-    /**
-     * Creates a new {@link TransformActionRuntime}
-     *
-     * @param stream  the stream where the results are sent out
-     * @param transforms the chain of transformations to be applied (in order)
-     */
-    public TransformActionRuntime(String stream, List<Transform> transforms) {
-        this.stream = stream;
-        this.transformRuntimes = getTransformRuntimes(transforms);
-    }
 
     /**
      * Creates a new {@link TransformActionRuntime} with the given {@code action} instance
@@ -81,7 +71,7 @@ public class TransformActionRuntime implements ActionRuntime {
     }
 
     @Override
-    public void prepare(ActionRuntimeContext actionRuntimeContext) {
+    public void setActionRuntimeContext(ActionRuntimeContext actionRuntimeContext) {
         if(stream == null) {
             stream = actionRuntimeContext.getRule().getOutputStreamNameForAction(actionRuntimeContext.getAction());
         }

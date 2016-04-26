@@ -24,9 +24,9 @@ import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.design.splitjoin.JoinAction;
-import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.RuntimeService;
-import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntimeContext;
+import com.hortonworks.iotas.layout.runtime.rule.action.AbstractActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.util.ProxyUtil;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * {@link ActionRuntime} implementation for {@link JoinAction}
  */
-public class JoinActionRuntime implements ActionRuntime {
+public class JoinActionRuntime extends AbstractActionRuntime {
     private Cache<String, EventGroup> groupedEvents;
     private final JoinAction joinAction;
     private Joiner joiner;
@@ -49,13 +49,16 @@ public class JoinActionRuntime implements ActionRuntime {
     }
 
     @Override
-    public void prepare(ActionRuntimeContext actionRuntimeContext) {
+    public void initialize(Map<String, Object> config) {
+        super.initialize(config);
+
         final String jarId = joinAction.getJarId();
         final String joinerClassName = joinAction.getJoinerClassName();
         if (jarId != null && joinerClassName != null) {
             ProxyUtil<Joiner> proxyUtil = new ProxyUtil<>(Joiner.class, this.getClass().getClassLoader());
             try {
-                joiner = proxyUtil.loadClassFromJar(jarId, joinerClassName);
+                String jarPath = getJarPathFor(jarId);
+                joiner = proxyUtil.loadClassFromJar(jarPath, joinerClassName);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), e);
             }

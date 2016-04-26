@@ -22,7 +22,7 @@ import com.hortonworks.iotas.layout.design.rule.Rule;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 
 /**
- * This class contains the context information for an Action. This is passed in {@link ActionRuntime#prepare(ActionRuntimeContext)}
+ * This class contains the context information for an Action. This is passed in {@link ActionRuntime#setActionRuntimeContext(ActionRuntimeContext)}
  */
 public class ActionRuntimeContext {
     private final Rule rule;

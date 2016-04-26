@@ -22,9 +22,9 @@ import com.hortonworks.iotas.common.IotasEvent;
 import com.hortonworks.iotas.common.Result;
 import com.hortonworks.iotas.layout.design.rule.action.Action;
 import com.hortonworks.iotas.layout.design.splitjoin.SplitAction;
-import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.layout.runtime.RuntimeService;
-import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntimeContext;
+import com.hortonworks.iotas.layout.runtime.rule.action.AbstractActionRuntime;
+import com.hortonworks.iotas.layout.runtime.rule.action.ActionRuntime;
 import com.hortonworks.iotas.util.ProxyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,7 @@ import java.util.Set;
 /**
  * Runtime for {@link SplitAction}
  */
-public class SplitActionRuntime implements ActionRuntime {
+public class SplitActionRuntime extends AbstractActionRuntime {
 
     private static final Logger log = LoggerFactory.getLogger(SplitActionRuntime.class);
 
@@ -55,27 +55,25 @@ public class SplitActionRuntime implements ActionRuntime {
 
     public SplitActionRuntime(SplitAction splitAction) {
         this.splitAction = splitAction;
-        prepare();
     }
 
-    public void prepare() {
+    @Override
+    public void initialize(Map<String, Object> config) {
+        super.initialize(config);
+
         final String jarId = splitAction.getJarId();
         final String splitterClassName = splitAction.getSplitterClassName();
         if (jarId != null && splitterClassName != null) {
             ProxyUtil<Splitter> proxyUtil = new ProxyUtil<>(Splitter.class, this.getClass().getClassLoader());
             try {
-                splitter = proxyUtil.loadClassFromJar(jarId, splitterClassName);
+                String jarPath = getJarPathFor(jarId);
+                splitter = proxyUtil.loadClassFromJar(jarPath, splitterClassName);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
         } else {
             splitter = new DefaultSplitter();
         }
-    }
-
-    @Override
-    public void prepare(ActionRuntimeContext actionRuntimeContext) {
-
     }
 
     @Override
@@ -115,8 +113,8 @@ public class SplitActionRuntime implements ActionRuntime {
     public static class Factory implements RuntimeService.Factory<ActionRuntime, Action> {
 
         @Override
-        public ActionRuntime create(Action splitAction) {
-            return new SplitActionRuntime((SplitAction) splitAction);
+        public ActionRuntime create(Action action) {
+            return new SplitActionRuntime((SplitAction) action);
         }
     }
 }

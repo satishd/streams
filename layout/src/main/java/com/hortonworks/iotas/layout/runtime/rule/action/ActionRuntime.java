@@ -24,6 +24,7 @@ import com.hortonworks.iotas.common.Result;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -32,12 +33,20 @@ import java.util.Set;
 public interface ActionRuntime extends Serializable {
 
     /**
-     * Any resources can be initialized using the given {@code actionRuntimeContext}. This is invoked once before any
-     * events are processed with {@link #execute(IotasEvent)}.
+     * This is invoked after this object is constructed before any of the other methods are invoked. Any resources can
+     * be initialized using the given {@code actionRuntimeContext}.
      *
      * @param actionRuntimeContext contextual information of {@link ActionRuntime}
      */
-    public void prepare(ActionRuntimeContext actionRuntimeContext);
+    public void setActionRuntimeContext(ActionRuntimeContext actionRuntimeContext);
+
+    /**
+     * This is invoked before {@link #execute(IotasEvent)} method is invoked. Any resources can be initialized which are used in
+     * processing the received events
+     *
+     * @param config configuration key/values which could have been configured at action/processor/topology level.
+     */
+    public void initialize(Map<String, Object> config);
 
     /**
      * Execute the current action and return a {@link List} of {@link Result}s.
