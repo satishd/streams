@@ -106,6 +106,6 @@ public class JoinAction extends Action {
                 ", joinerClassName='" + joinerClassName + '\'' +
                 ", groupExpiryInterval=" + groupExpiryInterval +
                 ", eventExpiryInterval=" + eventExpiryInterval +
-                '}';
+                '}' + super.toString();
     }
 }
