@@ -1,14 +1,13 @@
 package com.hortonworks.iotas.topology;
 
-import com.hortonworks.iotas.util.CoreUtils;
-import org.apache.storm.Config;
-import org.apache.storm.LocalCluster;
-import org.apache.storm.StormSubmitter;
-import org.apache.storm.topology.TopologyBuilder;
 import com.hortonworks.iotas.bolt.ParserBolt;
 import com.hortonworks.iotas.bolt.PrinterBolt;
 import com.hortonworks.iotas.hbase.ParserOutputHBaseMapper;
 import com.hortonworks.iotas.hdfs.IdentityHdfsRecordFormat;
+import com.hortonworks.iotas.util.CoreUtils;
+import org.apache.storm.Config;
+import org.apache.storm.LocalCluster;
+import org.apache.storm.StormSubmitter;
 import org.apache.storm.hbase.bolt.HBaseBolt;
 import org.apache.storm.hbase.bolt.mapper.HBaseMapper;
 import org.apache.storm.hdfs.bolt.HdfsBolt;
@@ -19,10 +18,11 @@ import org.apache.storm.hdfs.bolt.rotation.FileRotationPolicy;
 import org.apache.storm.hdfs.bolt.rotation.TimedRotationPolicy;
 import org.apache.storm.hdfs.bolt.sync.CountSyncPolicy;
 import org.apache.storm.hdfs.bolt.sync.SyncPolicy;
-import org.yaml.snakeyaml.Yaml;
 import org.apache.storm.kafka.KafkaSpout;
 import org.apache.storm.kafka.SpoutConfig;
 import org.apache.storm.kafka.ZkHosts;
+import org.apache.storm.topology.TopologyBuilder;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -30,8 +30,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.hortonworks.iotas.bolt.ParserBolt.PARSED_TUPLES_STREAM;
 import static com.hortonworks.iotas.bolt.ParserBolt.FAILED_TO_PARSE_TUPLES_STREAM;
+import static com.hortonworks.iotas.bolt.ParserBolt.PARSED_TUPLES_STREAM;
 
 public class IotasTopology {
     private static final String KAFKA_SPOUT_ZK_URL = "kafka.spout.zkUrl";

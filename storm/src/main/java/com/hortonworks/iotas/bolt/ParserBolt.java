@@ -1,6 +1,17 @@
 package com.hortonworks.iotas.bolt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hortonworks.iotas.catalog.DataSource;
+import com.hortonworks.iotas.catalog.ParserInfo;
+import com.hortonworks.iotas.client.CatalogRestClient;
+import com.hortonworks.iotas.common.IotasEvent;
+import com.hortonworks.iotas.common.IotasEventImpl;
+import com.hortonworks.iotas.model.IotasMessage;
+import com.hortonworks.iotas.parser.Parser;
 import com.hortonworks.iotas.util.CoreUtils;
+import com.hortonworks.iotas.util.ProxyUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -8,17 +19,6 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hortonworks.iotas.client.CatalogRestClient;
-import com.hortonworks.iotas.util.ProxyUtil;
-import com.hortonworks.iotas.catalog.DataSource;
-import com.hortonworks.iotas.catalog.ParserInfo;
-import com.hortonworks.iotas.common.IotasEvent;
-import com.hortonworks.iotas.common.IotasEventImpl;
-import com.hortonworks.iotas.model.IotasMessage;
-import com.hortonworks.iotas.parser.Parser;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
