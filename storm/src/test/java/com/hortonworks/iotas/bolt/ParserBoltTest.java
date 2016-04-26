@@ -1,5 +1,6 @@
 package com.hortonworks.iotas.bolt;
 
+import com.hortonworks.iotas.util.CoreUtils;
 import org.apache.storm.Config;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.tuple.Tuple;
@@ -53,7 +54,7 @@ public class ParserBoltTest {
         parserBolt.withUnparsedTuplesStreamId(FAILED_TO_PARSE_TUPLES_STREAM);
 
         Config config = new Config();
-        config.put(ParserBolt.CATALOG_ROOT_URL, "test");
+        config.put(CoreUtils.CATALOG_ROOT_URL, "test");
         config.put(ParserBolt.LOCAL_PARSER_JAR_PATH, "/tmp");
 
         parserBolt.prepare(config, null, mockOutputCollector);

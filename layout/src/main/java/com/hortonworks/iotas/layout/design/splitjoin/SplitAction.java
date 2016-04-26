@@ -25,18 +25,18 @@ import com.hortonworks.iotas.layout.design.rule.action.Action;
  *
  */
 public class SplitAction extends Action {
-    private String jarId;
+    private Long jarId;
     private String splitterClassName;
 
     public SplitAction() {
     }
 
-    public SplitAction(String jarId, String splitterClassName) {
+    public SplitAction(Long jarId, String splitterClassName) {
         this.jarId = jarId;
         this.splitterClassName = splitterClassName;
     }
 
-    public String getJarId() {
+    public Long getJarId() {
         return jarId;
     }
 

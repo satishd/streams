@@ -1,5 +1,6 @@
 package com.hortonworks.iotas.topology;
 
+import com.hortonworks.iotas.util.CoreUtils;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
@@ -47,8 +48,7 @@ public class IotasTopology {
     private static final String HDFS_FSURL = "hdfs.fsUrl";
     private static final String HDFS_PATH = "hdfs.path";
     private static final String HDFS_NAME = "hdfs.name";
-    private static final String HDFS_ROTATION_INTERVAL = "hdfs" +
-            ".rotationInterval";
+    private static final String HDFS_ROTATION_INTERVAL = "hdfs.rotationInterval";
     private static final String HDFS_SYNC_POLICY_COUNT = "hdfs.syncPolicyCount";
     public static final String HBASE_CONF = "hbase.conf";
 
@@ -112,7 +112,7 @@ public class IotasTopology {
 
         Config conf = new Config();
         conf.setDebug(true);
-        conf.put(ParserBolt.CATALOG_ROOT_URL, configuration.get(CATALOG_ROOT_URL));
+        conf.put(CoreUtils.CATALOG_ROOT_URL, configuration.get(CATALOG_ROOT_URL));
         conf.put(ParserBolt.LOCAL_PARSER_JAR_PATH, configuration.get(PARSER_JAR_PATH));
         conf.put(HBASE_CONF, hbaseConf);
 

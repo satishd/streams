@@ -10,18 +10,21 @@ import java.util.Map;
 /**
  * Utility methods for the core package.
  */
-public class CoreUtils {
+public final class CoreUtils {
+
+    public static final String CATALOG_ROOT_URL = "catalog.root.url";
+    public static final String LOCAL_JAR_PATH = "local.jar.path";
+
+    private CoreUtils() {
+    }
+
     public static <T extends Storable> T jsonToStorable(String json, Class<T> clazz) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(json, clazz);
     }
 
     public static String storableToJson(Storable storable) throws IOException {
-        if(storable != null) {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.writeValueAsString(storable);
-        }
-        return null;
+        return storable != null ? new ObjectMapper().writeValueAsString(storable) : null;
     }
 
     /**
