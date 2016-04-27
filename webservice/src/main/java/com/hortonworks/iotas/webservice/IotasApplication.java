@@ -90,10 +90,7 @@ public class IotasApplication extends Application<IotasConfiguration> {
         // final FeedResource feedResource = new FeedResource(kafkaProducerManager.getProducer(), zkClient);
         // environment.jersey().register(feedResource);
 
-        // TODO we should load the implementation based on configuration
-        final StorageManager cacheBackedDao = getCacheBackedDao();
-
-        registerResources(iotasConfiguration, environment, cacheBackedDao);
+        registerResources(iotasConfiguration, environment);
     }
 
     private StorageManager getCacheBackedDao() {
@@ -177,17 +174,15 @@ public class IotasApplication extends Application<IotasConfiguration> {
         return jarStorage;
     }
 
-
-    private void registerResources(IotasConfiguration iotasConfiguration, Environment environment, StorageManager manager) throws ConfigException {
+    private void registerResources(IotasConfiguration iotasConfiguration, Environment environment) throws ConfigException {
         StorageManager storageManager = getCacheBackedDao();
-        TopologyActions topologyActions = getTopologyActionsImpl
-                (iotasConfiguration);
+        TopologyActions topologyActions = getTopologyActionsImpl(iotasConfiguration);
         TopologyMetrics topologyMetrics = getTopologyMetricsImpl(iotasConfiguration);
         JarStorage jarStorage = this.getJarStorage(iotasConfiguration);
-        final CatalogService catalogService = new CatalogService
-                (storageManager, topologyActions, topologyMetrics, jarStorage);
+
+        final CatalogService catalogService = new CatalogService(storageManager, topologyActions, topologyMetrics, jarStorage);
         final FeedCatalogResource feedResource = new FeedCatalogResource(catalogService);
-        final ParserInfoCatalogResource parserResource = new ParserInfoCatalogResource(catalogService, iotasConfiguration, jarStorage);
+        final ParserInfoCatalogResource parserResource = new ParserInfoCatalogResource(catalogService);
         final DataSourceCatalogResource dataSourceResource = new DataSourceCatalogResource(catalogService);
         final DataSourceWithDataFeedCatalogResource dataSourceWithDataFeedCatalogResource =
                 new DataSourceWithDataFeedCatalogResource(new DataSourceFacade(catalogService));
@@ -200,7 +195,7 @@ public class IotasApplication extends Application<IotasConfiguration> {
         final TopologyEditorMetadataResource topologyEditorMetadataResource = new TopologyEditorMetadataResource(catalogService);
         final TagCatalogResource tagCatalogResource = new TagCatalogResource(catalogService);
 
-        final JarCatalogResource jarCatalogResource = new JarCatalogResource(catalogService, iotasConfiguration, jarStorage);
+        final JarCatalogResource jarCatalogResource = new JarCatalogResource(catalogService);
 
         List<Object> resources = Lists.newArrayList(feedResource, parserResource, dataSourceResource, dataSourceWithDataFeedCatalogResource,
                 topologyCatalogResource, clusterCatalogResource, componentCatalogResource,

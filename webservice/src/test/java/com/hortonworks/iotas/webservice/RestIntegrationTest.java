@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.hortonworks.iotas.webservice;
 
 
@@ -9,6 +27,7 @@ import com.hortonworks.iotas.catalog.DataFeed;
 import com.hortonworks.iotas.catalog.Component;
 import com.hortonworks.iotas.catalog.DataSource;
 import com.hortonworks.iotas.catalog.CatalogResponse;
+import com.hortonworks.iotas.catalog.Jar;
 import com.hortonworks.iotas.catalog.ParserInfo;
 import com.hortonworks.iotas.catalog.NotifierInfo;
 import com.hortonworks.iotas.catalog.Tag;
@@ -28,7 +47,10 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 import org.glassfish.jersey.media.multipart.internal.MultiPartWriter;
 import org.junit.Assert;
@@ -41,7 +63,9 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -383,6 +407,65 @@ public class RestIntegrationTest {
             Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
             Assert.assertEquals(expectedResults, getEntities(response, expectedResults.get(i).getClass()));
         }
+    }
+
+    @Test
+    public void testJarResources() throws Exception {
+        Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
+        String response = null;
+        String url = rootUrl + "jars";
+
+        // POST a jar
+        Jar jar = new Jar();
+        jar.setName("milkyway-jar");
+        jar.setVersion(System.currentTimeMillis());
+        jar.setClassName("com.hortonworks.jars.MyClass");
+        // create multi part
+        MultiPart multiPart = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE);
+        multiPart.bodyPart(new StreamDataBodyPart("file", JAR_FILE_STREAM, "file"));
+        multiPart.bodyPart(new FormDataBodyPart("jar", jar, MediaType.APPLICATION_JSON_TYPE));
+        response = client.target(url)
+                .request(MediaType.MULTIPART_FORM_DATA_TYPE, MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                .post(Entity.entity(multiPart, multiPart.getMediaType()), String.class);
+        Jar postedJar = getEntity(response, Jar.class);
+
+        Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
+
+        // GET jars
+        response = client.target(url).request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
+        Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
+        List<Jar> jars = getEntities(response, Jar.class);
+        Assert.assertEquals(jars.size(), 1);
+        Assert.assertEquals(jars.iterator().next().getName(), jar.getName());
+
+        // PUT
+        postedJar.setName("andromeda-jar");
+        postedJar.setVersion(System.currentTimeMillis());
+        multiPart = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE);
+        multiPart.bodyPart(new StreamDataBodyPart("file", JAR_FILE_STREAM, "file"));
+        multiPart.bodyPart(new FormDataBodyPart("jar", postedJar, MediaType.APPLICATION_JSON_TYPE));
+        response = client.target(url)
+                .request(MediaType.MULTIPART_FORM_DATA_TYPE, MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                .post(Entity.entity(multiPart, multiPart.getMediaType()), String.class);
+        Jar updatedJar = getEntity(response, Jar.class);
+
+        Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
+        Assert.assertEquals(updatedJar.getId(), postedJar.getId());
+        Assert.assertEquals(updatedJar.getName(), postedJar.getName());
+
+
+        // DELETE
+        response = client.target(url+"/"+updatedJar.getId()).request().delete(String.class);
+        Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
+        final Jar deletedJar = getEntity(response, Jar.class);
+        Assert.assertEquals(deletedJar.getId(), updatedJar.getId());
+
+        // GET
+        response = client.target(url).request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
+        Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
+        jars = getEntities(response, Jar.class);
+        Assert.assertTrue(jars.isEmpty());
+
     }
 
     /**
