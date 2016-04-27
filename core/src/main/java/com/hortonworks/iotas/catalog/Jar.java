@@ -54,9 +54,9 @@ public class Jar extends AbstractStorable {
     private String className;
 
     /**
-     * Storage location of the jar.
+     * Name of the jar in the configured storage.
      */
-    private String storagePath;
+    private String storedFileName;
 
     /**
      * Jar version.
@@ -138,12 +138,12 @@ public class Jar extends AbstractStorable {
     /**
      * @return Storage location of the jar.
      */
-    public String getStoragePath() {
-        return storagePath;
+    public String getStoredFileName() {
+        return storedFileName;
     }
 
-    public void setStoragePath(String storagePath) {
-        this.storagePath = storagePath;
+    public void setStoredFileName(String storedFileName) {
+        this.storedFileName = storedFileName;
     }
 
     /**
@@ -185,7 +185,7 @@ public class Jar extends AbstractStorable {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", className='" + className + '\'' +
-                ", storagePath='" + storagePath + '\'' +
+                ", storageName='" + storedFileName + '\'' +
                 ", version=" + version +
                 ", timestamp=" + timestamp +
                 ", auxiliaryInfo='" + auxiliaryInfo + '\'' +
@@ -202,7 +202,7 @@ public class Jar extends AbstractStorable {
         if (!id.equals(jar.id)) return false;
         if (!name.equals(jar.name)) return false;
         if (!className.equals(jar.className)) return false;
-        if (!storagePath.equals(jar.storagePath)) return false;
+        if (!storedFileName.equals(jar.storedFileName)) return false;
         if (!version.equals(jar.version)) return false;
         if (!timestamp.equals(jar.timestamp)) return false;
         return auxiliaryInfo.equals(jar.auxiliaryInfo);
@@ -214,7 +214,7 @@ public class Jar extends AbstractStorable {
         int result = id.hashCode();
         result = 31 * result + name.hashCode();
         result = 31 * result + className.hashCode();
-        result = 31 * result + storagePath.hashCode();
+        result = 31 * result + storedFileName.hashCode();
         result = 31 * result + version.hashCode();
         result = 31 * result + timestamp.hashCode();
         result = 31 * result + auxiliaryInfo.hashCode();

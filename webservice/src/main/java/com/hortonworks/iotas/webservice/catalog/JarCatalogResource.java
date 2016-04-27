@@ -19,13 +19,8 @@
 package com.hortonworks.iotas.webservice.catalog;
 
 import com.codahale.metrics.annotation.Timed;
-import com.google.common.io.ByteStreams;
 import com.hortonworks.iotas.catalog.Jar;
-import com.hortonworks.iotas.parser.Parser;
 import com.hortonworks.iotas.service.CatalogService;
-import com.hortonworks.iotas.util.JarStorage;
-import com.hortonworks.iotas.util.ProxyUtil;
-import com.hortonworks.iotas.webservice.IotasConfiguration;
 import com.hortonworks.iotas.webservice.util.WSUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -41,7 +36,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -50,7 +44,6 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -71,14 +64,9 @@ public class JarCatalogResource {
     private static final Logger log = LoggerFactory.getLogger(JarCatalogResource.class);
 
     private final CatalogService catalogService;
-    private final IotasConfiguration configuration;
-    private final JarStorage jarStorage;
-    private ProxyUtil<Parser> parserProxyUtil;
 
-    public JarCatalogResource(CatalogService catalogService, IotasConfiguration configuration, JarStorage jarStorage) {
+    public JarCatalogResource(CatalogService catalogService) {
         this.catalogService = catalogService;
-        this.configuration = configuration;
-        this.jarStorage = jarStorage;
     }
 
     @GET
@@ -104,7 +92,7 @@ public class JarCatalogResource {
      *
      * Below example describes how a jar file can be added along with metadata
      * <blockquote><pre>
-     * curl -X POST -i -F file=@user-lib.jar -F "jar={\"id\":1234, \"name\":\"jar-1\",\"version\":1};type=application/json"  http://localhost:8080/api/v1/catalog/jars
+     * curl -X POST -i -F file=@user-lib.jar -F "jar={\"name\":\"jar-1\",\"version\":1};type=application/json"  http://localhost:8080/api/v1/catalog/jars
      *
      * HTTP/1.1 100 Continue
      *
@@ -113,7 +101,7 @@ public class JarCatalogResource {
      * Content-Type: application/json
      * Content-Length: 239
      *
-     * {"responseCode":1000,"responseMessage":"Success","entity":{"id":1234,"name":"jar-1","className":null,"storagePath":"/tmp/test-hdfs/jar-1-ea41fe3a-12f9-45d4-ae24-818d570b8963.jar","version":1,"timestamp":1460716593157,"auxiliaryInfo":null}}
+     * {"responseCode":1000,"responseMessage":"Success","entity":{"id":1234,"name":"jar-1","className":null,"storedFileName":"/tmp/test-hdfs/jar-1-ea41fe3a-12f9-45d4-ae24-818d570b8963.jar","version":1,"timestamp":1460716593157,"auxiliaryInfo":null}}
      * </pre></blockquote>
      *
      * @param inputStream actual file content as {@link InputStream}.
@@ -131,19 +119,16 @@ public class JarCatalogResource {
 
         try {
             log.info("Received jar: [{}]", jar);
-            String jarStoragePath = (StringUtils.isBlank(jar.getName()) ? "jar" : jar.getName()) + "-" + UUID.randomUUID().toString() + ".jar";
-            String uploadedPath = jarStorage.uploadJar(inputStream, jarStoragePath);
-            inputStream.close();
-            log.info("Received Jar file is uploaded to [{}]", uploadedPath);
+            Jar updatedJar = addOrUpdateJar(inputStream, jar);
 
-            jar.setTimestamp(System.currentTimeMillis());
-            jar.setStoragePath(uploadedPath);
-            catalogService.addJar(jar);
-
-            return WSUtils.respond(CREATED, SUCCESS, jar);
+            return WSUtils.respond(CREATED, SUCCESS, updatedJar);
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
         }
+    }
+
+    protected String getJarStorageName(String jarName) {
+        return (StringUtils.isBlank(jarName) ? "jar" : jarName) + "-" + UUID.randomUUID().toString() + ".jar";
     }
 
     /**
@@ -161,14 +146,28 @@ public class JarCatalogResource {
                            @FormDataParam("jar") final Jar jar) {
         try {
             log.info("Received jar: [{}]", jar);
-            // todo updation
+            final String oldJarStorageName = catalogService.getJar(jar.getId()).getStoredFileName();
 
-            return WSUtils.respond(CREATED, SUCCESS, jar);
+            final Jar updatedJar = addOrUpdateJar(inputStream, jar);
+
+            final boolean deleted = catalogService.deleteJarFromStorage(oldJarStorageName);
+            logDeletionMessage(oldJarStorageName, deleted);
+
+            return WSUtils.respond(CREATED, SUCCESS, updatedJar);
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
         }
     }
 
+    protected Jar addOrUpdateJar(InputStream inputStream, Jar jar) throws IOException {
+        final String updatedJarStorageName = getJarStorageName(jar.getName());
+        jar.setStoredFileName(updatedJarStorageName);
+        log.info("Uploading Jar [{}]", jar);
+        final String uploadedJarStoragePath = catalogService.uploadJarToStorage(inputStream, updatedJarStorageName);
+        log.info("Received Jar file is uploaded to [{}]", uploadedJarStoragePath);
+        jar.setTimestamp(System.currentTimeMillis());
+        return catalogService.addOrUpdateJar(jar);
+    }
 
     @GET
     @Path("/jars/{id}")
@@ -194,18 +193,26 @@ public class JarCatalogResource {
     @DELETE
     @Path("/jars/{id}")
     @Timed
-    public Response removeParser(@PathParam("id") Long jarId) {
+    public Response removeJar(@PathParam("id") Long jarId) {
         try {
-            Jar removedParser = catalogService.removeJar(jarId);
-
-            if (removedParser != null) {
-                return WSUtils.respond(OK, SUCCESS, removedParser);
+            Jar removedJar = catalogService.removeJar(jarId);
+            log.info("Removed Jar entry is [{}]", removedJar);
+            if (removedJar != null) {
+                boolean removed = catalogService.deleteJarFromStorage(removedJar.getStoredFileName());
+                logDeletionMessage(removedJar.getStoredFileName(), removed);
+                return WSUtils.respond(OK, SUCCESS, removedJar);
             } else {
+                log.info("Jar entry with id [{}] is not found", jarId);
                 return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, jarId.toString());
             }
         } catch (Exception ex) {
+            log.error("Encountered error in removing jar with id [{}]", jarId, ex);
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
         }
+    }
+
+    protected void logDeletionMessage(String removedFileName, boolean removed) {
+        log.info("Delete action for Jar [{}] from storage is [{}]", removedFileName, removed ? "success" : "failure" );
     }
 
     /**
@@ -217,20 +224,11 @@ public class JarCatalogResource {
     @GET
     @Produces({"application/java-archive", "application/json"})
     @Path("/jars/download/{jarId}")
-    public Response downloadParserJar(@PathParam("jarId") Long jarId) {
+    public Response downloadJar(@PathParam("jarId") Long jarId) {
         try {
             Jar jar = catalogService.getJar(jarId);
             if (jar != null) {
-                final InputStream inputStream = jarStorage.downloadJar(jar.getStoragePath());
-                StreamingOutput streamOutput = new StreamingOutput() {
-                    public void write(OutputStream os) throws IOException, WebApplicationException {
-                        try {
-                            ByteStreams.copy(inputStream, os);
-                        } finally {
-                            os.close();
-                        }
-                    }
-                };
+                StreamingOutput streamOutput = WSUtils.wrapInStreamingOutput(catalogService.downloadJarFromStorage(jar.getStoredFileName()));
                 return Response.ok(streamOutput).build();
             }
         } catch (Exception ex) {

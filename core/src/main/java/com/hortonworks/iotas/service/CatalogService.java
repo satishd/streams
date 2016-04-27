@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.hortonworks.iotas.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -12,7 +30,6 @@ import com.hortonworks.iotas.catalog.ParserInfo;
 import com.hortonworks.iotas.catalog.NotifierInfo;
 import com.hortonworks.iotas.catalog.Device;
 import com.hortonworks.iotas.catalog.Tag;
-import com.hortonworks.iotas.catalog.TagStorableMapping;
 import com.hortonworks.iotas.catalog.Topology;
 import com.hortonworks.iotas.catalog.TopologyEditorMetadata;
 import com.hortonworks.iotas.processor.CustomProcessorInfo;
@@ -65,8 +82,6 @@ public class CatalogService {
     private static final String COMPONENT_NAMESPACE = new Component().getNameSpace();
     private static final String NOTIFIER_INFO_NAMESPACE = new NotifierInfo().getNameSpace();
     private static final String TOPOLOGY_NAMESPACE = new Topology().getNameSpace();
-    private static final String TAG_NAMESPACE = new Tag().getNameSpace();
-    private static final String TAG_STORABLE_MAPPING_NAMESPACE = new TagStorableMapping().getNameSpace();
     private static final String JAR_NAMESPACE = new Jar().getNameSpace();
 
     private StorageManager dao;
@@ -598,13 +613,11 @@ public class CatalogService {
     public TopologyComponent removeTopologyComponent (Long id) {
         TopologyComponent topologyComponent = new TopologyComponent();
         topologyComponent.setId(id);
-        return dao.remove(new StorableKey(TopologyComponent.NAME_SPACE,
-                topologyComponent.getPrimaryKey()));
+        return dao.remove(new StorableKey(TopologyComponent.NAME_SPACE, topologyComponent.getPrimaryKey()));
     }
 
-    public InputStream getCustomProcessorFile (String fileName) throws IOException {
-        final InputStream inputStream = this.jarStorage.downloadJar(fileName);
-        return inputStream;
+    public InputStream getFileFromJarStorage(String fileName) throws IOException {
+        return this.jarStorage.downloadJar(fileName);
     }
 
     public Collection<CustomProcessorInfo> listCustomProcessorsWithFilter (List<QueryParam> params) throws IOException {
@@ -651,8 +664,8 @@ public class CatalogService {
     }
 
     public CustomProcessorInfo addCustomProcessorInfo (CustomProcessorInfo customProcessorInfo, InputStream jarFile, InputStream imageFile) throws IOException {
-        this.jarStorage.uploadJar(jarFile, customProcessorInfo.getJarFileName());
-        this.jarStorage.uploadJar(imageFile, customProcessorInfo.getImageFileName());
+        uploadJarToStorage(jarFile, customProcessorInfo.getJarFileName());
+        uploadJarToStorage(imageFile, customProcessorInfo.getImageFileName());
         TopologyComponent topologyComponent = customProcessorInfo.toTopologyComponent();
         topologyComponent.setId(this.dao.nextId(TopologyComponent.NAME_SPACE));
         this.dao.add(topologyComponent);
@@ -662,18 +675,32 @@ public class CatalogService {
     public CustomProcessorInfo updateCustomProcessorInfo (CustomProcessorInfo customProcessorInfo, InputStream jarFile, InputStream imageFile) throws
             IOException {
         List<QueryParam> queryParams = new ArrayList<>();
-        queryParams.add(new QueryParam(customProcessorInfo.NAME, customProcessorInfo.getName()));
+        queryParams.add(new QueryParam(CustomProcessorInfo.NAME, customProcessorInfo.getName()));
         Collection<TopologyComponent> result = this.listCustomProcessorsComponentsWithFilter(queryParams);
         if (result.isEmpty() || result.size() != 1) {
             throw new IOException("Failed to update custom processor with name:" + customProcessorInfo.getName());
         }
-        this.jarStorage.uploadJar(jarFile, customProcessorInfo.getJarFileName());
-        this.jarStorage.uploadJar(imageFile, customProcessorInfo.getImageFileName());
+
+        uploadJarToStorage(jarFile, customProcessorInfo.getJarFileName());
+        uploadJarToStorage(imageFile, customProcessorInfo.getImageFileName());
         TopologyComponent customProcessorComponent = result.iterator().next();
         TopologyComponent newCustomProcessorComponent = customProcessorInfo.toTopologyComponent();
         newCustomProcessorComponent.setId(customProcessorComponent.getId());
         this.dao.addOrUpdate(newCustomProcessorComponent);
+
         return customProcessorInfo;
+    }
+
+    public String uploadJarToStorage(InputStream inputStream, String jarFileName) throws IOException {
+        return jarStorage.uploadJar(inputStream, jarFileName);
+    }
+
+    public InputStream downloadJarFromStorage(String jarName) throws IOException {
+        return jarStorage.downloadJar(jarName);
+    }
+
+    public boolean deleteJarFromStorage(String jarName) throws IOException {
+        return jarStorage.deleteJar(jarName);
     }
 
     public CustomProcessorInfo removeCustomProcessorInfo (String name) throws IOException {
@@ -829,17 +856,17 @@ public class CatalogService {
     public Jar removeJar(Long parserId) {
         Jar jar = new Jar();
         jar.setId(parserId);
-        return dao.remove(new StorableKey(PARSER_INFO_NAMESPACE, jar.getPrimaryKey()));
+        return dao.remove(new StorableKey(JAR_NAMESPACE, jar.getPrimaryKey()));
     }
 
-    public Jar addJar(Jar jar) {
+    public Jar addOrUpdateJar(Jar jar) {
         if (jar.getId() == null) {
             jar.setId(dao.nextId(JAR_NAMESPACE));
         }
         if (jar.getTimestamp() == null) {
             jar.setTimestamp(System.currentTimeMillis());
         }
-        dao.add(jar);
+        dao.addOrUpdate(jar);
 
         return jar;
     }
