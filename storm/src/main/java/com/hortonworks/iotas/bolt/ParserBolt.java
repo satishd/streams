@@ -29,13 +29,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 public class ParserBolt extends BaseRichBolt {
     public static final String LOCAL_PARSER_JAR_PATH = "local.parser.jar.path";
     public static final String BYTES_FIELD = "bytes";
     public static final String PARSED_TUPLES_STREAM = "parsed_tuples_stream";
     public static final String FAILED_TO_PARSE_TUPLES_STREAM = "failed_to_parse_tuples_stream";
-
 
     private static final Logger LOG = LoggerFactory.getLogger(ParserBolt.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -171,7 +169,7 @@ public class ParserBolt extends BaseRichBolt {
     }
 
     private DataSource getDataSource(IotasMessage iotasMessage) {
-        DataSourceIdentifier dataSrcIdf = new DataSourceIdentifier(iotasMessage.getId(), iotasMessage.getVersion());
+        DataSourceIdentifier dataSrcIdf = new DataSourceIdentifier(iotasMessage.getMake(), iotasMessage.getModel());
         DataSource dataSource = dataSrcIdfToDataSrc.get(dataSrcIdf);
         if(dataSource == null) {
             dataSource = client.getDataSource(dataSrcIdf.getId(), dataSrcIdf.getVersion());
@@ -184,7 +182,7 @@ public class ParserBolt extends BaseRichBolt {
     }
 
     private Parser getParser(IotasMessage iotasMessage) {
-        DataSourceIdentifier dataSrcIdf = new DataSourceIdentifier(iotasMessage.getId(), iotasMessage.getVersion());
+        DataSourceIdentifier dataSrcIdf = new DataSourceIdentifier(iotasMessage.getMake(), iotasMessage.getModel());
         Parser parser = dataSrcIdfToParser.get(dataSrcIdf);
         if (parser == null) {
             ParserInfo parserInfo = client.getParserInfo(dataSrcIdf.getId(), dataSrcIdf.getVersion());
@@ -224,9 +222,9 @@ public class ParserBolt extends BaseRichBolt {
      */
     private static class DataSourceIdentifier {
         private String id;
-        private Long version;
+        private String version;
 
-        private DataSourceIdentifier(String id, Long version) {
+        private DataSourceIdentifier(String id, String version) {
             this.id = id;
             this.version = version;
         }
@@ -235,7 +233,7 @@ public class ParserBolt extends BaseRichBolt {
             return id;
         }
 
-        public Long getVersion() {
+        public String getVersion() {
             return version;
         }
 
