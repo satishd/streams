@@ -107,20 +107,21 @@ public class CatalogRestClient {
     }
 
     public NotifierInfo getNotifierInfo(String notifierName) {
-        return getEntities(client.target(String.format("%s/%s/?name=%s",
-                                         rootCatalogURL, NOTIFIER_URL, notifierName)), NotifierInfo.class).get(0);
+        return getEntities(client.target(String.format("%s/%s/?name=%s", rootCatalogURL, NOTIFIER_URL, notifierName)),
+                            NotifierInfo.class).get(0);
     }
+
     public DataSource getDataSource(String deviceId, String version) {
-        return getEntities(client.target(String.format("%s/%s/type/DEVICE/?id=%s&version=%s",
-                                         rootCatalogURL, DATASOURCE_URL, deviceId, version)), DataSource.class).get(0);
+        return getEntities(client.target(String.format("%s/%s/type/DEVICE/?make=%s&model=%s",
+                                            rootCatalogURL, DATASOURCE_URL, deviceId, version)),
+                            DataSource.class).get(0);
     }
 
     public ParserInfo getParserInfo(String deviceId, String version) {
-        String url = String.format("%s/%s/type/DEVICE?id=%s&version=%s",
-                rootCatalogURL, DATASOURCE_URL, deviceId, version);
+        String url = String.format("%s/%s/type/DEVICE?make=%s&model=%s", rootCatalogURL, DATASOURCE_URL, deviceId, version);
         DataSource dataSource = getEntities(client.target(url), DataSource.class).get(0);
         DataFeed dataFeed = getEntities(client.target(String.format("%s/%s?dataSourceId=%s",
-                rootCatalogURL, FEED_URL, dataSource.getId())), DataFeed.class).get(0);
+                                        rootCatalogURL, FEED_URL, dataSource.getId())), DataFeed.class).get(0);
 
         return getParserInfo(dataFeed.getParserId());
     }
@@ -142,5 +143,6 @@ public class CatalogRestClient {
     public InputStream getJar(Long jarId) {
         return getInputStream(jarId.toString(), JAR_DOWNLOAD_URL);
     }
+
 
 }
