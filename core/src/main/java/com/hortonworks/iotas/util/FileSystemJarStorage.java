@@ -47,6 +47,10 @@ public class FileSystemJarStorage implements JarStorage {
             directory = dir;
         }
 
+        ensureDirExists();
+    }
+
+    protected void ensureDirExists() {
         final File dirFile = FileSystems.getDefault().getPath(directory).toFile();
 
         if (!dirFile.exists()) {
@@ -55,13 +59,15 @@ public class FileSystemJarStorage implements JarStorage {
             }
         } else {
             if (!dirFile.isDirectory()) {
-                throw new RuntimeException("Given directory path [{}] is not a directory");
+                throw new RuntimeException("Given directory path "+directory+" is not a directory");
             }
         }
     }
 
     @Override
     public String uploadJar (InputStream inputStream, String name) throws IOException {
+        ensureDirExists();
+
         Path path = FileSystems.getDefault().getPath(directory, name);
         File file = path.toFile();
         if (!file.createNewFile()) {
@@ -75,6 +81,8 @@ public class FileSystemJarStorage implements JarStorage {
 
     @Override
     public InputStream downloadJar (String name) throws IOException {
+        ensureDirExists();
+
         Path path = FileSystems.getDefault().getPath(directory, name);
         File file = path.toFile();
         return new FileInputStream(file);
@@ -82,6 +90,8 @@ public class FileSystemJarStorage implements JarStorage {
 
     @Override
     public boolean deleteJar(String name) throws IOException {
+        ensureDirExists();
+
         Path path = FileSystems.getDefault().getPath(directory, name);
         return Files.deleteIfExists(path);
     }
