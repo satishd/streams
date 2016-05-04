@@ -146,12 +146,18 @@ public class JarCatalogResource {
                            @FormDataParam("jar") final Jar jar) {
         try {
             log.info("Received jar: [{}]", jar);
-            final String oldJarStorageName = catalogService.getJar(jar.getId()).getStoredFileName();
+            String oldJarStorageName = null;
+            final Jar existingJar = catalogService.getJar(jar.getId());
+            if(existingJar != null) {
+                oldJarStorageName = existingJar.getStoredFileName();
+            }
 
             final Jar updatedJar = addOrUpdateJar(inputStream, jar);
 
-            final boolean deleted = catalogService.deleteJarFromStorage(oldJarStorageName);
-            logDeletionMessage(oldJarStorageName, deleted);
+            if(oldJarStorageName != null) {
+                final boolean deleted = catalogService.deleteJarFromStorage(oldJarStorageName);
+                logDeletionMessage(oldJarStorageName, deleted);
+            }
 
             return WSUtils.respond(CREATED, SUCCESS, updatedJar);
         } catch (Exception ex) {

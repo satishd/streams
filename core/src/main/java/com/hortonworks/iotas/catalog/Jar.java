@@ -31,11 +31,6 @@ import java.util.Map;
 public class Jar extends AbstractStorable {
     public static final String NAME_SPACE = "jars";
     public static final String ID = "id";
-    public static final String NAME = "name";
-    public static final String CLASS_NAME = "className";
-    public static final String STORAGE_PATH = "storagePath";
-    public static final String VERSION = "version";
-    public static final String TIMESTAMP = "timestamp";
 
     /**
      * Unique Id for a jar instance. This is the primary key column.
@@ -86,18 +81,6 @@ public class Jar extends AbstractStorable {
         Map<Schema.Field, Object> fieldObjectMap = new HashMap<>();
         fieldObjectMap.put(new Schema.Field(ID, Schema.Type.LONG), this.id);
         return new PrimaryKey(fieldObjectMap);
-    }
-
-    @JsonIgnore
-    public Schema getSchema() {
-        return Schema.of(
-                new Schema.Field(ID, Schema.Type.LONG),
-                new Schema.Field(NAME, Schema.Type.STRING),
-                new Schema.Field(CLASS_NAME, Schema.Type.STRING),
-                new Schema.Field(STORAGE_PATH, Schema.Type.STRING),
-                new Schema.Field(VERSION, Schema.Type.LONG),
-                new Schema.Field(TIMESTAMP, Schema.Type.LONG)
-        );
     }
 
     /**

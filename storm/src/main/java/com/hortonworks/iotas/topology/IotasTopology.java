@@ -111,7 +111,6 @@ public class IotasTopology {
                 FAILED_TO_PARSE_TUPLES_STREAM);
 
         Config conf = new Config();
-        conf.setDebug(true);
         conf.put(CoreUtils.CATALOG_ROOT_URL, configuration.get(CATALOG_ROOT_URL));
         conf.put(ParserBolt.LOCAL_PARSER_JAR_PATH, configuration.get(PARSER_JAR_PATH));
         conf.put(HBASE_CONF, hbaseConf);

@@ -20,7 +20,6 @@ package com.hortonworks.iotas.webservice.catalog;
 
 import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.ByteStreams;
 import com.hortonworks.iotas.catalog.Topology;
 import com.hortonworks.iotas.processor.CustomProcessorInfo;
 import com.hortonworks.iotas.service.CatalogService;
@@ -41,7 +40,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -50,7 +48,6 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -364,9 +361,7 @@ public class TopologyCatalogResource {
     @Timed
     public Response removeTopologyComponentConfig (@PathParam("component") TopologyComponent.TopologyComponentType componentType, @PathParam ("id") Long id) {
         try {
-            TopologyComponent removedTopologyComponent = catalogService
-                    .removeTopologyComponent
-                            (id);
+            TopologyComponent removedTopologyComponent = catalogService.removeTopologyComponent(id);
             if (removedTopologyComponent != null) {
                 return WSUtils.respond(OK, SUCCESS, removedTopologyComponent);
             } else {
@@ -387,16 +382,7 @@ public class TopologyCatalogResource {
         try {
             final InputStream inputStream = catalogService.getFileFromJarStorage(fileName);
             if (inputStream != null) {
-                StreamingOutput streamOutput = new StreamingOutput() {
-                    @Override
-                    public void write(OutputStream os) throws IOException, WebApplicationException {
-                        try {
-                            ByteStreams.copy(inputStream, os);
-                        } finally {
-                            os.close();
-                        }
-                    }
-                };
+                StreamingOutput streamOutput = WSUtils.wrapWithStreamingOutput(inputStream);
                 return Response.ok(streamOutput).build();
             }
         } catch (Exception ex) {

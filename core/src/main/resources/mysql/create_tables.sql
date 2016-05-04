@@ -40,7 +40,8 @@ CREATE TABLE IF NOT EXISTS jars (
     name VARCHAR(256) NOT NULL,
     version BIGINT NOT NULL,
     className TEXT NOT NULL,
-    jarStoragePath TEXT NOT NULL,
+    storedFileName TEXT NOT NULL,
+    auxiliaryInfo TEXT NOT NULL,
     timestamp  BIGINT,
     PRIMARY KEY (id),
     UNIQUE KEY `jars_UK_name_version` (name, version)
