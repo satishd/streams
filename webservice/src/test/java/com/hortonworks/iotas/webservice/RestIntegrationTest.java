@@ -27,7 +27,7 @@ import com.hortonworks.iotas.catalog.Cluster;
 import com.hortonworks.iotas.catalog.Component;
 import com.hortonworks.iotas.catalog.DataFeed;
 import com.hortonworks.iotas.catalog.DataSource;
-import com.hortonworks.iotas.catalog.Jar;
+import com.hortonworks.iotas.catalog.File;
 import com.hortonworks.iotas.catalog.NotifierInfo;
 import com.hortonworks.iotas.catalog.ParserInfo;
 import com.hortonworks.iotas.catalog.Tag;
@@ -64,7 +64,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -407,16 +406,15 @@ public class RestIntegrationTest {
     }
 
     @Test
-    public void testJarResources() throws Exception {
+    public void testFileResources() throws Exception {
         Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
         String response = null;
-        String url = rootUrl + "jars";
+        String url = rootUrl + "files";
 
         // POST
-        Jar jar = new Jar();
-        jar.setName("milkyway-jar");
-        jar.setVersion(System.currentTimeMillis());
-        jar.setClassName("com.hortonworks.jars.MyClass");
+        File file = new File();
+        file.setName("milkyway-jar");
+        file.setVersion(System.currentTimeMillis());
 
         MultiPart multiPart = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE);
 
@@ -424,18 +422,18 @@ public class RestIntegrationTest {
 
         final InputStream fileStream = new ByteArrayInputStream(initialJarContent.getBytes());
         multiPart.bodyPart(new StreamDataBodyPart("file", fileStream, "file"));
-        multiPart.bodyPart(new FormDataBodyPart("jar", jar, MediaType.APPLICATION_JSON_TYPE));
+        multiPart.bodyPart(new FormDataBodyPart("fileInfo", file, MediaType.APPLICATION_JSON_TYPE));
 
         response = client.target(url)
                 .request(MediaType.MULTIPART_FORM_DATA_TYPE, MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
                 .post(Entity.entity(multiPart, multiPart.getMediaType()), String.class);
-        Jar postedJar = getEntity(response, Jar.class);
+        File postedFile = getEntity(response, File.class);
 
         Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
 
 
         //DOWNLOAD
-        InputStream downloadInputStream = client.target(url+"/download/"+postedJar.getId()).request().get(InputStream.class);
+        InputStream downloadInputStream = client.target(url+"/download/"+ postedFile.getId()).request().get(InputStream.class);
         ByteArrayOutputStream downloadedJarOutputStream = new ByteArrayOutputStream();
         IOUtils.copy(downloadInputStream, downloadedJarOutputStream);
 
@@ -447,57 +445,57 @@ public class RestIntegrationTest {
 
         // GET all
         response = client.target(url).request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
-        List<Jar> jars = getEntities(response, Jar.class);
+        List<File> files = getEntities(response, File.class);
 
         Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
         Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
-        Assert.assertEquals(jars.size(), 1);
-        Assert.assertEquals(jars.iterator().next().getName(), jar.getName());
+        Assert.assertEquals(files.size(), 1);
+        Assert.assertEquals(files.iterator().next().getName(), file.getName());
 
 
-        // GET /jars/1
-        response = client.target(url+"/"+postedJar.getId()).request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
-        Jar receivedJar = getEntity(response, Jar.class);
+        // GET /files/1
+        response = client.target(url+"/"+ postedFile.getId()).request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
+        File receivedFile = getEntity(response, File.class);
 
         Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
         Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
-        Assert.assertEquals(receivedJar.getName(), postedJar.getName());
-        Assert.assertEquals(receivedJar.getId(), postedJar.getId());
+        Assert.assertEquals(receivedFile.getName(), postedFile.getName());
+        Assert.assertEquals(receivedFile.getId(), postedFile.getId());
 
 
         // PUT
-        postedJar.setName("andromeda-jar");
-        postedJar.setVersion(System.currentTimeMillis());
+        postedFile.setName("andromeda-jar");
+        postedFile.setVersion(System.currentTimeMillis());
 
         multiPart = new MultiPart(MediaType.MULTIPART_FORM_DATA_TYPE);
         InputStream updatedFileStream = new ByteArrayInputStream("andromeda-jar-contents".getBytes());
         multiPart.bodyPart(new StreamDataBodyPart("file", updatedFileStream, "file"));
-        multiPart.bodyPart(new FormDataBodyPart("jar", postedJar, MediaType.APPLICATION_JSON_TYPE));
+        multiPart.bodyPart(new FormDataBodyPart("fileInfo", postedFile, MediaType.APPLICATION_JSON_TYPE));
         response = client.target(url)
                 .request(MediaType.MULTIPART_FORM_DATA_TYPE, MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.entity(multiPart, multiPart.getMediaType()), String.class);
-        Jar updatedJar = getEntity(response, Jar.class);
+        File updatedFile = getEntity(response, File.class);
 
         Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
-        Assert.assertEquals(updatedJar.getId(), postedJar.getId());
-        Assert.assertEquals(updatedJar.getName(), postedJar.getName());
+        Assert.assertEquals(updatedFile.getId(), postedFile.getId());
+        Assert.assertEquals(updatedFile.getName(), postedFile.getName());
 
 
         // DELETE
-        response = client.target(url+"/"+updatedJar.getId()).request().delete(String.class);
-        final Jar deletedJar = getEntity(response, Jar.class);
+        response = client.target(url+"/"+ updatedFile.getId()).request().delete(String.class);
+        final File deletedFile = getEntity(response, File.class);
 
         Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
         Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
-        Assert.assertEquals(deletedJar.getId(), updatedJar.getId());
+        Assert.assertEquals(deletedFile.getId(), updatedFile.getId());
 
 
         // GET
         response = client.target(url).request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
-        jars = getEntities(response, Jar.class);
+        files = getEntities(response, File.class);
 
         Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
-        Assert.assertTrue(jars.isEmpty());
+        Assert.assertTrue(files.isEmpty());
 
     }
 
@@ -758,16 +756,16 @@ public class RestIntegrationTest {
         return outputStreamToSchema;
     }
 
-    private File getCpImageFile () throws IOException {
-        File imageFile = new File("/tmp/image.gif");
+    private java.io.File getCpImageFile () throws IOException {
+        java.io.File imageFile = new java.io.File("/tmp/image.gif");
         IOUtils.copy(IMAGE_FILE_STREAM, new FileOutputStream(imageFile));
         return imageFile;
     }
 
-    private File getCpJarFile () throws IOException {
-        File jarFile = new File("/tmp/iotas-core.jar");
-        IOUtils.copy(JAR_FILE_STREAM, new FileOutputStream(jarFile));
-        return jarFile;
+    private java.io.File getCpJarFile () throws IOException {
+        java.io.File fileFile = new java.io.File("/tmp/iotas-core.jar");
+        IOUtils.copy(JAR_FILE_STREAM, new FileOutputStream(fileFile));
+        return fileFile;
     }
 
 }

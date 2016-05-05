@@ -25,7 +25,7 @@ import com.hortonworks.iotas.catalog.Component;
 import com.hortonworks.iotas.catalog.DataFeed;
 import com.hortonworks.iotas.catalog.DataSet;
 import com.hortonworks.iotas.catalog.DataSource;
-import com.hortonworks.iotas.catalog.Jar;
+import com.hortonworks.iotas.catalog.File;
 import com.hortonworks.iotas.catalog.ParserInfo;
 import com.hortonworks.iotas.catalog.NotifierInfo;
 import com.hortonworks.iotas.catalog.Device;
@@ -45,7 +45,7 @@ import com.hortonworks.iotas.topology.TopologyLayoutConstants;
 import com.hortonworks.iotas.topology.TopologyLayoutValidator;
 import com.hortonworks.iotas.topology.TopologyMetrics;
 import com.hortonworks.iotas.util.CoreUtils;
-import com.hortonworks.iotas.util.JarStorage;
+import com.hortonworks.iotas.util.FileStorage;
 import com.hortonworks.iotas.util.JsonSchemaValidator;
 import com.hortonworks.iotas.util.exception.BadTopologyLayoutException;
 import org.apache.commons.lang.StringUtils;
@@ -82,12 +82,12 @@ public class CatalogService {
     private static final String COMPONENT_NAMESPACE = new Component().getNameSpace();
     private static final String NOTIFIER_INFO_NAMESPACE = new NotifierInfo().getNameSpace();
     private static final String TOPOLOGY_NAMESPACE = new Topology().getNameSpace();
-    private static final String JAR_NAMESPACE = new Jar().getNameSpace();
+    private static final String FILE_NAMESPACE = File.NAME_SPACE;
 
     private StorageManager dao;
     private TopologyActions topologyActions;
     private TopologyMetrics topologyMetrics;
-    private JarStorage jarStorage;
+    private FileStorage fileStorage;
     private TagService tagService;
 
     public static class QueryParam {
@@ -135,11 +135,11 @@ public class CatalogService {
         }
     }
 
-    public CatalogService(StorageManager dao, TopologyActions topologyActions, TopologyMetrics topologyMetrics, JarStorage jarStorage) {
+    public CatalogService(StorageManager dao, TopologyActions topologyActions, TopologyMetrics topologyMetrics, FileStorage fileStorage) {
         this.dao = dao;
         this.topologyActions = topologyActions;
         this.topologyMetrics = topologyMetrics;
-        this.jarStorage = jarStorage;
+        this.fileStorage = fileStorage;
         this.tagService = new CatalogTagService(dao);
     }
 
@@ -617,7 +617,7 @@ public class CatalogService {
     }
 
     public InputStream getFileFromJarStorage(String fileName) throws IOException {
-        return this.jarStorage.downloadJar(fileName);
+        return this.fileStorage.downloadFile(fileName);
     }
 
     public Collection<CustomProcessorInfo> listCustomProcessorsWithFilter (List<QueryParam> params) throws IOException {
@@ -664,8 +664,8 @@ public class CatalogService {
     }
 
     public CustomProcessorInfo addCustomProcessorInfo (CustomProcessorInfo customProcessorInfo, InputStream jarFile, InputStream imageFile) throws IOException {
-        uploadJarToStorage(jarFile, customProcessorInfo.getJarFileName());
-        uploadJarToStorage(imageFile, customProcessorInfo.getImageFileName());
+        uploadFileToStorage(jarFile, customProcessorInfo.getJarFileName());
+        uploadFileToStorage(imageFile, customProcessorInfo.getImageFileName());
         TopologyComponent topologyComponent = customProcessorInfo.toTopologyComponent();
         topologyComponent.setId(this.dao.nextId(TopologyComponent.NAME_SPACE));
         this.dao.add(topologyComponent);
@@ -681,8 +681,8 @@ public class CatalogService {
             throw new IOException("Failed to update custom processor with name:" + customProcessorInfo.getName());
         }
 
-        uploadJarToStorage(jarFile, customProcessorInfo.getJarFileName());
-        uploadJarToStorage(imageFile, customProcessorInfo.getImageFileName());
+        uploadFileToStorage(jarFile, customProcessorInfo.getJarFileName());
+        uploadFileToStorage(imageFile, customProcessorInfo.getImageFileName());
         TopologyComponent customProcessorComponent = result.iterator().next();
         TopologyComponent newCustomProcessorComponent = customProcessorInfo.toTopologyComponent();
         newCustomProcessorComponent.setId(customProcessorComponent.getId());
@@ -691,16 +691,16 @@ public class CatalogService {
         return customProcessorInfo;
     }
 
-    public String uploadJarToStorage(InputStream inputStream, String jarFileName) throws IOException {
-        return jarStorage.uploadJar(inputStream, jarFileName);
+    public String uploadFileToStorage(InputStream inputStream, String jarFileName) throws IOException {
+        return fileStorage.uploadFile(inputStream, jarFileName);
     }
 
-    public InputStream downloadJarFromStorage(String jarName) throws IOException {
-        return jarStorage.downloadJar(jarName);
+    public InputStream downloadFileFromStorage(String jarName) throws IOException {
+        return fileStorage.downloadFile(jarName);
     }
 
-    public boolean deleteJarFromStorage(String jarName) throws IOException {
-        return jarStorage.deleteJar(jarName);
+    public boolean deleteFileFromStorage(String jarName) throws IOException {
+        return fileStorage.deleteFile(jarName);
     }
 
     public CustomProcessorInfo removeCustomProcessorInfo (String name) throws IOException {
@@ -839,35 +839,35 @@ public class CatalogService {
         return tagService.getEntities(tagId, true);
     }
 
-    public Collection<Jar> listJars() {
-        return dao.list(JAR_NAMESPACE);
+    public Collection<File> listFiles() {
+        return dao.list(FILE_NAMESPACE);
     }
 
-    public Collection<Jar> listJars(List<QueryParam> queryParams) {
-        return dao.find(JAR_NAMESPACE, queryParams);
+    public Collection<File> listFiles(List<QueryParam> queryParams) {
+        return dao.find(FILE_NAMESPACE, queryParams);
     }
 
-    public Jar getJar(Long jarId) {
-        Jar jar = new Jar();
-        jar.setId(jarId);
-        return dao.get(new StorableKey(JAR_NAMESPACE, jar.getPrimaryKey()));
+    public File getFile(Long jarId) {
+        File file = new File();
+        file.setId(jarId);
+        return dao.get(new StorableKey(FILE_NAMESPACE, file.getPrimaryKey()));
     }
 
-    public Jar removeJar(Long parserId) {
-        Jar jar = new Jar();
-        jar.setId(parserId);
-        return dao.remove(new StorableKey(JAR_NAMESPACE, jar.getPrimaryKey()));
+    public File removeFile(Long fileId) {
+        File file = new File();
+        file.setId(fileId);
+        return dao.remove(new StorableKey(FILE_NAMESPACE, file.getPrimaryKey()));
     }
 
-    public Jar addOrUpdateJar(Jar jar) {
-        if (jar.getId() == null) {
-            jar.setId(dao.nextId(JAR_NAMESPACE));
+    public File addOrUpdateFile(File file) {
+        if (file.getId() == null) {
+            file.setId(dao.nextId(FILE_NAMESPACE));
         }
-        if (jar.getTimestamp() == null) {
-            jar.setTimestamp(System.currentTimeMillis());
+        if (file.getTimestamp() == null) {
+            file.setTimestamp(System.currentTimeMillis());
         }
-        dao.addOrUpdate(jar);
+        dao.addOrUpdate(file);
 
-        return jar;
+        return file;
     }
 }

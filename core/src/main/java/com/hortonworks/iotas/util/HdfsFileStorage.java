@@ -31,10 +31,10 @@ import java.util.Map;
 
 
 /**
- * HDFS based implementation for storing jar files.
+ * HDFS based implementation for storing files.
  *
  */
-public class HdfsJarStorage implements JarStorage {
+public class HdfsFileStorage implements FileStorage {
 
     // the configuration keys
     public static final String CONFIG_FSURL = "fsUrl";
@@ -59,7 +59,7 @@ public class HdfsJarStorage implements JarStorage {
 
         // make sure fsUrl is set
         if(fsUrl == null) {
-            throw new RuntimeException("fsUrl must be specified for HdfsJarStorage.");
+            throw new RuntimeException("fsUrl must be specified for HdfsFileStorage.");
         }
 
         try {
@@ -70,7 +70,7 @@ public class HdfsJarStorage implements JarStorage {
     }
 
     @Override
-    public String uploadJar(InputStream inputStream, String name) throws IOException {
+    public String uploadFile(InputStream inputStream, String name) throws IOException {
         Path jarPath = new Path(directory, name);
 
         try(FSDataOutputStream outputStream = hdfsFileSystem.create(jarPath, false)) {
@@ -81,13 +81,13 @@ public class HdfsJarStorage implements JarStorage {
     }
 
     @Override
-    public InputStream downloadJar(String name) throws IOException {
-        Path jarPath = new Path(directory, name);
-        return hdfsFileSystem.open(jarPath);
+    public InputStream downloadFile(String name) throws IOException {
+        Path filePath = new Path(directory, name);
+        return hdfsFileSystem.open(filePath);
     }
 
     @Override
-    public boolean deleteJar(String name) throws IOException {
+    public boolean deleteFile(String name) throws IOException {
         return hdfsFileSystem.delete(new Path(directory, name), true);
     }
 }

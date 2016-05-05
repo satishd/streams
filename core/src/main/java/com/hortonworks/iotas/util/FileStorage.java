@@ -23,17 +23,16 @@ import java.io.InputStream;
 import java.util.Map;
 
 /**
- * Interface abstracting the upload and download of jars (like parser, split/join or custom processor) for IoTaS.
- * IoTaS will provide a default file system based implementation which can be
- * swapped by another implementation using jarStorageImplementationClass
+ * Interface abstracting the upload and download of files (like parser jars, split/join or custom processor jars or any other files) for IoTaS.
+ * IoTaS will provide a default file system based implementation which can be swapped by another implementation using fileStorageConfiguration
  * property in the iotas.yaml
  */
-public interface JarStorage {
+public interface FileStorage {
 
-    String DEFAULT_DIR = "/tmp/iotas-jars";
+    String DEFAULT_DIR = "/tmp/iotas-files";
 
     /**
-     * The jar storage can be initialized with a set of key/value pairs.
+     * The file storage can be initialized with a set of key/value pairs.
      *
      * @param config the config specific to implementation
      */
@@ -41,33 +40,33 @@ public interface JarStorage {
 
     /**
      * Uploads the content from given {@code InputStream} to the configured storage with the given {@code name } as identifier which can
-     * be used later for {@link #downloadJar(String)} or {@link #deleteJar(String)}.
+     * be used later for {@link #downloadFile(String)} or {@link #deleteFile(String)}.
      *
-     * @param inputStream stream to read the jar content from
-     * @param name identifier of the jar file to be used later to retrieve
-     *             using downloadJar
+     * @param inputStream stream to read the file content from
+     * @param name identifier of the file to be used later to retrieve
+     *             using {@link #downloadFile(String)}
      * @throws java.io.IOException  if any IO error occurs
      */
-    String uploadJar(InputStream inputStream, String name) throws IOException;
+    String uploadFile(InputStream inputStream, String name) throws IOException;
 
     /**
-     * Returns {@link InputStream} of jar file for the given name.
+     * Returns {@link InputStream} of file for the given name.
      *
-     * @param name identifier of the jar file to be downloaded that was first
-     *             passed during {@link #uploadJar(InputStream, String)}
-     * @return InputStream representing the jar file
+     * @param name identifier of the file to be downloaded that was first
+     *             passed during {@link #uploadFile(InputStream, String)}
+     * @return InputStream representing the file
      * @throws java.io.IOException if any IO error occurs
      */
-    InputStream downloadJar(String name) throws IOException;
+    InputStream downloadFile(String name) throws IOException;
 
     /**
-     * Deletes the stored jar for given jar {@code name}.
+     * Deletes the stored file for given {@code name}.
      *
-     * @param name identifier of the jar file to be deleted that was
-     *             passed during {@link #uploadJar(InputStream, String)}
+     * @param name identifier of the file to be deleted that was
+     *             passed during {@link #uploadFile(InputStream, String)}
      * @return {@code true} if the file is deleted, {@code false} if the file could not be deleted
      * @throws IOException if any IO error occurs
      */
-    boolean deleteJar(String name) throws IOException;
+    boolean deleteFile(String name) throws IOException;
 
 }

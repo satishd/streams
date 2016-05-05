@@ -149,7 +149,7 @@ public class ParserInfoCatalogResource {
         try {
             ParserInfo removedParser = catalogService.removeParser(parserId);
             if (removedParser != null) {
-                catalogService.deleteJarFromStorage(removedParser.getJarStoragePath());
+                catalogService.deleteFileFromStorage(removedParser.getJarStoragePath());
                 return WSUtils.respond(OK, SUCCESS, removedParser);
             } else {
                 return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, parserId.toString());
@@ -171,7 +171,7 @@ public class ParserInfoCatalogResource {
             File tmpFile = File.createTempFile(UUID.randomUUID().toString(), ".jar");
             tmpFile.deleteOnExit();
             os = new FileOutputStream(tmpFile);
-            is = catalogService.downloadJarFromStorage(jarName);
+            is = catalogService.downloadFileFromStorage(jarName);
             ByteStreams.copy(is, os);
             Parser parser = parserProxyUtil.loadClassFromJar(tmpFile.getAbsolutePath(), className);
             result = parser.schema();
@@ -233,7 +233,7 @@ public class ParserInfoCatalogResource {
             ParserInfo parserInfo = objectMapper.readValue(parserInfoStr, ParserInfo.class);
             String prefix = StringUtils.isBlank(parserInfo.getName()) ? "parser-" : parserInfo.getName() + "-";
             String jarStoragePath = prefix + UUID.randomUUID().toString() + ".jar";
-            String uploadedPath = catalogService.uploadJarToStorage(inputStream, jarStoragePath);
+            String uploadedPath = catalogService.uploadFileToStorage(inputStream, jarStoragePath);
             inputStream.close();
             LOG.debug("Jar file uploaded to {}", uploadedPath);
             //TODO something special about multipart request so it wont let me pass just a ParserInfo json object, instead we must pass ParserInfo as a json string.
@@ -266,7 +266,7 @@ public class ParserInfoCatalogResource {
         try {
             ParserInfo parserInfo = doGetParserInfoById(parserId);
             if (parserInfo != null) {
-                StreamingOutput streamOutput = WSUtils.wrapWithStreamingOutput(catalogService.downloadJarFromStorage(parserInfo.getJarStoragePath()));
+                StreamingOutput streamOutput = WSUtils.wrapWithStreamingOutput(catalogService.downloadFileFromStorage(parserInfo.getJarStoragePath()));
                 return Response.ok(streamOutput).build();
             }
         } catch (Exception ex) {

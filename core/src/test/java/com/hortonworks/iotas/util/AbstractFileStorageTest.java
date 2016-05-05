@@ -19,7 +19,6 @@
 package com.hortonworks.iotas.util;
 
 import com.google.common.collect.Lists;
-import com.hortonworks.iotas.util.JarStorage;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,14 +32,14 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.List;
 
-public abstract class AbstractJarStorageTest {
+public abstract class AbstractFileStorageTest {
 
 
-    public abstract JarStorage getJarStorage();
+    public abstract FileStorage getFileStorage();
 
     @Test
     public void testJarStorage() throws IOException {
-        JarStorage jarStorage = getJarStorage();
+        FileStorage fileStorage = getFileStorage();
         File file = File.createTempFile("test", ".tmp");
         file.deleteOnExit();
         List<String> lines = Lists.newArrayList("test-line-1", "test-line-2");
@@ -48,13 +47,12 @@ public abstract class AbstractJarStorageTest {
         String name = "file.name";
 
         // delete the file if it already exists
-        jarStorage.deleteJar(name);
+        fileStorage.deleteFile(name);
 
-        jarStorage.uploadJar(new FileInputStream(file), name);
-        InputStream inputStream = jarStorage.downloadJar(name);
+        fileStorage.uploadFile(new FileInputStream(file), name);
+        InputStream inputStream = fileStorage.downloadFile(name);
 
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader
-                (inputStream));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String nextLine;
         List<String> actual = Lists.newArrayList();
         while((nextLine = bufferedReader.readLine()) != null) {

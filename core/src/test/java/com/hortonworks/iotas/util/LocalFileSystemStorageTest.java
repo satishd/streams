@@ -18,9 +18,9 @@
  */
 package com.hortonworks.iotas.util;
 
-public class FileSystemJarStorageTest extends AbstractJarStorageTest {
+public class LocalFileSystemStorageTest extends AbstractFileStorageTest {
     @Override
-    public JarStorage getJarStorage() {
-        return new FileSystemJarStorage();
+    public FileStorage getFileStorage() {
+        return new LocalFileSystemStorage();
     }
 }

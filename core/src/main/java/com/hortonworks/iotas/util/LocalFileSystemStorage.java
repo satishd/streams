@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * Implementation of JarStorage interface backed by local file system
  */
-public class FileSystemJarStorage implements JarStorage {
+public class LocalFileSystemStorage implements FileStorage {
     // the configuration keys
     public static final String CONFIG_DIRECTORY = "directory";
 
@@ -65,7 +65,7 @@ public class FileSystemJarStorage implements JarStorage {
     }
 
     @Override
-    public String uploadJar (InputStream inputStream, String name) throws IOException {
+    public String uploadFile(InputStream inputStream, String name) throws IOException {
         ensureDirExists();
 
         Path path = FileSystems.getDefault().getPath(directory, name);
@@ -80,7 +80,7 @@ public class FileSystemJarStorage implements JarStorage {
     }
 
     @Override
-    public InputStream downloadJar (String name) throws IOException {
+    public InputStream downloadFile(String name) throws IOException {
         ensureDirExists();
 
         Path path = FileSystems.getDefault().getPath(directory, name);
@@ -89,7 +89,7 @@ public class FileSystemJarStorage implements JarStorage {
     }
 
     @Override
-    public boolean deleteJar(String name) throws IOException {
+    public boolean deleteFile(String name) throws IOException {
         ensureDirExists();
 
         Path path = FileSystems.getDefault().getPath(directory, name);

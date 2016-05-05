@@ -36,25 +36,25 @@ import java.util.Map;
 /**
  *
  */
-public class HdfsJarStorageTest {
+public class HdfsFileStorageTest {
     private static final String HDFS_DIR = "/tmp/test-hdfs";
-    private HdfsJarStorage jarStorage;
+    private HdfsFileStorage fileStorage;
 
     @Before
     public void setUp() throws Exception {
-        jarStorage = new HdfsJarStorage();
+        fileStorage = new HdfsFileStorage();
     }
 
     @Test(expected = RuntimeException.class)
     public void testInitWithoutFsUrl() throws Exception {
-        jarStorage.init(new HashMap<String, String>());
+        fileStorage.init(new HashMap<String, String>());
     }
 
     @Test
     public void testUploadJar() throws Exception {
         Map<String, String> config = new HashMap<>();
-        config.put(HdfsJarStorage.CONFIG_FSURL, "file:///");
-        jarStorage.init(config);
+        config.put(HdfsFileStorage.CONFIG_FSURL, "file:///");
+        fileStorage.init(config);
 
         File file = File.createTempFile("test", ".tmp");
         file.deleteOnExit();
@@ -63,11 +63,11 @@ public class HdfsJarStorageTest {
         Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
         String jarFileName = "test.jar";
 
-        jarStorage.deleteJar(jarFileName);
+        fileStorage.deleteFile(jarFileName);
 
-        jarStorage.uploadJar(new FileInputStream(file), jarFileName);
+        fileStorage.uploadFile(new FileInputStream(file), jarFileName);
 
-        InputStream inputStream = jarStorage.downloadJar(jarFileName);
+        InputStream inputStream = fileStorage.downloadFile(jarFileName);
         List<String> actual = IOUtils.readLines(inputStream);
         Assert.assertEquals(lines, actual);
     }
@@ -75,9 +75,9 @@ public class HdfsJarStorageTest {
     @Test
     public void testUploadJarWithDir() throws Exception {
         Map<String, String> config = new HashMap<>();
-        config.put(HdfsJarStorage.CONFIG_FSURL, "file:///");
-        config.put(HdfsJarStorage.CONFIG_DIRECTORY, HDFS_DIR);
-        jarStorage.init(config);
+        config.put(HdfsFileStorage.CONFIG_FSURL, "file:///");
+        config.put(HdfsFileStorage.CONFIG_DIRECTORY, HDFS_DIR);
+        fileStorage.init(config);
 
         File file = File.createTempFile("test", ".tmp");
         file.deleteOnExit();
@@ -86,11 +86,11 @@ public class HdfsJarStorageTest {
         Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
         String jarFileName = "test.jar";
 
-        jarStorage.deleteJar(jarFileName);
+        fileStorage.deleteFile(jarFileName);
 
-        jarStorage.uploadJar(new FileInputStream(file), jarFileName);
+        fileStorage.uploadFile(new FileInputStream(file), jarFileName);
 
-        InputStream inputStream = jarStorage.downloadJar(jarFileName);
+        InputStream inputStream = fileStorage.downloadFile(jarFileName);
         List<String> actual = IOUtils.readLines(inputStream);
         Assert.assertEquals(lines, actual);
     }

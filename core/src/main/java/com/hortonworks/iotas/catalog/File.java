@@ -26,10 +26,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Jar configuration
+ * File configuration
  */
-public class Jar extends AbstractStorable {
-    public static final String NAME_SPACE = "jars";
+public class File extends AbstractStorable {
+    public static final String NAME_SPACE = "files";
     public static final String ID = "id";
 
     /**
@@ -42,11 +42,6 @@ public class Jar extends AbstractStorable {
      * (name, version) pair is unique constraint.
      */
     private String name;
-
-    /**
-     * Fully qualified class name that implements a given interface.
-     */
-    private String className;
 
     /**
      * Name of the jar in the configured storage.
@@ -107,18 +102,6 @@ public class Jar extends AbstractStorable {
     }
 
     /**
-     * @return Fully qualified class name that implements a given interface. This is an optional property.
-     *
-     */
-    public String getClassName() {
-        return className;
-    }
-
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
-    /**
      * @return Storage location of the jar.
      */
     public String getStoredFileName() {
@@ -164,44 +147,41 @@ public class Jar extends AbstractStorable {
 
     @Override
     public String toString() {
-        return "Jar{" +
+        return "File{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", className='" + className + '\'' +
-                ", storageName='" + storedFileName + '\'' +
+                ", storedFileName='" + storedFileName + '\'' +
                 ", version=" + version +
                 ", timestamp=" + timestamp +
                 ", auxiliaryInfo='" + auxiliaryInfo + '\'' +
-                '}';
+                '}'+super.toString();
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Jar)) return false;
+        if (!(o instanceof File)) return false;
 
-        Jar jar = (Jar) o;
+        File file = (File) o;
 
-        if (!id.equals(jar.id)) return false;
-        if (!name.equals(jar.name)) return false;
-        if (!className.equals(jar.className)) return false;
-        if (!storedFileName.equals(jar.storedFileName)) return false;
-        if (!version.equals(jar.version)) return false;
-        if (!timestamp.equals(jar.timestamp)) return false;
-        return auxiliaryInfo.equals(jar.auxiliaryInfo);
+        if (id != null ? !id.equals(file.id) : file.id != null) return false;
+        if (name != null ? !name.equals(file.name) : file.name != null) return false;
+        if (storedFileName != null ? !storedFileName.equals(file.storedFileName) : file.storedFileName != null)
+            return false;
+        if (version != null ? !version.equals(file.version) : file.version != null) return false;
+        if (timestamp != null ? !timestamp.equals(file.timestamp) : file.timestamp != null) return false;
+        return !(auxiliaryInfo != null ? !auxiliaryInfo.equals(file.auxiliaryInfo) : file.auxiliaryInfo != null);
 
     }
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + name.hashCode();
-        result = 31 * result + className.hashCode();
-        result = 31 * result + storedFileName.hashCode();
-        result = 31 * result + version.hashCode();
-        result = 31 * result + timestamp.hashCode();
-        result = 31 * result + auxiliaryInfo.hashCode();
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (storedFileName != null ? storedFileName.hashCode() : 0);
+        result = 31 * result + (version != null ? version.hashCode() : 0);
+        result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
+        result = 31 * result + (auxiliaryInfo != null ? auxiliaryInfo.hashCode() : 0);
         return result;
     }
-
 }

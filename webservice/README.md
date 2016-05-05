@@ -1254,14 +1254,14 @@ DELETE /api/v1/catalog/system/topologyeditormetadata/ID
 }
 ```
 
-## Jars
+## Files
 ### Create
 
-POST /api/v1/catalog/jars
+POST /api/v1/catalog/files
 
 *Sample Input*
 
-    curl -X POST -i -F file=@user-lib.jar -F "jar={\"name\":\"my-lib-jar-1\",\"version\":1};type=application/json"  http://localhost:8080/api/v1/catalog/jars
+    curl -X POST -i -F file=@user-lib.jar -F "jar={\"name\":\"my-lib-jar-1\",\"version\":1};type=application/json"  http://localhost:8080/api/v1/catalog/files
 
 
 *Success Response*
@@ -1299,12 +1299,12 @@ POST /api/v1/catalog/jars
 ```
 
 ### Update
-PUT /api/v1/catalog/jars
+PUT /api/v1/catalog/files
 
 
 *Sample Input*
 
-    curl -X PUT -i -F file=@user-lib-2.jar -F "jar={\"id\":1234,\"name\":\"my-lib-jar-1\",\"version\":2};type=application/json"  http://localhost:8080/api/v1/catalog/jars
+    curl -X PUT -i -F file=@user-lib-2.jar -F "jar={\"id\":1234,\"name\":\"my-lib-jar-1\",\"version\":2};type=application/json"  http://localhost:8080/api/v1/catalog/files
 
 
 *Success Response*
@@ -1343,11 +1343,11 @@ PUT /api/v1/catalog/jars
 
 
 ### Get
-GET /api/v1/catalog/jars/{id}
+GET /api/v1/catalog/files/{id}
 
 *Success Response*
 
-    GET /api/v1/catalog/jars/1
+    GET /api/v1/catalog/files/1
     
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -1370,7 +1370,7 @@ GET /api/v1/catalog/jars/{id}
 
 *Error Response*
 
-    GET /api/v1/catalog/jars/10
+    GET /api/v1/catalog/files/10
     
     HTTP/1.1 404 Not Found
     Content-Type: application/json
@@ -1383,11 +1383,11 @@ GET /api/v1/catalog/jars/{id}
 ```
     
 ### Get All
-GET /api/v1/catalog/jars
+GET /api/v1/catalog/files
 
 *Success Response*
 
-    GET /api/v1/catalog/jars
+    GET /api/v1/catalog/files
     
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -1424,7 +1424,7 @@ GET /api/v1/catalog/jars
     
 *Error Response*
 
-    GET /api/v1/catalog/jars/
+    GET /api/v1/catalog/files/
     
     HTTP/1.1 500 Internal Server Error
     Content-Type: application/json
@@ -1438,12 +1438,12 @@ GET /api/v1/catalog/jars
     
  
 ### Delete
-DELETE /api/v1/catalog/jars/ID
+DELETE /api/v1/catalog/files/ID
 
 
 *Success Response*
 
-    DELETE /api/v1/catalog/jars/1
+    DELETE /api/v1/catalog/files/1
 
     HTTP/1.1 200 OK
     Content-Type: application/json    
@@ -1478,22 +1478,22 @@ DELETE /api/v1/catalog/jars/ID
 }
 ```
 
-### Download Jar
-GET /api/v1/catalog/jars/download/ID
+### Download File
+GET /api/v1/catalog/files/download/ID
 
 
-    curl http://localhost:8080/api/v1/catalog/jars/download/1 -o downloaded-lib.jar
+    curl http://localhost:8080/api/v1/catalog/files/download/1 -o downloaded-lib.jar
     
 *Success Response*
 
-    GET /api/v1/catalog/jars/download/1
+    GET /api/v1/catalog/files/download/1
 
     HTTP/1.1 200 OK
-    Content-Type: application/java-archive
+    Content-Type: application/octet-stream
         
 *Error Response*
     
-     GET /api/v1/catalog/jars/download/10
+     GET /api/v1/catalog/files/download/10
 
      HTTP/1.1 404 Not Found
      Content-Type: application/json
