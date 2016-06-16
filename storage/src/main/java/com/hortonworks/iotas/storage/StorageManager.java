@@ -5,6 +5,7 @@ import com.hortonworks.iotas.storage.exception.StorageException;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * TODO: All the methods are very restrictive and needs heavy synchronization to get right but my assumption is that
@@ -14,6 +15,14 @@ import java.util.List;
  * I am still not done thinking through the semantics so don't assume this to be concrete APIs.
  */
 public interface StorageManager {
+
+    /**
+     * Initialize respective {@link StorageManager}  with the given properties
+     *
+     * @param properties
+     */
+    public void init(Map<String, Object> properties);
+    
     /**
      * TODO: update this javadoc
      * Adds this storable to storage layer, if the storable with same {@code Storable.getPrimaryKey} exists,

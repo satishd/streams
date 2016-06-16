@@ -8,6 +8,7 @@ import com.hortonworks.iotas.storage.exception.StorageException;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by hlouro on 8/7/15.
@@ -25,6 +26,11 @@ public class CacheBackedStorageManager implements StorageManager {
         this.cache = cache;
         this.dao = ((GuavaCache)cache).getDao();
         this.writer = storageWriter;
+    }
+
+    @Override
+    public void init(Map<String, Object> properties) {
+
     }
 
     //TODO: Exception handling in add, remove, addOrUpdate, ...

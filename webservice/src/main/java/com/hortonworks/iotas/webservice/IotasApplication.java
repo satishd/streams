@@ -34,8 +34,6 @@ import com.hortonworks.iotas.storage.CacheBackedStorageManager;
 import com.hortonworks.iotas.storage.Storable;
 import com.hortonworks.iotas.storage.StorableKey;
 import com.hortonworks.iotas.storage.StorageManager;
-import com.hortonworks.iotas.storage.impl.jdbc.JdbcStorageManager;
-import com.hortonworks.iotas.storage.impl.memory.InMemoryStorageManager;
 import com.hortonworks.iotas.streams.layout.storm.StormTopologyLayoutConstants;
 import com.hortonworks.iotas.streams.notification.service.NotificationServiceImpl;
 import com.hortonworks.iotas.streams.layout.component.TopologyActions;
@@ -111,14 +109,25 @@ public class IotasApplication extends Application<IotasConfiguration> {
 
     private StorageManager getCacheBackedDao(IotasConfiguration iotasConfiguration) {
         StorageProviderConfiguration storageProviderConfiguration = iotasConfiguration.getStorageProviderConfiguration();
-        final String providerType = storageProviderConfiguration.getType();
-        final StorageManager dao = providerType.equalsIgnoreCase(JDBC) ?
-                JdbcStorageManager.createStorageManager(storageProviderConfiguration.getProperties()) : new InMemoryStorageManager();
+        final StorageManager dao = getStorageManager(storageProviderConfiguration);
         final CacheBuilder cacheBuilder = getGuavaCacheBuilder();
         final Cache<StorableKey, Storable> cache = getCache(dao, cacheBuilder);
         final StorageWriter storageWriter = getStorageWriter(dao);
 
         return doGetCacheBackedDao(cache, storageWriter);
+    }
+
+    private StorageManager getStorageManager(StorageProviderConfiguration storageProviderConfiguration) {
+        final String providerClass = storageProviderConfiguration.getProviderClass();
+        StorageManager storageManager = null;
+        try {
+            storageManager = (StorageManager) Class.forName(providerClass).newInstance();
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        storageManager.init(storageProviderConfiguration.getProperties());
+
+        return storageManager;
     }
 
     private StorageWriter getStorageWriter(StorageManager dao) {

@@ -10,6 +10,7 @@
     <artifactId>parsers</artifactId>
     <name>parsers</name>
     <description>Built in IoTaS parsers</description>
+
     <dependencies>
         <dependency>
             <groupId>com.hortonworks.iotas</groupId>
@@ -40,15 +41,17 @@
             <artifactId>jackson-dataformat-protobuf</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>15.0</version>
+        </dependency>
+
         <!-- test dependencies -->
         <dependency>
             <groupId>junit</groupId>

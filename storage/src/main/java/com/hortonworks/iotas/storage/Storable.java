@@ -64,5 +64,10 @@ public interface Storable {
      * @return the id.
      */
     Long getId();
+    
+    public interface Factory {
+        public String getNameSpace();
+        public Storable create();
+    }
 
 }
