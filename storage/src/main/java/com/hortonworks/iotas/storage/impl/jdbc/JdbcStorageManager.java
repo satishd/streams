@@ -49,7 +49,10 @@ public class JdbcStorageManager implements StorageManager {
     public static final String DB_TYPE = "db.type";
 
     private final StorableFactory storableFactory = new StorableFactory();
-    private final QueryExecutor queryExecutor;
+    private QueryExecutor queryExecutor;
+
+    public JdbcStorageManager() {
+    }
 
     public JdbcStorageManager(QueryExecutor queryExecutor) {
         this.queryExecutor = queryExecutor;
@@ -197,18 +200,19 @@ public class JdbcStorageManager implements StorageManager {
     }
 
     /**
-     * Returns an instance of {@link JdbcStorageManager} with the given {@code jdbcProps}.
+     * Initializes this instance with {@link QueryExecutor} created from the given {@code properties}.
      * Some of these properties are jdbcDriverClass, jdbcUrl, queryTimeoutInSecs.
      *
-     * @param jdbcProps properties with name/value pairs
+     * @param properties properties with name/value pairs
      */
-    public static JdbcStorageManager createStorageManager(Map<String, Object> jdbcProps) {
+    @Override
+    public void init(Map<String, Object> properties) {
 
-        if(!jdbcProps.containsKey(DB_TYPE)) {
+        if(!properties.containsKey(DB_TYPE)) {
             throw new IllegalArgumentException("db.type should be set on jdbc properties");
         }
 
-        String type = (String) jdbcProps.get(DB_TYPE);
+        String type = (String) properties.get(DB_TYPE);
 
         // When we have more providers we can add a layer to have a factory to create respective jdbc storage managers.
         // For now, keeping it simple as there are only 2.
@@ -221,19 +225,19 @@ public class JdbcStorageManager implements StorageManager {
         switch (type) {
             case "phoenix":
                 try {
-                    queryExecutor = PhoenixExecutor.createExecutor(jdbcProps);
+                    queryExecutor = PhoenixExecutor.createExecutor(properties);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
                 break;
             case "mysql":
-                queryExecutor = MySqlExecutor.createExecutor(jdbcProps);
+                queryExecutor = MySqlExecutor.createExecutor(properties);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported storage provider type: "+type);
         }
 
-        return new JdbcStorageManager(queryExecutor);
+        this.queryExecutor = queryExecutor;
     }
 
 }

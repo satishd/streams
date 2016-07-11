@@ -3,23 +3,23 @@ package com.hortonworks.iotas.storage.catalog;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hortonworks.iotas.common.Schema;
 import com.hortonworks.iotas.common.exception.ParserException;
+import com.hortonworks.iotas.common.util.ReflectionHelper;
 import com.hortonworks.iotas.storage.Storable;
 import com.hortonworks.iotas.storage.StorableKey;
 import com.hortonworks.iotas.storage.exception.StorageException;
-import com.hortonworks.iotas.common.util.ReflectionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Set;
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Default implementations go here
  */
-
 public abstract class AbstractStorable implements Storable {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractStorable.class);
 

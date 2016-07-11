@@ -46,6 +46,11 @@ public class InMemoryStorageManager implements StorageManager {
     private ConcurrentHashMap<String, Class<?>> nameSpaceClassMap = new ConcurrentHashMap<String, Class<?>>();
 
     @Override
+    public void init(Map<String, Object> properties) {
+
+    }
+
+    @Override
     public void add(Storable storable) throws AlreadyExistsException {
         final Storable existing = get(storable.getStorableKey());
 

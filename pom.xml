@@ -13,6 +13,7 @@
         <module>common</module>
         <module>storage</module>
         <module>core</module>
+        <module>atlas-storage</module>
         <module>simulator</module>
         <module>webservice</module>
         <module>storm</module>
