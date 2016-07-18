@@ -14,6 +14,7 @@
         <module>storage</module>
         <module>core</module>
         <module>simulator</module>
+        <module>registries</module>
         <module>webservice</module>
         <module>storm</module>
         <module>parsers</module>

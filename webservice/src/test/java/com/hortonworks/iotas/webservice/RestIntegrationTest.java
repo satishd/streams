@@ -188,11 +188,12 @@ public class RestIntegrationTest {
             new ResourceTestElement(createTopologyComponent(1l, "kafkaSpoutComponent", TopologyComponentDefinition.TopologyComponentType.SOURCE, "KAFKA"), createTopologyComponent(1l, "kafkaSpoutComponentPut", TopologyComponentDefinition.TopologyComponentType.SOURCE, "KAFKA") , "1", rootUrl + "system/componentdefinitions/SOURCE"),
             new ResourceTestElement(createTopologyComponent(2l, "parserProcessor", TopologyComponentDefinition.TopologyComponentType.PROCESSOR, "PARSER"), createTopologyComponent(2l, "parserProcessorPut", TopologyComponentDefinition.TopologyComponentType.PROCESSOR, "PARSER"), "2", rootUrl + "system/componentdefinitions/PROCESSOR"),
             new ResourceTestElement(createTopologyComponent(3l, "hbaseSink", TopologyComponentDefinition.TopologyComponentType.SINK, "HBASE"), createTopologyComponent(3l, "hbaseSinkPut", TopologyComponentDefinition.TopologyComponentType.SINK, "HBASE"), "3", rootUrl + "system/componentdefinitions/SINK"),
-            new ResourceTestElement(createTopologyComponent(4l, "shuffleGroupingLink", TopologyComponentDefinition.TopologyComponentType.LINK, "SHUFFLE"), createTopologyComponent(4l, "shuffleGroupingLinkPut", TopologyComponentDefinition.TopologyComponentType.LINK, "SHUFFLE"), "4", rootUrl + "system/componentdefinitions/LINK"),
+            new ResourceTestElement(createTopologyComponent(4l, "shuffleGroupingLink", TopologyComponentDefinition.TopologyComponentType.LINK, "SHUFFLE"), createTopologyComponent(4l, "shuffleGroupingLinkPut", TopologyComponentDefinition.TopologyComponentType.LINK, "SHUFFLE"), "4", rootUrl + "system/componentdefinitions/LINK")
+
             // parser is commented as parser takes a jar as input along with the parserInfo instance and so it needs a multipart request.
-            new ResourceTestElement(createParserInfo(1l, "testParser"), null, "1", rootUrl + "parsers")
-                                    .withMultiPart().withEntitiyNameHeader("parserInfo").withFileNameHeader("parserJar")
-                                    .withFileToUpload("parser.jar").withFieldsToIgnore(Collections.singletonList("jarStoragePath"))
+//          ,new ResourceTestElement(createParserInfo(1l, "testParser"), null, "1", rootUrl + "parsers")
+//                                    .withMultiPart().withEntitiyNameHeader("parserInfo").withFileNameHeader("parserJar")
+//                                    .withFileToUpload("parser.jar").withFieldsToIgnore(Collections.singletonList("jarStoragePath"))
     );
 
     private MultiPart getMultiPart(ResourceTestElement resourceToTest, Object entity) {
