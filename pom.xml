@@ -15,6 +15,7 @@
         <module>storage</module>
         <module>core</module>
         <module>simulator</module>
+        <module>registries</module>
         <module>webservice</module>
         <module>parsers</module>
         <module>layout</module>
