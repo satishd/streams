@@ -18,14 +18,10 @@
 package com.hortonworks.iotas.schemaregistry.avro;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hortonworks.iotas.schemaregistry.serde.SnapshotSerializer;
+import com.hortonworks.iotas.schemaregistry.serdes.SnapshotSerializer;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericRecordBuilder;
-import org.apache.avro.io.DatumReader;
-import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.Encoder;

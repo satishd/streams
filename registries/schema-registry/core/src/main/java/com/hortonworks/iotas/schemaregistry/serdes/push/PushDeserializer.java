@@ -16,28 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.schemaregistry.serde;
+package com.hortonworks.iotas.schemaregistry.serdes.push;
 
-import com.hortonworks.iotas.common.Schema;
-import com.hortonworks.iotas.common.exception.ParserException;
+import java.io.InputStream;
 
 /**
- * Basic parser interface for a given {@link Schema} and {@code version}.
+ * This deserializer gives callbacks to the given {@link PushDeserializerHandler} whenever a respective event or field is encountered.
+ * It pushes the parser contents to the given {@link PushDeserializerHandler}
+ *
+ * @param <S> Schema representation class
+ * @param <F> Field representation class
  */
-public interface IDeserializer<S> extends AutoCloseable {
+public interface PushDeserializer<S, F> extends AutoCloseable {
 
     /**
-     * Returns the version associated with this parser.
+     * parses the given input stream and invokes respective callbacks to the given {@code handler} whenever a respective
+     * event or field is encountered.
      *
-     * @return
+     * @param inputStream
+     * @param schema
+     * @param handler
      */
-    public String version();
-
-    /**
-     * Returns the schema of the data this parser produces.
-     *
-     * @return
-     */
-    public S schema();
+    public void deserialize(InputStream inputStream, S schema, PushDeserializerHandler<F> handler);
 
 }

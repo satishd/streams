@@ -16,29 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.schemaregistry.serde.pull;
+package com.hortonworks.iotas.schemaregistry.serdes.pull;
 
 /**
- * {@link PullEventContext} implementation containing {@link FieldValue} instance.
- *
- * @param <F> Field type
+ * {@link PullEventContext} instance indicating an event.
  */
-public class FieldValueContext<F> implements PullEventContext<F> {
+public class RecordContext<F> implements PullEventContext<F> {
 
-    private final FieldValue<F> fieldValue;
+    private final boolean startEvent;
+    private final boolean endEvent;
 
-    public FieldValueContext(FieldValue<F> fieldValue) {
-        this.fieldValue = fieldValue;
+    protected RecordContext(boolean startEvent, boolean endEvent) {
+        this.startEvent = startEvent;
+        this.endEvent = endEvent;
+        if (startEvent == endEvent) {
+            throw new IllegalArgumentException("start-event and end-event can not be same.");
+        }
     }
 
     @Override
     public boolean startRecord() {
-        return false;
+        return startEvent;
     }
 
     @Override
     public boolean endRecord() {
-        return false;
+        return endEvent;
     }
 
     @Override
@@ -48,16 +51,17 @@ public class FieldValueContext<F> implements PullEventContext<F> {
 
     @Override
     public boolean endField() {
-        return true;
+        return false;
     }
 
     @Override
     public F currentField() {
-        return fieldValue.field();
+        return null;
     }
 
     @Override
     public FieldValue<F> fieldValue() {
-        return fieldValue;
+        return null;
     }
+
 }

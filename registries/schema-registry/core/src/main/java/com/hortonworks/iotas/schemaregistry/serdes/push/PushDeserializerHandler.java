@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.schemaregistry.serde.push;
+package com.hortonworks.iotas.schemaregistry.serdes.push;
 
 import java.io.InputStream;
 

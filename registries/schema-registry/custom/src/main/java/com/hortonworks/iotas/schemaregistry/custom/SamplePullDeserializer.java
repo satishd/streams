@@ -20,10 +20,10 @@ package com.hortonworks.iotas.schemaregistry.custom;
 
 import com.hortonworks.iotas.common.Schema;
 import com.hortonworks.iotas.common.exception.ParserException;
-import com.hortonworks.iotas.schemaregistry.serde.pull.FieldValueContext;
-import com.hortonworks.iotas.schemaregistry.serde.pull.PullDeserializer;
-import com.hortonworks.iotas.schemaregistry.serde.pull.PullEventContext;
-import com.hortonworks.iotas.schemaregistry.serde.pull.StartRecordContext;
+import com.hortonworks.iotas.schemaregistry.serdes.pull.FieldValueContext;
+import com.hortonworks.iotas.schemaregistry.serdes.pull.PullDeserializer;
+import com.hortonworks.iotas.schemaregistry.serdes.pull.PullEventContext;
+import com.hortonworks.iotas.schemaregistry.serdes.pull.StartRecordContext;
 
 import java.io.BufferedReader;
 import java.io.IOException;

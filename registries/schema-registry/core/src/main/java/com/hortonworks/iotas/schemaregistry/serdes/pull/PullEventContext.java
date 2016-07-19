@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.schemaregistry.serde.pull;
+package com.hortonworks.iotas.schemaregistry.serdes.pull;
 
 /**
  * This class represents the current context of the parsed payload which can be of a new record or a new field.

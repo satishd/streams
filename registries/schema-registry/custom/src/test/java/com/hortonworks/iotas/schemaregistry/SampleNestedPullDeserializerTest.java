@@ -21,7 +21,7 @@ package com.hortonworks.iotas.schemaregistry;
 import com.hortonworks.iotas.common.Schema;
 import com.hortonworks.iotas.schemaregistry.custom.SampleNestedPullDeserializer;
 import com.hortonworks.iotas.schemaregistry.custom.SchemaDetails;
-import com.hortonworks.iotas.schemaregistry.serde.pull.PullEventContext;
+import com.hortonworks.iotas.schemaregistry.serdes.pull.PullEventContext;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;

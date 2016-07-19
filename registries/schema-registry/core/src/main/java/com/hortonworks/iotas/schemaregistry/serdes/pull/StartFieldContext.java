@@ -1,4 +1,4 @@
-package com.hortonworks.iotas.schemaregistry.serde.pull;
+package com.hortonworks.iotas.schemaregistry.serdes.pull;
 
 /**
  *

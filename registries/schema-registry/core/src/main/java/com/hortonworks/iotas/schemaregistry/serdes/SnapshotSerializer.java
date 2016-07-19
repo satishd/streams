@@ -15,17 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hortonworks.iotas.schemaregistry.serde.pull;
+package com.hortonworks.iotas.schemaregistry.serdes;
+
+import java.io.OutputStream;
 
 /**
  *
+ * @param <I> Input type of the payload
+ * @param <O> serialized output type. For ex: byte[], String etc.
+ * @param <S> schema to which given Input to be serialized as Output
  */
-public interface PullSerializer extends AutoCloseable {
+public interface SnapshotSerializer<I, O, S> {
 
     /**
-     * Adds the given context to output.
      *
-     * @param pullContext
+     * @param input
+     * @param schema
+     * @return
      */
-    public void add(PullEventContext pullContext);
+    public O serialize(I input, S schema);
+
+    /**
+     * Serializes the given input according to the schema and writes it to the given outputStream
+     *
+     * @param input
+     * @param outputStream
+     * @param schema
+     */
+    public void serialize(I input, OutputStream outputStream, S schema);
 }

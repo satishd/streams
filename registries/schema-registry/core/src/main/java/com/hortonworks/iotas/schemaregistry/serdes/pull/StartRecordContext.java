@@ -15,14 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hortonworks.iotas.schemaregistry.serde.pull;
+package com.hortonworks.iotas.schemaregistry.serdes.pull;
 
 /**
- * This class represents the end of a record.
+ * This class represents the start of a record.
  */
-public final class EndRecordContext<F> extends RecordContext<F> {
+public final class StartRecordContext<F> extends RecordContext<F> {
 
-    public EndRecordContext() {
-        super(false, true);
+    public StartRecordContext() {
+        super(true, false);
     }
 }

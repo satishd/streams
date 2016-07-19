@@ -20,7 +20,7 @@ package com.hortonworks.iotas.schemaregistry.avro;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.hortonworks.iotas.schemaregistry.serde.SnapshotDeserializer;
+import com.hortonworks.iotas.schemaregistry.serdes.SnapshotDeserializer;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
@@ -34,7 +34,6 @@ import org.apache.avro.io.EncoderFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 /**
  *

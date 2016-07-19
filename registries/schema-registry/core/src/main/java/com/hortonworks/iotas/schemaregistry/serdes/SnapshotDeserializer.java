@@ -15,32 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hortonworks.iotas.schemaregistry.serde;
+package com.hortonworks.iotas.schemaregistry.serdes;
 
-import java.io.OutputStream;
+import java.io.InputStream;
+import java.util.Map;
 
 /**
+ * This parser returns {@link Map} of field and values after parsing the given payload.
+ * <p>
  *
- * @param <I> Input type of the payload
- * @param <O> serialized output type. For ex: byte[], String etc.
- * @param <S> schema to which given Input to be serialized as Output
+ * @param <S> Schema representation class
+ * @param <O> Output type of the deserialized content.
  */
-public interface SnapshotSerializer<I, O, S> {
+public interface SnapshotDeserializer<S, O> {
 
     /**
+     * Returns output {@code O} of field and values generated after deserializing the given {@code payloadInputStream}
      *
-     * @param input
+     * @param payloadInputStream
      * @param schema
      * @return
      */
-    public O serialize(I input, S schema);
+    public O deserialize(InputStream payloadInputStream, S schema);
 
-    /**
-     * Serializes the given input according to the schema and writes it to the given outputStream
-     *
-     * @param input
-     * @param outputStream
-     * @param schema
-     */
-    public void serialize(I input, OutputStream outputStream, S schema);
 }

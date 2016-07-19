@@ -15,27 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hortonworks.iotas.schemaregistry.serde;
-
-import java.io.InputStream;
-import java.util.Map;
+package com.hortonworks.iotas.schemaregistry.serdes.pull;
 
 /**
- * This parser returns {@link Map} of field and values after parsing the given payload.
- * <p>
  *
- * @param <S> Schema representation class
- * @param <O> Output type of the deserialized content.
  */
-public interface SnapshotDeserializer<S, O> {
+public interface PullSerializer extends AutoCloseable {
 
     /**
-     * Returns output {@code O} of field and values generated after deserializing the given {@code payloadInputStream}
+     * Adds the given context to output.
      *
-     * @param payloadInputStream
-     * @param schema
-     * @return
+     * @param pullContext
      */
-    public O deserialize(InputStream payloadInputStream, S schema);
-
+    public void add(PullEventContext pullContext);
 }
