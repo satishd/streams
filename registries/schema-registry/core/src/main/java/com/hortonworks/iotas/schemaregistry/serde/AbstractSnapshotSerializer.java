@@ -62,6 +62,6 @@ public abstract class AbstractSnapshotSerializer<O> implements SnapshotSerialize
      * @return
      */
     protected long getSchemaId(SchemaInfo schemaInfo) {
-        return schemaRegistryClient.add(schemaInfo);
+        return schemaRegistryClient.add(schemaInfo).getId();
     };
 }

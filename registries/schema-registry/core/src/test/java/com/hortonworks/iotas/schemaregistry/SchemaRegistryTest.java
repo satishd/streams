@@ -17,24 +17,9 @@
  */
 package com.hortonworks.iotas.schemaregistry;
 
-import java.util.Collection;
-
 /**
  *
  */
-public interface ISchemaRegistryClient {
+public class SchemaRegistryTest {
 
-    public SchemaInfo add(SchemaInfo schemaInfo);
-
-    public Collection<SchemaInfo> list();
-
-    public Collection<SchemaInfo> list(String type);
-
-    public SchemaInfo get(String type, String name, Integer version);
-
-    public SchemaInfo get(Long id);
-
-    public SchemaInfo getLatest(String type, String name);
-
-    public Collection<SchemaInfo> get(String type, String name);
 }

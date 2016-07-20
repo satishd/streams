@@ -27,22 +27,30 @@ public interface ISchemaRegistry {
 
     public void init(Map<String, Object> props);
 
-    public Long add(SchemaInfo schemaInfo);
+    public SchemaInfo add(SchemaInfo schemaInfo);
 
     public Collection<SchemaInfo> list();
 
-    public SchemaInfo get(String name, Integer version);
+    public SchemaInfo get(String type, String name, Integer version);
 
     public SchemaInfo get(Long id);
 
     public SchemaInfo remove(Long id);
 
-    public SchemaInfo getLatest(String name);
+    public SchemaInfo getLatest(String type, String name);
 
-    public SchemaInfo remove(String name, Integer version);
+    public SchemaInfo remove(String type, String name, Integer version);
 
-    public Collection<SchemaInfo> get(String name);
+    public Collection<SchemaInfo> get(String type, String name);
 
-    public Collection<SchemaInfo> removeAll(String name);
+    public Collection<SchemaInfo> removeAll(String type, String name);
+
+    public boolean isCompatible(String type, String name, Integer existingSchemaVersion, Integer toSchemaVersion);
+
+    public boolean isCompatible(String type, String name, Integer existingSchemaVersion, String schema);
+
+    public boolean isCompatible(String type, String toSchema, String existingSchema, SchemaProvider.Compatibility compatibility);
+
+    public Collection<SchemaInfo> getCompatibleSchemas(String type, String name, SchemaProvider.Compatibility compatibility, String toSchema);
 
 }

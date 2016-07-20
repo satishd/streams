@@ -17,6 +17,7 @@
  */
 package com.hortonworks.iotas.schemaregistry;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hortonworks.iotas.common.Schema;
 import com.hortonworks.iotas.storage.PrimaryKey;
 import com.hortonworks.iotas.storage.Storable;
@@ -26,9 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * todo:
- *  - Add registration of producers and consumers of this schema.
- *  - Whenever there is an update with this schema, consumers should know about this.
+ *
  */
 public class SchemaInfo extends AbstractStorable {
     public static final String NAME_SPACE = "schema_info";
@@ -38,7 +37,7 @@ public class SchemaInfo extends AbstractStorable {
     public static final String VERSION = "version";
     public static final String TIMESTAMP = "timestamp";
     public static final String COMPATIBILITY = "compatibility";
-
+    public static final String TYPE="type";
     /**
      * Unique ID generated for this component.
      */
@@ -64,28 +63,32 @@ public class SchemaInfo extends AbstractStorable {
      */
     private Long timestamp;
 
-    private Compatibility compatibility = Compatibility.NONE;
+    /**
+     * Schema type which can be avro, protobuf or json etc
+     */
+    private String type;
 
-    public enum Compatibility {
-        NONE(),
-        BACKWARD(),
-        FORWARD()
-    }
+    /**
+     * Compatibility of this schema instance
+     */
+    private SchemaProvider.Compatibility compatibility = SchemaProvider.Compatibility.NONE;
 
     public SchemaInfo() {
     }
 
-    public SchemaInfo(String name, Integer version) {
+    public SchemaInfo(String name, String type) {
         this.name = name;
-        this.version = version;
+        this.type = type;
     }
 
     @Override
+    @JsonIgnore
     public String getNameSpace() {
         return NAME_SPACE;
     }
 
     @Override
+    @JsonIgnore
     public PrimaryKey getPrimaryKey() {
         Map<Schema.Field, Object> values = new HashMap<>();
         values.put(new Schema.Field(ID, Schema.Type.LONG), id);
@@ -93,11 +96,13 @@ public class SchemaInfo extends AbstractStorable {
     }
 
     @Override
+    @JsonIgnore
     public Schema getSchema() {
         return Schema.of(
                 Schema.Field.of(ID, Schema.Type.LONG),
                 Schema.Field.of(NAME, Schema.Type.STRING),
                 Schema.Field.of(SCHEMA_TEXT, Schema.Type.STRING),
+                Schema.Field.of(TYPE, Schema.Type.STRING),
                 Schema.Field.of(VERSION, Schema.Type.LONG),
                 Schema.Field.of(TIMESTAMP, Schema.Type.LONG)
         );
@@ -113,7 +118,7 @@ public class SchemaInfo extends AbstractStorable {
     @Override
     public Storable fromMap(Map<String, Object> map) {
         String compatibilityName = (String) map.remove(COMPATIBILITY);
-        compatibility = Compatibility.valueOf(compatibilityName);
+        compatibility = SchemaProvider.Compatibility.valueOf(compatibilityName);
         super.fromMap(map);
         return this;
     }
@@ -159,11 +164,48 @@ public class SchemaInfo extends AbstractStorable {
         this.timestamp = timestamp;
     }
 
-    public Compatibility getCompatibility() {
+    public SchemaProvider.Compatibility getCompatibility() {
         return compatibility;
     }
 
-    public void setCompatibility(Compatibility compatibility) {
+    public void setCompatibility(SchemaProvider.Compatibility compatibility) {
         this.compatibility = compatibility;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SchemaInfo that = (SchemaInfo) o;
+
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (schemaText != null ? !schemaText.equals(that.schemaText) : that.schemaText != null) return false;
+        if (version != null ? !version.equals(that.version) : that.version != null) return false;
+        if (timestamp != null ? !timestamp.equals(that.timestamp) : that.timestamp != null) return false;
+        if (type != null ? !type.equals(that.type) : that.type != null) return false;
+        return compatibility == that.compatibility;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (schemaText != null ? schemaText.hashCode() : 0);
+        result = 31 * result + (version != null ? version.hashCode() : 0);
+        result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (compatibility != null ? compatibility.hashCode() : 0);
+        return result;
     }
 }

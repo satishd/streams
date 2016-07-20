@@ -35,7 +35,7 @@ public abstract class AbstractSnapshotDeserializer<O> implements SnapshotDeseria
     }
 
     @Override
-    public final O deserialize(InputStream payloadInputStream, SchemaInfo schema) throws SerDeException {
+    public final O deserialize(InputStream payloadInputStream, SchemaInfo readerSchema) throws SerDeException {
         ByteBuffer byteBuffer = ByteBuffer.allocate(8);
         try {
             payloadInputStream.read(byteBuffer.array());
@@ -45,8 +45,8 @@ public abstract class AbstractSnapshotDeserializer<O> implements SnapshotDeseria
         long id = byteBuffer.asLongBuffer().get();
         SchemaInfo writerSchema = schemaRegistryClient.get(id);
 
-        return doDeserialize(payloadInputStream, schema);
+        return doDeserialize(payloadInputStream, writerSchema, readerSchema);
     }
 
-    protected abstract O doDeserialize(InputStream payloadInputStream, SchemaInfo schema);
+    protected abstract O doDeserialize(InputStream payloadInputStream, SchemaInfo writerSchema, SchemaInfo readerSchema);
 }

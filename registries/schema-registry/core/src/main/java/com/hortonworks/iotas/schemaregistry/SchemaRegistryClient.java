@@ -36,6 +36,8 @@ import java.util.List;
  */
 public class SchemaRegistryClient implements ISchemaRegistryClient {
     private static final String SCHEMAREGISTRY_PATH = "/schemaregistry";
+    public static final String SCHEMAS_PATH = "/schemas";
+    public static final String TYPES_PATH = "/types";
 
     private final WebTarget webTarget;
     private final String rootCatalogURL;
@@ -51,8 +53,8 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
     }
 
     @Override
-    public Long add(SchemaInfo schemaInfo) {
-        return webTarget.request().get(Long.class);
+    public SchemaInfo add(SchemaInfo schemaInfo) {
+        return webTarget.request().get(SchemaInfo.class);
     }
 
     private <T extends Storable> List<T> getEntities(WebTarget target, Class<T> clazz) {
@@ -85,26 +87,32 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
 
     @Override
     public Collection<SchemaInfo> list() {
-        return getEntities(webTarget, SchemaInfo.class);
-    }
-
-    @Override
-    public SchemaInfo get(String name, Integer version) {
-        return getEntity(webTarget.path(String.format("/%s/%s", name, version)), SchemaInfo.class);
+        return getEntities(webTarget.path(SCHEMAS_PATH), SchemaInfo.class);
     }
 
     @Override
     public SchemaInfo get(Long id) {
-        return getEntity(webTarget.path(id+""), SchemaInfo.class);
+        return getEntity(webTarget.path(SCHEMAS_PATH).path(id.toString()), SchemaInfo.class);
+    }
+    
+    @Override
+    public Collection<SchemaInfo> list(String type) {
+        return getEntities(webTarget.path(String.format(TYPES_PATH + "/%s", type)), SchemaInfo.class);
     }
 
     @Override
-    public SchemaInfo getLatest(String name) {
-        return getEntity(webTarget.path(String.format("/%s/latest", name)), SchemaInfo.class);
+    public SchemaInfo get(String type, String name, Integer version) {
+        return getEntity(webTarget.path(String.format(TYPES_PATH + "/%s/%s/%s", type, name, version)), SchemaInfo.class);
+    }
+
+
+    @Override
+    public SchemaInfo getLatest(String type, String name) {
+        return getEntity(webTarget.path(String.format(TYPES_PATH + "/%s/%s/latest", type, name)), SchemaInfo.class);
     }
 
     @Override
-    public Collection<SchemaInfo> get(String name) {
-        return getEntities(webTarget.path(String.format("/%s", name)), SchemaInfo.class);
+    public Collection<SchemaInfo> get(String type, String name) {
+        return getEntities(webTarget.path(String.format(TYPES_PATH + "/%s/%s", type, name)), SchemaInfo.class);
     }
 }

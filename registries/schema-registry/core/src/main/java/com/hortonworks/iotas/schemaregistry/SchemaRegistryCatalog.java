@@ -57,6 +57,7 @@ public class SchemaRegistryCatalog {
     }
 
     @GET
+    @Path("/schemas")
     @Timed
     public Response listSchemas(@Context UriInfo uriInfo) {
         try {
@@ -67,11 +68,12 @@ public class SchemaRegistryCatalog {
     }
 
     @POST
+    @Path("/schemas")
     @Timed
     public Response addSchema(SchemaInfo schemaInfo) {
         try {
-            Long addedId = schemaRegistry.add(schemaInfo);
-            return WSUtils.respond(CREATED, SUCCESS, addedId);
+            SchemaInfo addedSchemaInfo = schemaRegistry.add(schemaInfo);
+            return WSUtils.respond(CREATED, SUCCESS, addedSchemaInfo);
         } catch (Exception ex) {
             LOG.error("Error encountered while adding schema", ex);
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
@@ -79,7 +81,7 @@ public class SchemaRegistryCatalog {
     }
 
     @GET
-    @Path("/{id}")
+    @Path("/schemas/{id}")
     @Timed
     public Response getSchema(@PathParam("id") Long schemaId) {
         try {
@@ -95,11 +97,11 @@ public class SchemaRegistryCatalog {
     }
 
     @DELETE
-    @Path("/{id}")
+    @Path("/schemas/{id}")
     @Timed
-    public Response removeSchemaInfo(@PathParam("id") Long parserId) {
+    public Response removeSchemaInfo(@PathParam("id") Long schemaId) {
         try {
-            SchemaInfo removedParser = schemaRegistry.remove(parserId);
+            SchemaInfo removedParser = schemaRegistry.remove(schemaId);
             return WSUtils.respond(OK, SUCCESS, removedParser);
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
@@ -107,11 +109,11 @@ public class SchemaRegistryCatalog {
     }
 
     @GET
-    @Path("/schemas/{name}")
+    @Path("/types/{type}/{name}")
     @Timed
-    public Response listSchemas(@PathParam("name") String name) {
+    public Response listSchemas(@PathParam("name") String name, @PathParam("type") String type) {
         try {
-            Collection<SchemaInfo> schemaInfos = schemaRegistry.get(name);
+            Collection<SchemaInfo> schemaInfos = schemaRegistry.get(type, name);
             if (schemaInfos != null) {
                 return WSUtils.respond(OK, SUCCESS, schemaInfos);
             }
@@ -123,11 +125,11 @@ public class SchemaRegistryCatalog {
     }
 
     @GET
-    @Path("/schemas/{name}/latest")
+    @Path("/types/{type}/{name}/latest")
     @Timed
-    public Response getLatestSchema(@PathParam("name") String name) {
+    public Response getLatestSchema(@PathParam("name") String name, @PathParam("type") String type) {
         try {
-            SchemaInfo schemaInfo = schemaRegistry.getLatest(name);
+            SchemaInfo schemaInfo = schemaRegistry.getLatest(type, name);
             if (schemaInfo != null) {
                 return WSUtils.respond(OK, SUCCESS, schemaInfo);
             }
@@ -139,11 +141,11 @@ public class SchemaRegistryCatalog {
     }
 
     @GET
-    @Path("/schemas/{name}/{version}")
+    @Path("/types/{type}/{name}/{version}")
     @Timed
-    public Response getSchema(@PathParam("name") String name, @PathParam("version") Integer version) {
+    public Response getSchema(@PathParam("name") String name, @PathParam("type") String type, @PathParam("version") Integer version) {
         try {
-            SchemaInfo schemaInfo = schemaRegistry.get(name, version);
+            SchemaInfo schemaInfo = schemaRegistry.get(type, name, version);
             if (schemaInfo != null) {
                 return WSUtils.respond(OK, SUCCESS, schemaInfo);
             }

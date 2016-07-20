@@ -57,8 +57,6 @@ public class AvroSerDeTest {
         Assert.assertEquals(event, deserializedEvent);
     }
 
-
-
     private Map<String, Object> createEvent() {
         Map<String, Object> event = new LinkedHashMap<>();
 

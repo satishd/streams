@@ -22,19 +22,19 @@ import java.util.Collection;
 /**
  *
  */
-public interface ISchemaRegistryClient {
+public interface SchemaProvider {
 
-    public SchemaInfo add(SchemaInfo schemaInfo);
+    public enum Compatibility {
+        NONE,
+        BACKWARD,
+        FORWARD,
+        BOTH
+    }
 
-    public Collection<SchemaInfo> list();
+    public String getType();
 
-    public Collection<SchemaInfo> list(String type);
+    public boolean isCompatible(String toSchema, String existingSchema, Compatibility compatibility);
 
-    public SchemaInfo get(String type, String name, Integer version);
+    public boolean isCompatible(String toSchemaText, Collection<String> existingSchemaTexts, Compatibility existingSchemaCompatibility);
 
-    public SchemaInfo get(Long id);
-
-    public SchemaInfo getLatest(String type, String name);
-
-    public Collection<SchemaInfo> get(String type, String name);
 }
