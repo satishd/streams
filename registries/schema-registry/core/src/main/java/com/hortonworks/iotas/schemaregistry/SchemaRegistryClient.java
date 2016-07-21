@@ -24,6 +24,7 @@ import org.glassfish.jersey.client.ClientConfig;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
@@ -40,21 +41,19 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
     public static final String TYPES_PATH = "/types";
 
     private final WebTarget webTarget;
-    private final String rootCatalogURL;
 
     public SchemaRegistryClient(String rootCatalogURL) {
         this(rootCatalogURL, new ClientConfig());
     }
 
     public SchemaRegistryClient(String rootCatalogURL, ClientConfig clientConfig) {
-        this.rootCatalogURL = rootCatalogURL;
         Client client = ClientBuilder.newClient(clientConfig);
         webTarget = client.target(rootCatalogURL).path(SCHEMAREGISTRY_PATH);
     }
 
     @Override
     public SchemaInfo add(SchemaInfo schemaInfo) {
-        return webTarget.request().get(SchemaInfo.class);
+        return postEntity(webTarget.path(SCHEMAS_PATH), schemaInfo, SchemaInfo.class);
     }
 
     private <T extends Storable> List<T> getEntities(WebTarget target, Class<T> clazz) {
@@ -73,9 +72,13 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
         return entities;
     }
 
-    private <T extends Storable> T getEntity(WebTarget target, Class<T> clazz) {
-        String response = target.request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
+    private <T extends Storable> T postEntity(WebTarget target, Object json, Class<T> clazz) {
+        String response = target.request(MediaType.APPLICATION_JSON_TYPE).post(Entity.json(json), String.class);
 
+        return readEntity(clazz, response);
+    }
+
+    private <T extends Storable> T readEntity(Class<T> clazz, String response) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(response);
@@ -83,6 +86,12 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private <T extends Storable> T getEntity(WebTarget target, Class<T> clazz) {
+        String response = target.request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
+
+        return readEntity(clazz, response);
     }
 
     @Override
@@ -102,17 +111,22 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
 
     @Override
     public SchemaInfo get(String type, String name, Integer version) {
-        return getEntity(webTarget.path(String.format(TYPES_PATH + "/%s/%s/%s", type, name, version)), SchemaInfo.class);
+        return getEntity(webTarget.path(String.format(TYPES_PATH + "/%s/schemas/%s/%s", type, name, version)), SchemaInfo.class);
     }
-
 
     @Override
     public SchemaInfo getLatest(String type, String name) {
-        return getEntity(webTarget.path(String.format(TYPES_PATH + "/%s/%s/latest", type, name)), SchemaInfo.class);
+        return getEntity(webTarget.path(String.format(TYPES_PATH + "/%s/schemas/%s/latest", type, name)), SchemaInfo.class);
     }
 
     @Override
     public Collection<SchemaInfo> get(String type, String name) {
-        return getEntities(webTarget.path(String.format(TYPES_PATH + "/%s/%s", type, name)), SchemaInfo.class);
+        return getEntities(webTarget.path(String.format(TYPES_PATH + "/%s/schemas/%s", type, name)), SchemaInfo.class);
     }
+
+    public boolean isCompatibleWithLatest(String type, String toSchemaText, String existingSchemaName, SchemaProvider.Compatibility compatibility) {
+
+        return false;
+    }
+
 }

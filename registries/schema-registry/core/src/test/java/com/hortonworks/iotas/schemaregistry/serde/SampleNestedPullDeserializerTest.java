@@ -16,11 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.hortonworks.iotas.schemaregistry;
+package com.hortonworks.iotas.schemaregistry.serde;
 
 import com.hortonworks.iotas.common.Schema;
-import com.hortonworks.iotas.schemaregistry.custom.SampleNestedPullDeserializer;
-import com.hortonworks.iotas.schemaregistry.custom.SchemaDetails;
 import com.hortonworks.iotas.schemaregistry.serde.pull.PullEventContext;
 import org.junit.Assert;
 import org.junit.Test;

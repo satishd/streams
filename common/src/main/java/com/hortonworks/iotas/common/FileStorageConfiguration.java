@@ -1,4 +1,4 @@
-package com.hortonworks.iotas.webservice;
+package com.hortonworks.iotas.common;
 
 import org.hibernate.validator.constraints.NotEmpty;
 

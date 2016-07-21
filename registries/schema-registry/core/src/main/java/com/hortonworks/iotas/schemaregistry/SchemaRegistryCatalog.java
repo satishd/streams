@@ -18,6 +18,7 @@
 package com.hortonworks.iotas.schemaregistry;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.common.base.Preconditions;
 import com.hortonworks.iotas.common.util.WSUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +85,7 @@ public class SchemaRegistryCatalog {
     @Path("/schemas/{id}")
     @Timed
     public Response getSchema(@PathParam("id") Long schemaId) {
+        Preconditions.checkNotNull(schemaId, "schemaID must not be null");
         try {
             SchemaInfo schemaInfo = schemaRegistry.get(schemaId);
             if (schemaInfo != null) {
@@ -109,7 +111,7 @@ public class SchemaRegistryCatalog {
     }
 
     @GET
-    @Path("/types/{type}/{name}")
+    @Path("/types/{type}/{name}/schemas")
     @Timed
     public Response listSchemas(@PathParam("name") String name, @PathParam("type") String type) {
         try {
@@ -125,7 +127,7 @@ public class SchemaRegistryCatalog {
     }
 
     @GET
-    @Path("/types/{type}/{name}/latest")
+    @Path("/types/{type}/schemas/{name}/latest")
     @Timed
     public Response getLatestSchema(@PathParam("name") String name, @PathParam("type") String type) {
         try {
@@ -141,7 +143,7 @@ public class SchemaRegistryCatalog {
     }
 
     @GET
-    @Path("/types/{type}/{name}/{version}")
+    @Path("/types/{type}/schemas/{name}/{version}")
     @Timed
     public Response getSchema(@PathParam("name") String name, @PathParam("type") String type, @PathParam("version") Integer version) {
         try {

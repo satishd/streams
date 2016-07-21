@@ -21,6 +21,7 @@ package com.hortonworks.iotas.webservice;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.hortonworks.iotas.cache.Cache;
+import com.hortonworks.iotas.storage.StorageProviderConfiguration;
 import com.hortonworks.iotas.registries.tag.client.TagClient;
 import com.hortonworks.iotas.registries.tag.service.CatalogTagService;
 import com.hortonworks.iotas.registries.tag.service.TagCatalogResource;

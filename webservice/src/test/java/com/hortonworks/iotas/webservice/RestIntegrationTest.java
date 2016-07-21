@@ -18,19 +18,25 @@
  */
 package com.hortonworks.iotas.webservice;
 
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.hortonworks.iotas.common.catalog.CatalogResponse;
 import com.hortonworks.iotas.catalog.DataFeed;
 import com.hortonworks.iotas.catalog.DataSource;
 import com.hortonworks.iotas.catalog.FileInfo;
 import com.hortonworks.iotas.catalog.ParserInfo;
+import com.hortonworks.iotas.catalog.Tag;
+import com.hortonworks.iotas.common.AbstractRestIntegrationTest;
+import com.hortonworks.iotas.common.QueryParamsResourceTestElement;
+import com.hortonworks.iotas.common.ResourceTestElement;
 import com.hortonworks.iotas.common.Schema;
+import com.hortonworks.iotas.common.catalog.CatalogResponse;
 import com.hortonworks.iotas.common.test.IntegrationTest;
 import com.hortonworks.iotas.processor.examples.ConsoleCustomProcessorRuntime;
+import com.hortonworks.iotas.streams.catalog.Cluster;
+import com.hortonworks.iotas.streams.catalog.Component;
+import com.hortonworks.iotas.streams.catalog.NotifierInfo;
+import com.hortonworks.iotas.streams.catalog.Topology;
+import com.hortonworks.iotas.streams.catalog.TopologyEditorMetadata;
 import com.hortonworks.iotas.registries.tag.TaggedEntity;
 import com.hortonworks.iotas.registries.tag.Tag;
 import com.hortonworks.iotas.streams.catalog.*;
@@ -45,11 +51,9 @@ import io.dropwizard.testing.ResourceHelpers;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 import org.glassfish.jersey.media.multipart.internal.MultiPartWriter;
 import org.junit.Assert;
@@ -65,21 +69,16 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 
@@ -87,7 +86,7 @@ import java.util.Map;
  * Tests the entire code path for our rest APIs. Currently tests Post, Put, Get(list, ById) and Delete.
  */
 @Category(IntegrationTest.class)
-public class RestIntegrationTest {
+public class RestIntegrationTest extends AbstractRestIntegrationTest {
 
     /**
      * See https://dropwizard.github.io/dropwizard/manual/testing.html#integration-testing
@@ -98,79 +97,6 @@ public class RestIntegrationTest {
     private String rootUrl = String.format("http://localhost:%d/api/v1/catalog/", RULE.getLocalPort());
     private final InputStream IMAGE_FILE_STREAM = new ByteArrayInputStream("some gif gibberish".getBytes());
     private final InputStream JAR_FILE_STREAM = new ByteArrayInputStream("some jar gibberish".getBytes());
-    /**
-     * A Test element holder class
-     */
-    private class ResourceTestElement {
-        final Object resourceToPost; // resource that will be used to test post
-        final Object resourceToPut; // resource that will be used to test put
-        final String id; //Id by which Get(id) and Delete(id) will be tested, should match the actual Id set in post/put request.
-        final String url; //Rest Url to test.
-        boolean multipart;
-        String entityNameHeader;
-        String fileNameHeader;
-        File fileToUpload;
-        List<String> fieldsToIgnore;
-
-        public ResourceTestElement(Object resourceToPost, Object resourceToPut, String id, String url) {
-            this.resourceToPost = resourceToPost;
-            this.resourceToPut = resourceToPut;
-            this.id = id;
-            this.url = url;
-        }
-
-        public ResourceTestElement withMultiPart() {
-            this.multipart = true;
-            return this;
-        }
-
-        public ResourceTestElement withEntitiyNameHeader(String entitiyNameHeader) {
-            this.entityNameHeader = entitiyNameHeader;
-            return this;
-        }
-
-        public ResourceTestElement withFileNameHeader(String fileNameHeader) {
-            this.fileNameHeader = fileNameHeader;
-            return this;
-        }
-
-        public ResourceTestElement withFileToUpload(String fileName) {
-            try {
-                this.fileToUpload = Paths.get(this.getClass().getClassLoader().getResource(fileName).toURI()).toFile();
-            } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
-            }
-            return this;
-        }
-
-        public ResourceTestElement withFieldsToIgnore(List<String> fields) {
-            this.fieldsToIgnore = fields;
-            return this;
-        }
-
-    }
-
-    /**
-     * A Test element holder class for testing resources that support a get
-     * with query params
-     */
-    private class QueryParamsResourceTestElement {
-        final List<Object> resourcesToPost; // resources that will be posted to postUrl
-        final String postUrl; // Rest Url to post.
-        // get urls with different query parameters. To be called before
-        // and after post
-        final List<String> getUrls;
-        // expected results for each get url above after the post. should be
-        // same length as getUrls
-        final List<List<Object>> getResults;
-
-        public QueryParamsResourceTestElement (List<Object> resourcesToPost, String postUrl, List<String> getUrls, List<List<Object>> getResults) {
-            this.resourcesToPost = resourcesToPost;
-            this.postUrl = postUrl;
-            this.getUrls = getUrls;
-            this.getResults = getResults;
-        }
-    }
 
     /**
      * List of all things that will be tested
@@ -197,25 +123,6 @@ public class RestIntegrationTest {
 //                                    .withFileToUpload("parser.jar").withFieldsToIgnore(Collections.singletonList("jarStoragePath"))
     );
 
-    private MultiPart getMultiPart(ResourceTestElement resourceToTest, Object entity) {
-        MultiPart multiPart = new MultiPart();
-        BodyPart filePart = new FileDataBodyPart(resourceToTest.fileNameHeader, resourceToTest.fileToUpload);
-        BodyPart entityPart = new FormDataBodyPart(resourceToTest.entityNameHeader, entity, MediaType.APPLICATION_JSON_TYPE);
-        multiPart.bodyPart(filePart).bodyPart(entityPart);
-        return multiPart;
-    }
-
-    public <T> T filterFields(T object, List<String> fields) throws Exception {
-        if (fields != null && !fields.isEmpty()) {
-            Class<?> clazz = object.getClass();
-            for (String fieldName : fields) {
-                Field field = clazz.getDeclaredField(fieldName);
-                field.setAccessible(true);
-                field.set(object, null);
-            }
-        }
-        return object;
-    }
     /**
      * For each TestResource element in resourcesToTest List, tests Post, Put, Get and Delete.
      *
@@ -226,13 +133,13 @@ public class RestIntegrationTest {
         Client client = ClientBuilder.newClient(new ClientConfig());
         client.register(MultiPartFeature.class);
         for (ResourceTestElement resourceToTest : resourcesToTest) {
-            String url = resourceToTest.url;
-            Object resourceToPost = resourceToTest.resourceToPost;
-            Object resourceToPut = resourceToTest.resourceToPut;
-            String id = resourceToTest.id;
+            String url = resourceToTest.getUrl();
+            Object resourceToPost = resourceToTest.getResourceToPost();
+            Object resourceToPut = resourceToTest.getResourceToPut();
+            String id = resourceToTest.getId();
             String response;
 
-            if (resourceToTest.multipart) {
+            if (resourceToTest.isMultipart()) {
                 response = client.target(url).request().post(Entity.entity(getMultiPart(resourceToTest, resourceToPost),
                                                                            MediaType.MULTIPART_FORM_DATA), String.class);
             } else {
@@ -242,16 +149,16 @@ public class RestIntegrationTest {
 
             response = client.target(url).request().get(String.class);
             Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
-            Assert.assertEquals(Lists.newArrayList(filterFields(resourceToPost, resourceToTest.fieldsToIgnore)),
-                                getEntities(response, resourceToPost.getClass(), resourceToTest.fieldsToIgnore));
+            Assert.assertEquals(Lists.newArrayList(filterFields(resourceToPost, resourceToTest.getFieldsToIgnore())),
+                                getEntities(response, resourceToPost.getClass(), resourceToTest.getFieldsToIgnore()));
 
             url = url + "/" + id;
             response = client.target(url).request().get(String.class);
             Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
-            Assert.assertEquals(resourceToPost, getEntity(response, resourceToPost.getClass(), resourceToTest.fieldsToIgnore));
+            Assert.assertEquals(resourceToPost, getEntity(response, resourceToPost.getClass(), resourceToTest.getFieldsToIgnore()));
 
             if (resourceToPut != null) {
-                if (resourceToTest.multipart) {
+                if (resourceToTest.isMultipart()) {
                     response = client.target(url).request().put(Entity.entity(getMultiPart(resourceToTest, resourceToPut),
                                                                               MediaType.MULTIPART_FORM_DATA), String.class);
                 } else {
@@ -260,7 +167,7 @@ public class RestIntegrationTest {
                 Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
                 response = client.target(url).request().get(String.class);
                 Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
-                Assert.assertEquals(resourceToPut, getEntity(response, resourceToPut.getClass(), resourceToTest.fieldsToIgnore));
+                Assert.assertEquals(resourceToPut, getEntity(response, resourceToPut.getClass(), resourceToTest.getFieldsToIgnore()));
             }
 
             response = client.target(url).request().delete(String.class);
@@ -370,7 +277,7 @@ public class RestIntegrationTest {
     }
 
     @Test
-    public void testHierarchicalTags() throws Exception {
+    public void testHeirarchicalTags() throws Exception {
         Client client = ClientBuilder.newClient(new ClientConfig());
         String tagUrl = rootUrl + "tags";
         String dsUrl = rootUrl + "datasources";
@@ -662,70 +569,6 @@ public class RestIntegrationTest {
                 Assert.assertEquals(CatalogResponse.ResponseMessage.SUCCESS.getCode(), getResponseCode(response));
                 Assert.assertEquals(expectedResults, getEntities(response, expectedResults.get(i).getClass()));
             }
-        }
-    }
-
-    /**
-     * Get response code from the response string.
-     *
-     * @param response
-     * @return
-     * @throws Exception
-     */
-    public int getResponseCode(String response) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode node = mapper.readTree(response);
-        return mapper.treeToValue(node.get("responseCode"), Integer.class);
-    }
-
-    private <T extends Object> List<T> getEntities(String response, Class<T> clazz) {
-        return getEntities(response, clazz, Collections.<String>emptyList());
-    }
-
-    /**
-     * Get the entities from response string
-     *
-     * @param response
-     * @param clazz
-     * @param <T>
-     * @return
-     */
-    private <T extends Object> List<T> getEntities(String response, Class<T> clazz,
-                                                   List<String> fieldsToIgnore) {
-        List<T> entities = new ArrayList<>();
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode node = mapper.readTree(response);
-            Iterator<JsonNode> it = node.get("entities").elements();
-            while (it.hasNext()) {
-                entities.add(filterFields(mapper.treeToValue(it.next(), clazz), fieldsToIgnore));
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-        return entities;
-    }
-
-    private <T> T getEntity(String response, Class<T> clazz) {
-        return getEntity(response, clazz, Collections.<String>emptyList());
-    }
-
-    /**
-     * Get entity from the response string.
-     *
-     * @param response
-     * @param clazz
-     * @param <T>
-     * @return
-     */
-    private <T> T getEntity(String response, Class<T> clazz,
-                                           List<String> fieldsToIgnore) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode node = mapper.readTree(response);
-            return filterFields(mapper.treeToValue(node.get("entity"), clazz), fieldsToIgnore);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
         }
     }
 
