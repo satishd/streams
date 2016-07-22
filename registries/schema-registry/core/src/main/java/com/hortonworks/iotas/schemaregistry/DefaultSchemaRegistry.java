@@ -164,12 +164,12 @@ public class DefaultSchemaRegistry implements ISchemaRegistry {
         return schemaInfos;
     }
 
-    public boolean isCompatible(String type, String name, Integer version, Integer toSchemaVersion) {
+    public boolean isCompatible(String type, String name, Integer version, Integer toSchemaVersion) throws SchemaNotFoundException {
         SchemaInfo toSchema = get(type, name, toSchemaVersion);
         return isCompatible(type, name, version, toSchema.getSchemaText());
     }
 
-    public boolean isCompatible(String type, String name, Integer version, String toSchema) {
+    public boolean isCompatible(String type, String name, Integer version, String toSchema) throws SchemaNotFoundException {
         SchemaInfo existingSchemaInfo = get(type, name, version);
         String schemaText = existingSchemaInfo.getSchemaText();
         SchemaProvider.Compatibility compatibility = existingSchemaInfo.getCompatibility();
@@ -185,7 +185,7 @@ public class DefaultSchemaRegistry implements ISchemaRegistry {
         return schemaProvider.isCompatible(toSchema, existingSchema, compatibility);
     }
 
-    public Collection<SchemaInfo> getCompatibleSchemas(String type, String name, SchemaProvider.Compatibility compatibility, String toSchema) {
+    public Collection<SchemaInfo> getCompatibleSchemas(String type, String name, SchemaProvider.Compatibility compatibility, String toSchema) throws SchemaNotFoundException {
         SchemaProvider schemaProvider = schemaTypeWithProviders.get(type);
         List<SchemaInfo> supportedSchemas = new ArrayList<>();
         Collection<SchemaInfo> schemaInfos = get(type, name);

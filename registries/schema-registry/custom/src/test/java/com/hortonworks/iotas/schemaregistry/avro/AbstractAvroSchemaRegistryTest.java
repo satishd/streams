@@ -38,24 +38,25 @@ public abstract class AbstractAvroSchemaRegistryTest {
         schemaInfo.setCompatibility(SchemaProvider.Compatibility.BOTH);
         schemaInfo.setSchemaText(schema1);
 
-        addSchemaAndVerify(schemaInfo);
+        int v1 = addSchemaAndVerify(schemaInfo).getVersion();
 
         schemaInfo.setSchemaText(schema2);
-        addSchemaAndVerify(schemaInfo);
+        int v2 = addSchemaAndVerify(schemaInfo).getVersion();
 
         SchemaInfo latest = getLatestSchema(type, schemaInfo.getName());
         Assert.assertEquals(latest, schemaInfo);
 
-        testCompatibility(type, schema1, schema2);
+        testCompatibility(type, v1, v2);
     }
 
-    private void addSchemaAndVerify(SchemaInfo schemaInfo) {
+    private SchemaInfo addSchemaAndVerify(SchemaInfo schemaInfo) {
         SchemaInfo addedSchemaInfo = addSchema(schemaInfo);
         Integer nextVersion = schemaInfo.getVersion() == null ? 0 : schemaInfo.getVersion();
         schemaInfo.setVersion(nextVersion+1);
         schemaInfo.setId(addedSchemaInfo.getId());
         schemaInfo.setTimestamp(addedSchemaInfo.getTimestamp());
         Assert.assertEquals(addedSchemaInfo, schemaInfo);
+        return addedSchemaInfo;
     }
 
     protected abstract SchemaInfo getLatestSchema(String type, String name);

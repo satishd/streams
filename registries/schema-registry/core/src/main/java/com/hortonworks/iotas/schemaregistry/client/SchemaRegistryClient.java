@@ -15,10 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hortonworks.iotas.schemaregistry;
+package com.hortonworks.iotas.schemaregistry.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hortonworks.iotas.schemaregistry.ISchemaRegistryClient;
+import com.hortonworks.iotas.schemaregistry.SchemaInfo;
 import com.hortonworks.iotas.storage.Storable;
 import org.glassfish.jersey.client.ClientConfig;
 
@@ -111,12 +113,12 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
 
     @Override
     public SchemaInfo get(String type, String name, Integer version) {
-        return getEntity(webTarget.path(String.format(TYPES_PATH + "/%s/schemas/%s/%s", type, name, version)), SchemaInfo.class);
+        return getEntity(webTarget.path(String.format(TYPES_PATH + "/%s/schemas/%s/versions/%s", type, name, version)), SchemaInfo.class);
     }
 
     @Override
     public SchemaInfo getLatest(String type, String name) {
-        return getEntity(webTarget.path(String.format(TYPES_PATH + "/%s/schemas/%s/latest", type, name)), SchemaInfo.class);
+        return getEntity(webTarget.path(String.format(TYPES_PATH + "/%s/schemas/%s/versions/latest", type, name)), SchemaInfo.class);
     }
 
     @Override
@@ -124,9 +126,9 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
         return getEntities(webTarget.path(String.format(TYPES_PATH + "/%s/schemas/%s", type, name)), SchemaInfo.class);
     }
 
-    public boolean isCompatibleWithLatest(String type, String toSchemaText, String existingSchemaName, SchemaProvider.Compatibility compatibility) {
-
-        return false;
+    public boolean isCompatibleWithLatest(String type, String toSchemaText, String existingSchemaName) {
+        WebTarget target = webTarget.path(String.format(TYPES_PATH + "/%s/compatibility/%s/latest", type, existingSchemaName));
+        return target.request().post(Entity.text(toSchemaText), Boolean.class);
     }
 
 }

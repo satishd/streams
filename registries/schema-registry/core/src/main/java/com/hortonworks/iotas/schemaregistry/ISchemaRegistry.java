@@ -45,12 +45,12 @@ public interface ISchemaRegistry {
 
     public Collection<SchemaInfo> removeAll(String type, String name);
 
-    public boolean isCompatible(String type, String name, Integer existingSchemaVersion, Integer toSchemaVersion);
+    public boolean isCompatible(String type, String name, Integer existingSchemaVersion, Integer toSchemaVersion) throws SchemaNotFoundException;
 
-    public boolean isCompatible(String type, String name, Integer existingSchemaVersion, String schema);
+    public boolean isCompatible(String type, String name, Integer existingSchemaVersion, String schema) throws SchemaNotFoundException;
 
     public boolean isCompatible(String type, String toSchema, String existingSchema, SchemaProvider.Compatibility compatibility);
 
-    public Collection<SchemaInfo> getCompatibleSchemas(String type, String name, SchemaProvider.Compatibility compatibility, String toSchema);
+    public Collection<SchemaInfo> getCompatibleSchemas(String type, String name, SchemaProvider.Compatibility compatibility, String toSchema) throws SchemaNotFoundException;
 
 }

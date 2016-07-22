@@ -18,7 +18,7 @@
 package com.hortonworks.iotas.schemaregistry.serde;
 
 import com.hortonworks.iotas.schemaregistry.SchemaInfo;
-import com.hortonworks.iotas.schemaregistry.SchemaRegistryClient;
+import com.hortonworks.iotas.schemaregistry.client.SchemaRegistryClient;
 
 import java.io.IOException;
 import java.io.InputStream;

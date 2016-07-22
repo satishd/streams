@@ -20,13 +20,12 @@ package com.hortonworks.iotas.schemaregistry.avro;
 import com.hortonworks.iotas.common.test.IntegrationTest;
 import com.hortonworks.iotas.schemaregistry.SchemaInfo;
 import com.hortonworks.iotas.schemaregistry.SchemaRegistryApplication;
-import com.hortonworks.iotas.schemaregistry.SchemaRegistryClient;
+import com.hortonworks.iotas.schemaregistry.client.SchemaRegistryClient;
 import com.hortonworks.iotas.schemaregistry.SchemaRegistryConfiguration;
 import io.dropwizard.testing.ResourceHelpers;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
