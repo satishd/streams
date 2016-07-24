@@ -19,6 +19,7 @@ package com.hortonworks.iotas.schemaregistry.avro;
 
 import com.hortonworks.iotas.schemaregistry.DefaultSchemaRegistry;
 import com.hortonworks.iotas.schemaregistry.SchemaInfo;
+import com.hortonworks.iotas.schemaregistry.SchemaNotFoundException;
 import com.hortonworks.iotas.schemaregistry.SchemaProvider;
 import com.hortonworks.iotas.storage.StorageManager;
 import com.hortonworks.iotas.storage.impl.memory.InMemoryStorageManager;
@@ -55,5 +56,10 @@ public class AvroSchemaRegistryTest extends AbstractAvroSchemaRegistryTest {
 
     protected SchemaInfo addSchema(SchemaInfo schemaInfo) {
         return schemaRegistry.add(schemaInfo);
+    }
+
+    @Override
+    protected void testCompatibility(String type, int version1, int version2) throws SchemaNotFoundException {
+        Assert.assertTrue(schemaRegistry.isCompatible(type, schemaName, version1, version2));
     }
 }

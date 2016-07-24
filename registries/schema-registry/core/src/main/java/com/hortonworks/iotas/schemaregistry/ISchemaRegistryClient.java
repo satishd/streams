@@ -37,4 +37,8 @@ public interface ISchemaRegistryClient {
     public SchemaInfo getLatest(String type, String name);
 
     public Collection<SchemaInfo> get(String type, String name);
+
+    public boolean isCompatibleWithLatest(String type, String toSchemaText, String existingSchemaName);
+
+    public boolean isCompatible(String type, String name, Integer existingSchemaVersion, Integer toSchemaVersion);
 }

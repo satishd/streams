@@ -113,7 +113,8 @@ public class SchemaRegistryCatalog {
     @GET
     @Path("/types/{type}/schemas/{name}/")
     @Timed
-    public Response listSchemas(@PathParam("name") String name, @PathParam("type") String type) {
+    public Response listSchemas(@PathParam("name") String name,
+                                @PathParam("type") String type) {
         try {
             Collection<SchemaInfo> schemaInfos = schemaRegistry.get(type, name);
             if (schemaInfos != null) {
@@ -129,7 +130,8 @@ public class SchemaRegistryCatalog {
     @GET
     @Path("/types/{type}/schemas/{name}/versions/latest")
     @Timed
-    public Response getLatestSchema(@PathParam("name") String name, @PathParam("type") String type) {
+    public Response getLatestSchema(@PathParam("name") String name,
+                                    @PathParam("type") String type) {
         try {
             SchemaInfo schemaInfo = schemaRegistry.getLatest(type, name);
             if (schemaInfo != null) {
@@ -145,7 +147,9 @@ public class SchemaRegistryCatalog {
     @GET
     @Path("/types/{type}/schemas/{name}/versions/{version}")
     @Timed
-    public Response getSchema(@PathParam("name") String name, @PathParam("type") String type, @PathParam("version") Integer version) {
+    public Response getSchema(@PathParam("name") String name,
+                              @PathParam("type") String type,
+                              @PathParam("version") Integer version) {
         try {
             SchemaInfo schemaInfo = schemaRegistry.get(type, name, version);
             if (schemaInfo != null) {
@@ -158,10 +162,32 @@ public class SchemaRegistryCatalog {
         return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, name);
     }
 
+    @GET
+    @Path("/types/{type}/compatibility/schemas/{name}/versions/{fromVersion}/{toVersion}")
+    @Timed
+    public Response isCompatible(@PathParam("name") String name,
+                                 @PathParam("type") String type,
+                                 @PathParam("fromVersion") Integer fromVersion,
+                                 @PathParam("toVersion") Integer toVersion) {
+        try {
+            boolean compatible = schemaRegistry.isCompatible(type, name, fromVersion, toVersion);
+            return WSUtils.respond(OK, SUCCESS, compatible);
+        } catch(SchemaNotFoundException ex) {
+            LOG.error("Error encountered", ex);
+            return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, name);
+        } catch (Exception ex) {
+            LOG.error("Error encountered", ex);
+            return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
+        }
+    }
+
     @POST
     @Path("/types/{type}/compatibility/schemas/{name}/versions/{version}")
     @Timed
-    public Response isCompatible(String schema, @PathParam("name") String name, @PathParam("type") String type, @PathParam("version") Integer version) {
+    public Response isCompatible(String schema,
+                                 @PathParam("name") String name,
+                                 @PathParam("type") String type,
+                                 @PathParam("version") Integer version) {
         try {
             boolean compatible = schemaRegistry.isCompatible(type, name, version, schema);
             return WSUtils.respond(OK, SUCCESS, compatible);

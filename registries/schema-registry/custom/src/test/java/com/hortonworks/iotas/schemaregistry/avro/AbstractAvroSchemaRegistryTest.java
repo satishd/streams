@@ -2,6 +2,7 @@ package com.hortonworks.iotas.schemaregistry.avro;
 
 
 import com.hortonworks.iotas.schemaregistry.SchemaInfo;
+import com.hortonworks.iotas.schemaregistry.SchemaNotFoundException;
 import com.hortonworks.iotas.schemaregistry.SchemaProvider;
 import org.apache.avro.Schema;
 import org.junit.Assert;
@@ -17,11 +18,12 @@ public abstract class AbstractAvroSchemaRegistryTest {
 
     protected String schema1;
     protected String schema2;
+    protected String schemaName;
 
     protected void setup() throws IOException {
         schema1 = getSchema("/device.avsc");
         schema2 = getSchema("/device2.avsc");
-
+        schemaName = "schema-"+System.currentTimeMillis();
     }
 
     private String getSchema(String schemaFileName) throws IOException {
@@ -31,31 +33,32 @@ public abstract class AbstractAvroSchemaRegistryTest {
     }
 
     @Test
-    public void testRegistryOps() {
+    public void testRegistryOps() throws Exception {
         String type = AvroSchemaProvider.TYPE;
 
-        SchemaInfo schemaInfo = new SchemaInfo("schema-"+System.currentTimeMillis(), type);
-        schemaInfo.setCompatibility(SchemaProvider.Compatibility.BOTH);
-        schemaInfo.setSchemaText(schema1);
+        SchemaInfo schemaInfo1 = new SchemaInfo(schemaName, type);
+        schemaInfo1.setCompatibility(SchemaProvider.Compatibility.BOTH);
+        schemaInfo1.setSchemaText(schema1);
+        int v1 = addSchemaAndVerify(schemaInfo1).getVersion();
 
-        int v1 = addSchemaAndVerify(schemaInfo).getVersion();
+        SchemaInfo schemaInfo2 = new SchemaInfo(schemaName, type);
+        schemaInfo2.setCompatibility(SchemaProvider.Compatibility.BOTH);
+        schemaInfo2.setSchemaText(schema2);
+        SchemaInfo addedSchemaInfo2 = addSchemaAndVerify(schemaInfo2);
+        int v2 = addedSchemaInfo2.getVersion();
 
-        schemaInfo.setSchemaText(schema2);
-        int v2 = addSchemaAndVerify(schemaInfo).getVersion();
+        Assert.assertTrue(v2 == v1+1);
 
-        SchemaInfo latest = getLatestSchema(type, schemaInfo.getName());
-        Assert.assertEquals(latest, schemaInfo);
+        SchemaInfo latest = getLatestSchema(type, schemaName);
+        Assert.assertEquals(latest, addedSchemaInfo2);
 
         testCompatibility(type, v1, v2);
     }
 
     private SchemaInfo addSchemaAndVerify(SchemaInfo schemaInfo) {
         SchemaInfo addedSchemaInfo = addSchema(schemaInfo);
-        Integer nextVersion = schemaInfo.getVersion() == null ? 0 : schemaInfo.getVersion();
-        schemaInfo.setVersion(nextVersion+1);
-        schemaInfo.setId(addedSchemaInfo.getId());
-        schemaInfo.setTimestamp(addedSchemaInfo.getTimestamp());
-        Assert.assertEquals(addedSchemaInfo, schemaInfo);
+        Assert.assertEquals(addedSchemaInfo.getName(), schemaInfo.getName());
+        Assert.assertEquals(addedSchemaInfo.getSchemaText(), schemaInfo.getSchemaText());
         return addedSchemaInfo;
     }
 
@@ -63,6 +66,6 @@ public abstract class AbstractAvroSchemaRegistryTest {
 
     protected abstract SchemaInfo addSchema(SchemaInfo schemaInfo);
 
-    protected abstract void testCompatibility(String type, String schema1, String schema2);
+    protected abstract void testCompatibility(String type, int version1, int version2) throws Exception;
 
 }

@@ -27,6 +27,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  *
@@ -39,6 +40,8 @@ public class SchemaRegistryApplication extends Application<SchemaRegistryConfigu
         StorageManager storageManager = getStorageManager(configuration.getStorageProviderConfiguration());
         Collection<? extends SchemaProvider> schemaProviders = getSchemaProviders(configuration.getSchemaProviderClasses());
         ISchemaRegistry schemaRegistry = new DefaultSchemaRegistry(storageManager, schemaProviders);
+        //todo should be moved to resource initialization callback method
+        schemaRegistry.init(Collections.<String, Object>emptyMap());
         environment.jersey().register(new SchemaRegistryCatalog(schemaRegistry));
     }
 

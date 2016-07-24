@@ -18,7 +18,7 @@
 package com.hortonworks.iotas.schemaregistry.serde.pull;
 
 /**
- *
+ * Serializer interface for writing events
  */
 public interface PullSerializer extends AutoCloseable {
 

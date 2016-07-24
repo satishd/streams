@@ -23,25 +23,25 @@ package com.hortonworks.iotas.schemaregistry.serde.pull;
  */
 public class RecordContext<F> implements PullEventContext<F> {
 
-    private final boolean startEvent;
-    private final boolean endEvent;
+    private final boolean startRecord;
+    private final boolean endRecord;
 
-    protected RecordContext(boolean startEvent, boolean endEvent) {
-        this.startEvent = startEvent;
-        this.endEvent = endEvent;
-        if (startEvent == endEvent) {
+    protected RecordContext(boolean startRecord, boolean endRecord) {
+        this.startRecord = startRecord;
+        this.endRecord = endRecord;
+        if (startRecord == endRecord) {
             throw new IllegalArgumentException("start-event and end-event can not be same.");
         }
     }
 
     @Override
     public boolean startRecord() {
-        return startEvent;
+        return startRecord;
     }
 
     @Override
     public boolean endRecord() {
-        return endEvent;
+        return endRecord;
     }
 
     @Override

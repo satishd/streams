@@ -81,6 +81,16 @@ public class SchemaInfo extends AbstractStorable {
         this.type = type;
     }
 
+    public SchemaInfo(SchemaInfo givenSchemaInfo) {
+        id = givenSchemaInfo.id;
+        name = givenSchemaInfo.name;
+        type = givenSchemaInfo.type;
+        version = givenSchemaInfo.version;
+        schemaText = givenSchemaInfo.schemaText;
+        timestamp = givenSchemaInfo.timestamp;
+        compatibility = givenSchemaInfo.compatibility;
+    }
+
     @Override
     @JsonIgnore
     public String getNameSpace() {

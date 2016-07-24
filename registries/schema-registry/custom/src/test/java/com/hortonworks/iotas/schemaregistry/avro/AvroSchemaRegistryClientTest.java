@@ -61,8 +61,8 @@ public class AvroSchemaRegistryClientTest extends AbstractAvroSchemaRegistryTest
     }
 
     @Override
-    protected void testCompatibility(String type, String schema1, String schema2) {
-
+    protected void testCompatibility(String type, int version1, int version2) throws Exception {
+        schemaRegistryClient.isCompatible(type, schemaName, version1, version2);
     }
 
 }

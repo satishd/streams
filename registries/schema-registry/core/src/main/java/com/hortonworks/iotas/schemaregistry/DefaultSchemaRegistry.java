@@ -56,9 +56,11 @@ public class DefaultSchemaRegistry implements ISchemaRegistry {
     }
 
     @Override
-    public SchemaInfo add(SchemaInfo schemaInfo) {
-        Preconditions.checkNotNull(schemaInfo.getType(), "type must not be null");
-        Preconditions.checkNotNull(schemaInfo.getName(), "name must not be null");
+    public SchemaInfo add(SchemaInfo givenSchemaInfo) {
+        Preconditions.checkNotNull(givenSchemaInfo.getType(), "type must not be null");
+        Preconditions.checkNotNull(givenSchemaInfo.getName(), "name must not be null");
+
+        SchemaInfo schemaInfo = new SchemaInfo(givenSchemaInfo);
 
         Long id = schemaInfo.getId();
         if (id != null) {

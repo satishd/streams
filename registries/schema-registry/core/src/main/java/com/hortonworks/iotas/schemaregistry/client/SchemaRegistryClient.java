@@ -74,13 +74,13 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
         return entities;
     }
 
-    private <T extends Storable> T postEntity(WebTarget target, Object json, Class<T> clazz) {
+    private <T> T postEntity(WebTarget target, Object json, Class<T> clazz) {
         String response = target.request(MediaType.APPLICATION_JSON_TYPE).post(Entity.json(json), String.class);
 
         return readEntity(clazz, response);
     }
 
-    private <T extends Storable> T readEntity(Class<T> clazz, String response) {
+    private <T> T readEntity(Class<T> clazz, String response) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(response);
@@ -90,7 +90,7 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
         }
     }
 
-    private <T extends Storable> T getEntity(WebTarget target, Class<T> clazz) {
+    private <T> T getEntity(WebTarget target, Class<T> clazz) {
         String response = target.request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
 
         return readEntity(clazz, response);
@@ -126,9 +126,18 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
         return getEntities(webTarget.path(String.format(TYPES_PATH + "/%s/schemas/%s", type, name)), SchemaInfo.class);
     }
 
+    public boolean isCompatible(String type, String name, Integer existingSchemaVersion, Integer toSchemaVersion) {
+        String path = String.format(TYPES_PATH + "/%s/compatibility/schemas/%s/versions/%d/%d",
+                                                    type, name, existingSchemaVersion, toSchemaVersion);
+        WebTarget target = webTarget.path(path);
+        String response = target.request().get(String.class);
+        return readEntity(Boolean.class, response);
+    }
+
     public boolean isCompatibleWithLatest(String type, String toSchemaText, String existingSchemaName) {
-        WebTarget target = webTarget.path(String.format(TYPES_PATH + "/%s/compatibility/%s/latest", type, existingSchemaName));
-        return target.request().post(Entity.text(toSchemaText), Boolean.class);
+        WebTarget target = webTarget.path(String.format(TYPES_PATH + "/%s/compatibility/%s/versions/latest", type, existingSchemaName));
+        String response = target.request().post(Entity.text(toSchemaText), String.class);
+        return readEntity(Boolean.class, response);
     }
 
 }
