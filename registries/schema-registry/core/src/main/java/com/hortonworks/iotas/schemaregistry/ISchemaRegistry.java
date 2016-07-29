@@ -17,6 +17,7 @@
  */
 package com.hortonworks.iotas.schemaregistry;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
 
@@ -27,30 +28,41 @@ public interface ISchemaRegistry {
 
     public void init(Map<String, Object> props);
 
-    public SchemaInfo add(SchemaInfo schemaInfo);
+    public SchemaMetadata addSchemaMetadata(SchemaMetadata schemaMetadata);
 
-    public Collection<SchemaInfo> list();
+    public SchemaMetadata getSchemaMetadata(Long schemaMetadataId);
 
-    public SchemaInfo get(String type, String name, Integer version);
+    public Collection<SchemaInfo> findAllVersions(Long schemaMetadataId);
 
-    public SchemaInfo get(Long id);
+    public SchemaInfo getSchemaInfo(Long schemaMetadataId, Integer version);
 
-    public SchemaInfo remove(Long id);
+    public SchemaInfo getLatestSchemaInfo(Long schemaMetadataId);
 
-    public SchemaInfo getLatest(String type, String name);
+    public SchemaInfo addSchemaInfo(SchemaInfo schemaInfo);
 
-    public SchemaInfo remove(String type, String name, Integer version);
+    public Collection<SchemaInfo> listAll();
 
-    public Collection<SchemaInfo> get(String type, String name);
+    public SchemaInfo getSchemaInfo(String type, String name, Integer version);
 
-    public Collection<SchemaInfo> removeAll(String type, String name);
+    public SchemaInfo getSchemaInfo(Long schemaInfoId);
 
-    public boolean isCompatible(String type, String name, Integer existingSchemaVersion, Integer toSchemaVersion) throws SchemaNotFoundException;
+    public SchemaInfo removeSchemaInfo(Long schemaInfoId);
 
-    public boolean isCompatible(String type, String name, Integer existingSchemaVersion, String schema) throws SchemaNotFoundException;
+    public boolean isCompatible(Long schemaMetadataId, Integer existingSchemaVersion, Integer toSchemaVersion) throws SchemaNotFoundException;
+
+    public boolean isCompatible(Long schemaMetadataId, Integer existingSchemaVersion, String schema) throws SchemaNotFoundException;
 
     public boolean isCompatible(String type, String toSchema, String existingSchema, SchemaProvider.Compatibility compatibility);
 
-    public Collection<SchemaInfo> getCompatibleSchemas(String type, String name, SchemaProvider.Compatibility compatibility, String toSchema) throws SchemaNotFoundException;
+    public Collection<SchemaInfo> getCompatibleSchemas(Long schemaMetadataId, SchemaProvider.Compatibility compatibility, String toSchema) throws SchemaNotFoundException;
 
+    public SchemaMetadata getOrCreateSchemaMetadata(SchemaMetadata givenSchemaMetadata);
+
+    public Long addSerializer(SchemaSerializerInfo schemaSerializerInfo, InputStream inputStream);
+
+    public SchemaSerializerInfo getSerializer(Long serializerId);
+
+    public Iterable<SchemaSerializerInfo> getSchemaSerializers(Long schemaMetadataId);
+
+    public InputStream downloadSerializer(Long schemaMetadataId, Long serializerId);
 }

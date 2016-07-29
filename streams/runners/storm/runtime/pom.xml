@@ -51,6 +51,11 @@
         </dependency>
         <dependency>
             <groupId>com.hortonworks.iotas</groupId>
+            <artifactId>schema-registry-core</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hortonworks.iotas</groupId>
             <artifactId>streams-layout-storm</artifactId>
             <version>0.1.0-SNAPSHOT</version>
             <!-- dropwizard and phoenix have conflicts in jersey related dependencies  -->

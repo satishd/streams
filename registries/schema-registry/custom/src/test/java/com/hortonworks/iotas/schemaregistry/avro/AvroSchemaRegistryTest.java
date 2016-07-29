@@ -18,48 +18,76 @@
 package com.hortonworks.iotas.schemaregistry.avro;
 
 import com.hortonworks.iotas.schemaregistry.DefaultSchemaRegistry;
+import com.hortonworks.iotas.schemaregistry.SchemaDto;
 import com.hortonworks.iotas.schemaregistry.SchemaInfo;
-import com.hortonworks.iotas.schemaregistry.SchemaNotFoundException;
 import com.hortonworks.iotas.schemaregistry.SchemaProvider;
 import com.hortonworks.iotas.storage.StorageManager;
 import com.hortonworks.iotas.storage.impl.memory.InMemoryStorageManager;
+import org.apache.avro.Schema;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 
 /**
  *
  */
-public class AvroSchemaRegistryTest extends AbstractAvroSchemaRegistryTest {
+public class AvroSchemaRegistryTest {
 
     private DefaultSchemaRegistry schemaRegistry;
 
     @Before
     public void setup() throws IOException {
-        super.setup();
+        schema1 = getSchema("/device.avsc");
+        schema2 = getSchema("/device2.avsc");
+        schemaName = "schema-" + System.currentTimeMillis();
         StorageManager storageManager = new InMemoryStorageManager();
-        schemaRegistry = new DefaultSchemaRegistry(storageManager, Collections.singleton(new AvroSchemaProvider()));
+        schemaRegistry = new DefaultSchemaRegistry(storageManager, null, Collections.singleton(new AvroSchemaProvider()));
         schemaRegistry.init(Collections.<String, Object>emptyMap());
     }
 
-    protected void testCompatibility(String type, String schema1, String schema2) {
-        Assert.assertTrue(schemaRegistry.isCompatible(type, schema1, schema2, SchemaProvider.Compatibility.BACKWARD));
-        Assert.assertTrue(schemaRegistry.isCompatible(type, schema1, schema2, SchemaProvider.Compatibility.FORWARD));
-        Assert.assertTrue(schemaRegistry.isCompatible(type, schema1, schema2, SchemaProvider.Compatibility.BOTH));
+    protected String schema1;
+    protected String schema2;
+    protected String schemaName;
+
+    private String getSchema(String schemaFileName) throws IOException {
+        InputStream avroSchemaStream = AvroSerDeTest.class.getResourceAsStream(schemaFileName);
+        Schema.Parser parser = new Schema.Parser();
+        return parser.parse(avroSchemaStream).toString();
     }
 
-    protected SchemaInfo getLatestSchema(String type, String name) {
-        return schemaRegistry.getLatest(type, name);
+    @Test
+    public void testRegistryOps() throws Exception {
+
+        SchemaDto schemaDto = new SchemaDto();
+        schemaDto.setSchemaText(schema1);
+        schemaDto.setType(AvroSchemaProvider.TYPE);
+        schemaDto.setCompatibility(SchemaProvider.Compatibility.BOTH);
+        SchemaDto schemaDto1 = SchemaDto.addSchemaDto(schemaRegistry, schemaDto);
+        int v1 = schemaDto1.getVersion();
+
+        SchemaInfo schemaInfo2 = new SchemaInfo();
+        schemaInfo2.setSchemaMetadataId(schemaDto1.getId());
+        schemaInfo2.setCompatibility(SchemaProvider.Compatibility.BOTH);
+        schemaInfo2.setSchemaText(schema2);
+        SchemaInfo addedSchemaInfo2 = addSchemaAndVerify(schemaInfo2);
+        int v2 = addedSchemaInfo2.getVersion();
+
+        Assert.assertTrue(v2 == v1 + 1);
+
+        SchemaInfo latest = schemaRegistry.getLatestSchemaInfo(schemaDto1.getId());
+        Assert.assertEquals(latest, addedSchemaInfo2);
+
     }
 
-    protected SchemaInfo addSchema(SchemaInfo schemaInfo) {
-        return schemaRegistry.add(schemaInfo);
+    private SchemaInfo addSchemaAndVerify(SchemaInfo schemaInfo) {
+        SchemaInfo addedSchemaInfo = schemaRegistry.addSchemaInfo(schemaInfo);
+        Assert.assertEquals(addedSchemaInfo.getSchemaMetadataId(), schemaInfo.getSchemaMetadataId());
+        Assert.assertEquals(addedSchemaInfo.getSchemaText(), schemaInfo.getSchemaText());
+        return addedSchemaInfo;
     }
 
-    @Override
-    protected void testCompatibility(String type, int version1, int version2) throws SchemaNotFoundException {
-        Assert.assertTrue(schemaRegistry.isCompatible(type, schemaName, version1, version2));
-    }
 }

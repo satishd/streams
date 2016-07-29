@@ -23,21 +23,20 @@ import com.hortonworks.iotas.storage.PrimaryKey;
 import com.hortonworks.iotas.storage.Storable;
 import com.hortonworks.iotas.storage.catalog.AbstractStorable;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  *
  */
-public class SchemaInfo extends AbstractStorable {
-    public static final String NAME_SPACE = "schema_instance_info";
+public class SchemaMetadata extends AbstractStorable {
+    public static final String NAME_SPACE = "schema_metadata_info";
     public static final String ID = "id";
-    public static final String SCHEMA_METADATA_ID = "schemaMetadataId";
-    public static final String DESCRIPTION = "description";
-    public static final String SCHEMA_TEXT = "schemaText";
-    public static final String VERSION = "version";
-    public static final String TIMESTAMP = "timestamp";
+    public static final String NAME = "name";
     public static final String COMPATIBILITY = "compatibility";
+    public static final String TYPE="type";
+    public static final String TIMESTAMP = "timestamp";
 
     /**
      * Unique ID generated for this component.
@@ -45,24 +44,14 @@ public class SchemaInfo extends AbstractStorable {
     protected Long id;
 
     /**
-     * Id of the SchemaMetadata instance.
+     * Given name of the schema.
      */
-    private Long schemaMetadataId;
+    private String name;
 
     /**
-     * Description about this schema instance
+     * Description of the schema.
      */
     private String description;
-
-    /**
-     * Textual representation of the schema
-     */
-    private String schemaText;
-
-    /**
-     * Current version of the schema. (id, version) pair is unique constraint.
-     */
-    private Integer version;
 
     /**
      * Time at which this schema was created/updated.
@@ -70,20 +59,30 @@ public class SchemaInfo extends AbstractStorable {
     protected Long timestamp;
 
     /**
+     * Schema type which can be avro, protobuf or json etc. User can have a unique constraint with (type, name) values.
+     */
+    private String type;
+
+    /**
      * Compatibility of this schema instance
      */
     private SchemaProvider.Compatibility compatibility = SchemaProvider.Compatibility.NONE;
 
-    public SchemaInfo() {
+    public SchemaMetadata() {
     }
 
-    public SchemaInfo(SchemaInfo givenSchemaInfo) {
+    public SchemaMetadata(String name, String type) {
+        this.name = name;
+        this.type = type;
+    }
+
+    public SchemaMetadata(SchemaMetadata givenSchemaInfo) {
         id = givenSchemaInfo.id;
-        schemaMetadataId = givenSchemaInfo.schemaMetadataId;
-        version = givenSchemaInfo.version;
-        schemaText = givenSchemaInfo.schemaText;
+        name = givenSchemaInfo.name;
+        type = givenSchemaInfo.type;
         timestamp = givenSchemaInfo.timestamp;
         compatibility = givenSchemaInfo.compatibility;
+        description = givenSchemaInfo.description;
     }
 
     @Override
@@ -95,9 +94,7 @@ public class SchemaInfo extends AbstractStorable {
     @Override
     @JsonIgnore
     public PrimaryKey getPrimaryKey() {
-        Map<Schema.Field, Object> values = new HashMap<>();
-        values.put(new Schema.Field(ID, Schema.Type.LONG), id);
-        return new PrimaryKey(values);
+        return new PrimaryKey(Collections.singletonMap(new Schema.Field(ID, Schema.Type.LONG), (Object) id));
     }
 
     @Override
@@ -105,10 +102,9 @@ public class SchemaInfo extends AbstractStorable {
     public Schema getSchema() {
         return Schema.of(
                 Schema.Field.of(ID, Schema.Type.LONG),
-                Schema.Field.of(SCHEMA_METADATA_ID, Schema.Type.LONG),
-                Schema.Field.of(SCHEMA_TEXT, Schema.Type.STRING),
-                Schema.Field.of(DESCRIPTION, Schema.Type.STRING),
-                Schema.Field.of(VERSION, Schema.Type.LONG),
+                Schema.Field.of(NAME, Schema.Type.STRING),
+                Schema.Field.of(TYPE, Schema.Type.STRING),
+                Schema.Field.of(COMPATIBILITY, Schema.Type.STRING),
                 Schema.Field.of(TIMESTAMP, Schema.Type.LONG)
         );
     }
@@ -133,24 +129,12 @@ public class SchemaInfo extends AbstractStorable {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public String getName() {
+        return name;
     }
 
-    public String getSchemaText() {
-        return schemaText;
-    }
-
-    public void setSchemaText(String schemaText) {
-        this.schemaText = schemaText;
-    }
-
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Long getTimestamp() {
@@ -165,12 +149,12 @@ public class SchemaInfo extends AbstractStorable {
         this.compatibility = compatibility;
     }
 
-    public Long getSchemaMetadataId() {
-        return schemaMetadataId;
+    public String getType() {
+        return type;
     }
 
-    public void setSchemaMetadataId(Long schemaMetadataId) {
-        this.schemaMetadataId = schemaMetadataId;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getDescription() {
@@ -179,5 +163,32 @@ public class SchemaInfo extends AbstractStorable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SchemaMetadata that = (SchemaMetadata) o;
+
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (description != null ? !description.equals(that.description) : that.description != null) return false;
+        if (timestamp != null ? !timestamp.equals(that.timestamp) : that.timestamp != null) return false;
+        if (type != null ? !type.equals(that.type) : that.type != null) return false;
+        return compatibility == that.compatibility;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (compatibility != null ? compatibility.hashCode() : 0);
+        return result;
     }
 }

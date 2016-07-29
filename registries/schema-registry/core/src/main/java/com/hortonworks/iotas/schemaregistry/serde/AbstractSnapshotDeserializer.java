@@ -17,7 +17,8 @@
  */
 package com.hortonworks.iotas.schemaregistry.serde;
 
-import com.hortonworks.iotas.schemaregistry.SchemaInfo;
+import com.hortonworks.iotas.schemaregistry.SchemaDto;
+import com.hortonworks.iotas.schemaregistry.SchemaKey;
 import com.hortonworks.iotas.schemaregistry.client.SchemaRegistryClient;
 
 import java.io.IOException;
@@ -25,9 +26,9 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 /**
- *
+ * SnapShotDeserializer implementation which deserializes schema id and version from received payload
  */
-public abstract class AbstractSnapshotDeserializer<O> implements SnapshotDeserializer<O, SchemaInfo> {
+public abstract class AbstractSnapshotDeserializer<O> implements SnapshotDeserializer<O, SchemaDto> {
     private final SchemaRegistryClient schemaRegistryClient;
 
     public AbstractSnapshotDeserializer(SchemaRegistryClient schemaRegistryClient) {
@@ -35,18 +36,19 @@ public abstract class AbstractSnapshotDeserializer<O> implements SnapshotDeseria
     }
 
     @Override
-    public final O deserialize(InputStream payloadInputStream, SchemaInfo readerSchema) throws SerDeException {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(8);
+    public final O deserialize(InputStream payloadInputStream, SchemaDto readerSchema) throws SerDeException {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(12);
         try {
             payloadInputStream.read(byteBuffer.array());
         } catch (IOException e) {
             throw new SerDeException(e);
         }
-        long id = byteBuffer.asLongBuffer().get();
-        SchemaInfo writerSchema = schemaRegistryClient.get(id);
+        long id = byteBuffer.getLong();
+        int version = byteBuffer.getInt();
+        SchemaDto writerSchema = schemaRegistryClient.getSchema(new SchemaKey(id, version));
 
         return doDeserialize(payloadInputStream, writerSchema, readerSchema);
     }
 
-    protected abstract O doDeserialize(InputStream payloadInputStream, SchemaInfo writerSchema, SchemaInfo readerSchema);
+    protected abstract O doDeserialize(InputStream payloadInputStream, SchemaDto writerSchema, SchemaDto readerSchema);
 }

@@ -19,47 +19,69 @@ package com.hortonworks.iotas.schemaregistry.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hortonworks.iotas.schemaregistry.ISchemaRegistryClient;
-import com.hortonworks.iotas.schemaregistry.SchemaInfo;
-import com.hortonworks.iotas.storage.Storable;
+import com.hortonworks.iotas.schemaregistry.SchemaDto;
+import com.hortonworks.iotas.schemaregistry.SchemaKey;
+import com.hortonworks.iotas.schemaregistry.serde.SnapshotDeserializer;
+import com.hortonworks.iotas.schemaregistry.serde.SnapshotSerializer;
 import org.glassfish.jersey.client.ClientConfig;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
- *
+ * This is the default implementation of {@link ISchemaRegistryClient} which connects to the given {@code rootCatalogURL}.
+ * <pre>
+ * This can be used to
+ *      - register schemas
+ *      - adding new versions of a schema
+ *      - fetching different versions of schema
+ *      - fetching latest version of a schema
+ *      - check whether the given schema text is compatible with a latest version of the schema
+ * </pre>
  */
 public class SchemaRegistryClient implements ISchemaRegistryClient {
-    private static final String SCHEMAREGISTRY_PATH = "/schemaregistry";
-    public static final String SCHEMAS_PATH = "/schemas";
-    public static final String TYPES_PATH = "/types";
+    private static final String SCHEMAREGISTRY_PATH = "/schemaregistry/schemas/";
+    public static final String SCHEMA_REGISTRY_URL = "schema.registry.url";
 
-    private final WebTarget webTarget;
+    private WebTarget webTarget;
+    private Client client;
 
-    public SchemaRegistryClient(String rootCatalogURL) {
-        this(rootCatalogURL, new ClientConfig());
+    public SchemaRegistryClient() {
     }
 
-    public SchemaRegistryClient(String rootCatalogURL, ClientConfig clientConfig) {
-        Client client = ClientBuilder.newClient(clientConfig);
+    @Override
+    public void init(Map<String, Object> conf) {
+        client = ClientBuilder.newClient(new ClientConfig());
+        String rootCatalogURL = (String) conf.get(SCHEMA_REGISTRY_URL);
         webTarget = client.target(rootCatalogURL).path(SCHEMAREGISTRY_PATH);
     }
 
     @Override
-    public SchemaInfo add(SchemaInfo schemaInfo) {
-        return postEntity(webTarget.path(SCHEMAS_PATH), schemaInfo, SchemaInfo.class);
+    public void close() {
+        client.close();
     }
 
-    private <T extends Storable> List<T> getEntities(WebTarget target, Class<T> clazz) {
-        List<T> entities = new ArrayList<T>();
+    @Override
+    public SchemaKey registerSchema(Schema schema) {
+        return postEntity(webTarget, new SchemaDto(schema.schemaMetadata(), schema.schemaInfo()), SchemaKey.class);
+    }
+
+    @Override
+    public SchemaKey addVersionedSchema(Long schemaMetadataId, VersionedSchema schemaInfo) {
+        WebTarget path = webTarget.path(schemaMetadataId.toString());
+        return postEntity(path, schemaInfo, SchemaKey.class);
+    }
+
+    private <T> List<T> getEntities(WebTarget target, Class<T> clazz) {
+        List<T> entities = new ArrayList<>();
         String response = target.request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -97,47 +119,41 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
     }
 
     @Override
-    public Collection<SchemaInfo> list() {
-        return getEntities(webTarget.path(SCHEMAS_PATH), SchemaInfo.class);
+    public Iterable<SchemaDto> listAllSchemas() {
+        return getEntities(webTarget, SchemaDto.class);
     }
 
     @Override
-    public SchemaInfo get(Long id) {
-        return getEntity(webTarget.path(SCHEMAS_PATH).path(id.toString()), SchemaInfo.class);
-    }
-    
-    @Override
-    public Collection<SchemaInfo> list(String type) {
-        return getEntities(webTarget.path(String.format(TYPES_PATH + "/%s", type)), SchemaInfo.class);
+    public SchemaDto getSchema(SchemaKey schemaKey) {
+        return getEntity(webTarget.path(String.format("%d/versions/%d", schemaKey.getId(), schemaKey.getVersion())), SchemaDto.class);
     }
 
     @Override
-    public SchemaInfo get(String type, String name, Integer version) {
-        return getEntity(webTarget.path(String.format(TYPES_PATH + "/%s/schemas/%s/versions/%s", type, name, version)), SchemaInfo.class);
+    public SchemaDto getLatestSchema(Long schemaMetadataId) {
+        return getEntity(webTarget.path(String.format("%d/versions/latest", schemaMetadataId)), SchemaDto.class);
     }
 
     @Override
-    public SchemaInfo getLatest(String type, String name) {
-        return getEntity(webTarget.path(String.format(TYPES_PATH + "/%s/schemas/%s/versions/latest", type, name)), SchemaInfo.class);
+    public Iterable<SchemaDto> getAllVersions(Long schemaMetadataId) {
+        return getEntities(webTarget.path(schemaMetadataId.toString()), SchemaDto.class);
     }
 
     @Override
-    public Collection<SchemaInfo> get(String type, String name) {
-        return getEntities(webTarget.path(String.format(TYPES_PATH + "/%s/schemas/%s", type, name)), SchemaInfo.class);
-    }
-
-    public boolean isCompatible(String type, String name, Integer existingSchemaVersion, Integer toSchemaVersion) {
-        String path = String.format(TYPES_PATH + "/%s/compatibility/schemas/%s/versions/%d/%d",
-                                                    type, name, existingSchemaVersion, toSchemaVersion);
-        WebTarget target = webTarget.path(path);
-        String response = target.request().get(String.class);
-        return readEntity(Boolean.class, response);
-    }
-
-    public boolean isCompatibleWithLatest(String type, String toSchemaText, String existingSchemaName) {
-        WebTarget target = webTarget.path(String.format(TYPES_PATH + "/%s/compatibility/%s/versions/latest", type, existingSchemaName));
+    public boolean isCompatibleWithLatestSchema(Long schemaMetadataId, String toSchemaText) {
+        WebTarget target = webTarget.path(String.format("compatibility/%d/versions/latest", schemaMetadataId));
         String response = target.request().post(Entity.text(toSchemaText), String.class);
         return readEntity(Boolean.class, response);
     }
+
+    @Override
+    public <I, O> SnapshotSerializer<I, O, Schema> getSnapshotSerializer(Long schemaMetadataId) {
+        return null;
+    }
+
+    @Override
+    public <O> SnapshotDeserializer<O, Schema> getSnapshotDeserializer(Long schemaMetadataId) {
+        return null;
+    }
+
 
 }

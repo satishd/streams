@@ -19,6 +19,9 @@ package com.hortonworks.iotas.schemaregistry;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.hortonworks.iotas.common.FileStorageConfiguration;
+import com.hortonworks.iotas.common.util.FileStorage;
+import com.hortonworks.iotas.common.util.ReflectionHelper;
 import com.hortonworks.iotas.storage.StorageManager;
 import com.hortonworks.iotas.storage.StorageProviderConfiguration;
 import io.dropwizard.Application;
@@ -37,12 +40,27 @@ public class SchemaRegistryApplication extends Application<SchemaRegistryConfigu
     @Override
     public void run(SchemaRegistryConfiguration configuration, Environment environment) throws Exception {
         environment.jersey().register(MultiPartFeature.class);
+
         StorageManager storageManager = getStorageManager(configuration.getStorageProviderConfiguration());
+        FileStorage fileStorage = getJarStorage(configuration.getFileStorageConfiguration());
         Collection<? extends SchemaProvider> schemaProviders = getSchemaProviders(configuration.getSchemaProviderClasses());
-        ISchemaRegistry schemaRegistry = new DefaultSchemaRegistry(storageManager, schemaProviders);
+        ISchemaRegistry schemaRegistry = new DefaultSchemaRegistry(storageManager, fileStorage, schemaProviders);
+
         //todo should be moved to resource initialization callback method
         schemaRegistry.init(Collections.<String, Object>emptyMap());
         environment.jersey().register(new SchemaRegistryCatalog(schemaRegistry));
+    }
+
+    private FileStorage getJarStorage(FileStorageConfiguration fileStorageConfiguration) {
+        FileStorage fileStorage = null;
+        if(fileStorageConfiguration.getClassName() != null)
+        try {
+            fileStorage = (FileStorage) Class.forName(fileStorageConfiguration.getClassName()).newInstance();
+            fileStorage.init(fileStorageConfiguration.getProperties());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return fileStorage;
     }
 
     private Collection<? extends SchemaProvider> getSchemaProviders(Collection<String> schemaProviderClassNames) {

@@ -20,9 +20,13 @@ package com.hortonworks.iotas.schemaregistry;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Preconditions;
 import com.hortonworks.iotas.common.util.WSUtils;
+import com.hortonworks.iotas.schemaregistry.client.VersionedSchema;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -32,8 +36,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
-import java.util.Collection;
+
+import java.io.InputStream;
 
 import static com.hortonworks.iotas.common.catalog.CatalogResponse.ResponseMessage.ENTITY_NOT_FOUND;
 import static com.hortonworks.iotas.common.catalog.CatalogResponse.ResponseMessage.EXCEPTION;
@@ -62,7 +68,7 @@ public class SchemaRegistryCatalog {
     @Timed
     public Response listSchemas(@Context UriInfo uriInfo) {
         try {
-            return WSUtils.respond(OK, SUCCESS, schemaRegistry.list());
+            return WSUtils.respond(OK, SUCCESS, schemaRegistry.listAll());
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
         }
@@ -71,10 +77,29 @@ public class SchemaRegistryCatalog {
     @POST
     @Path("/schemas")
     @Timed
-    public Response addSchema(SchemaInfo schemaInfo) {
+    public Response addSchema(SchemaDto schemaDto) {
         try {
-            SchemaInfo addedSchemaInfo = schemaRegistry.add(schemaInfo);
-            return WSUtils.respond(CREATED, SUCCESS, addedSchemaInfo);
+            SchemaDto addedSchemaDto = SchemaDto.addSchemaDto(schemaRegistry, schemaDto);
+            return WSUtils.respond(CREATED, SUCCESS, new SchemaKey(addedSchemaDto.getId(), addedSchemaDto.getVersion()));
+        } catch (Exception ex) {
+            LOG.error("Error encountered while adding schema", ex);
+            return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
+        }
+    }
+
+    @POST
+    @Path("/schemas/{id}")
+    @Timed
+    public Response addSchemaInfo(@PathParam("id") Long schemaMetadataId, VersionedSchema versionedSchema) {
+        try {
+            SchemaInfo schemaInfo = new SchemaInfo();
+            schemaInfo.setSchemaMetadataId(schemaMetadataId);
+            schemaInfo.setCompatibility(versionedSchema.getCompatibility());
+            schemaInfo.setSchemaText(versionedSchema.getSchemaText());
+            schemaInfo.setDescription(versionedSchema.getDescription());
+
+            SchemaInfo addedSchemaInfo = schemaRegistry.addSchemaInfo(schemaInfo);
+            return WSUtils.respond(CREATED, SUCCESS, new SchemaKey(addedSchemaInfo.getSchemaMetadataId(), addedSchemaInfo.getVersion()));
         } catch (Exception ex) {
             LOG.error("Error encountered while adding schema", ex);
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
@@ -84,26 +109,28 @@ public class SchemaRegistryCatalog {
     @GET
     @Path("/schemas/{id}")
     @Timed
-    public Response getSchema(@PathParam("id") Long schemaId) {
-        Preconditions.checkNotNull(schemaId, "schemaID must not be null");
+    public Response getSchema(@PathParam("id") Long schemaMetadataId) {
+        Preconditions.checkNotNull(schemaMetadataId, "id must not be null");
         try {
-            SchemaInfo schemaInfo = schemaRegistry.get(schemaId);
+            SchemaInfo schemaInfo = schemaRegistry.getSchemaInfo(schemaMetadataId);
             if (schemaInfo != null) {
-                return WSUtils.respond(OK, SUCCESS, schemaInfo);
+                SchemaMetadata schemaMetadata = schemaRegistry.getSchemaMetadata(schemaInfo.getSchemaMetadataId());
+                SchemaDto schemaDto = new SchemaDto(schemaMetadata, schemaInfo);
+                return WSUtils.respond(OK, SUCCESS, schemaDto);
             }
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
         }
 
-        return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, schemaId.toString());
+        return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, schemaMetadataId.toString());
     }
 
     @DELETE
     @Path("/schemas/{id}")
     @Timed
-    public Response removeSchemaInfo(@PathParam("id") Long schemaId) {
+    public Response removeSchemaInfo(@PathParam("id") Long schemaMetadataId) {
         try {
-            SchemaInfo removedParser = schemaRegistry.remove(schemaId);
+            SchemaInfo removedParser = schemaRegistry.removeSchemaInfo(schemaMetadataId);
             return WSUtils.respond(OK, SUCCESS, removedParser);
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
@@ -111,106 +138,116 @@ public class SchemaRegistryCatalog {
     }
 
     @GET
-    @Path("/types/{type}/schemas/{name}/")
+    @Path("/schemas/{id}/versions/latest")
     @Timed
-    public Response listSchemas(@PathParam("name") String name,
-                                @PathParam("type") String type) {
+    public Response getLatestSchema(@PathParam("id") Long schemaMetadataId) {
         try {
-            Collection<SchemaInfo> schemaInfos = schemaRegistry.get(type, name);
-            if (schemaInfos != null) {
-                return WSUtils.respond(OK, SUCCESS, schemaInfos);
-            }
-        } catch (Exception ex) {
-            return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
-        }
-
-        return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, name);
-    }
-
-    @GET
-    @Path("/types/{type}/schemas/{name}/versions/latest")
-    @Timed
-    public Response getLatestSchema(@PathParam("name") String name,
-                                    @PathParam("type") String type) {
-        try {
-            SchemaInfo schemaInfo = schemaRegistry.getLatest(type, name);
+            SchemaMetadata schemaMetadata = schemaRegistry.getSchemaMetadata(schemaMetadataId);
+            SchemaInfo schemaInfo = schemaRegistry.getLatestSchemaInfo(schemaMetadataId);
             if (schemaInfo != null) {
-                return WSUtils.respond(OK, SUCCESS, schemaInfo);
+                return WSUtils.respond(OK, SUCCESS, new SchemaDto(schemaMetadata, schemaInfo));
             }
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
         }
 
-        return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, name);
+        return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, schemaMetadataId.toString());
     }
 
     @GET
-    @Path("/types/{type}/schemas/{name}/versions/{version}")
+    @Path("/schemas/{id}/versions/{version}")
     @Timed
-    public Response getSchema(@PathParam("name") String name,
-                              @PathParam("type") String type,
-                              @PathParam("version") Integer version) {
+    public Response getLatestSchema(@PathParam("id") Long schemaMetadataId, @PathParam("version") Integer version) {
         try {
-            SchemaInfo schemaInfo = schemaRegistry.get(type, name, version);
+            SchemaMetadata schemaMetadata = schemaRegistry.getSchemaMetadata(schemaMetadataId);
+            SchemaInfo schemaInfo = schemaRegistry.getSchemaInfo(schemaMetadataId, version);
             if (schemaInfo != null) {
-                return WSUtils.respond(OK, SUCCESS, schemaInfo);
+                return WSUtils.respond(OK, SUCCESS, new SchemaDto(schemaMetadata, schemaInfo));
             }
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
         }
 
-        return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, name);
-    }
-
-    @GET
-    @Path("/types/{type}/compatibility/schemas/{name}/versions/{fromVersion}/{toVersion}")
-    @Timed
-    public Response isCompatible(@PathParam("name") String name,
-                                 @PathParam("type") String type,
-                                 @PathParam("fromVersion") Integer fromVersion,
-                                 @PathParam("toVersion") Integer toVersion) {
-        try {
-            boolean compatible = schemaRegistry.isCompatible(type, name, fromVersion, toVersion);
-            return WSUtils.respond(OK, SUCCESS, compatible);
-        } catch(SchemaNotFoundException ex) {
-            LOG.error("Error encountered", ex);
-            return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, name);
-        } catch (Exception ex) {
-            LOG.error("Error encountered", ex);
-            return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
-        }
+        return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, schemaMetadataId.toString());
     }
 
     @POST
-    @Path("/types/{type}/compatibility/schemas/{name}/versions/{version}")
+    @Path("/schemas/{id}/compatible/versions/{version}")
     @Timed
     public Response isCompatible(String schema,
-                                 @PathParam("name") String name,
-                                 @PathParam("type") String type,
+                                 @PathParam("id") Long schemaMetadataId,
                                  @PathParam("version") Integer version) {
         try {
-            boolean compatible = schemaRegistry.isCompatible(type, name, version, schema);
+            boolean compatible = schemaRegistry.isCompatible(schemaMetadataId, version, schema);
             return WSUtils.respond(OK, SUCCESS, compatible);
         } catch(SchemaNotFoundException e) {
-            return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, name);
+            return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, schemaMetadataId.toString());
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
         }
     }
+
+    @GET
+    @Path("/schemas/{id}/serializers/")
+    @Timed
+    public Response getSerializers(@PathParam("id") Long schemaMetadataId) {
+        try {
+            Iterable<SchemaSerializerInfo> serializers = schemaRegistry.getSchemaSerializers(schemaMetadataId);
+
+            if (serializers != null) {
+                return WSUtils.respond(OK, SUCCESS, serializers);
+            }
+        } catch (Exception ex) {
+            return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
+        }
+
+        return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, schemaMetadataId.toString());
+    }
+
+
+    @GET
+    @Produces({"application/octet-stream", "application/json"})
+    @Path("/schemas/{id}/serializers/{serializerId}")
+    @Timed
+    public Response downloadSerializer(@PathParam("id") Long schemaMetadataId, @PathParam("serializerId") Long serializerId) {
+        try {
+            InputStream inputStream = schemaRegistry.downloadSerializer(schemaMetadataId, serializerId);
+            if (inputStream != null) {
+                StreamingOutput streamOutput = WSUtils.wrapWithStreamingOutput(inputStream);
+                return Response.ok(streamOutput).build();
+            }
+        } catch (Exception ex) {
+            return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
+        }
+
+        return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, schemaMetadataId.toString());
+    }
+
 
     @POST
-    @Path("/types/{type}/compatibility/schemas/{name}/versions/latest")
+    @Path("/serializers")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Timed
-    public Response isCompatibleWithLatest(String schema, @PathParam("name") String name, @PathParam("type") String type) {
+    public Response addSerializer(@FormDataParam("file") final InputStream inputStream,
+                                  @FormDataParam("file") final FormDataContentDisposition contentDispositionHeader,
+                                  @FormDataParam("serializerInfo") SchemaSerializerInfo schemaSerializerInfo) {
         try {
-            Integer latestVersion = schemaRegistry.getLatest(type, name).getVersion();
-            boolean compatible = schemaRegistry.isCompatible(type, name, latestVersion, schema);
-            return WSUtils.respond(OK, SUCCESS, compatible);
-        } catch(SchemaNotFoundException e) {
-            return WSUtils.respond(NOT_FOUND, ENTITY_NOT_FOUND, name);
+            Long serializerId = schemaRegistry.addSerializer(schemaSerializerInfo, inputStream);
+            return WSUtils.respond(OK, SUCCESS, serializerId);
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
         }
     }
 
+    @GET
+    @Path("/serializers/{id}")
+    @Timed
+    public Response getSerializer(@PathParam("id") Long serializerId) {
+        try {
+            SchemaSerializerInfo serializerInfo = schemaRegistry.getSerializer(serializerId);
+            return WSUtils.respond(OK, SUCCESS, serializerInfo);
+        } catch (Exception ex) {
+            return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
+        }
+    }
 }
