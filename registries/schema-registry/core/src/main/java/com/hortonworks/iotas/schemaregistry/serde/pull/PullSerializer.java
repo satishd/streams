@@ -17,10 +17,12 @@
  */
 package com.hortonworks.iotas.schemaregistry.serde.pull;
 
+import com.hortonworks.iotas.schemaregistry.Resourceable;
+
 /**
  * Serializer interface for writing events
  */
-public interface PullSerializer extends AutoCloseable {
+public interface PullSerializer extends Resourceable {
 
     /**
      * Adds the given context to output.

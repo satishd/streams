@@ -17,7 +17,10 @@
  */
 package com.hortonworks.iotas.schemaregistry.serde;
 
+import com.hortonworks.iotas.schemaregistry.Resourceable;
+
 import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * Serializer interface for serializing input {@code I} into output {@code O} according to the Schema {@code S}.
@@ -26,7 +29,7 @@ import java.io.OutputStream;
  * @param <O> serialized output type. For ex: byte[], String etc.
  * @param <S> schema to which given Input to be serialized as Output
  */
-public interface SnapshotSerializer<I, O, S> {
+public interface SnapshotSerializer<I, O, S> extends Resourceable {
 
     /**
      * Returns an instance of O which is serialized input according to the given schema

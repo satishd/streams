@@ -23,8 +23,9 @@ import com.hortonworks.iotas.schemaregistry.SchemaKey;
 import com.hortonworks.iotas.schemaregistry.SchemaProvider;
 import com.hortonworks.iotas.schemaregistry.SchemaRegistryApplication;
 import com.hortonworks.iotas.schemaregistry.SchemaRegistryConfiguration;
+import com.hortonworks.iotas.schemaregistry.SerializerInfo;
+import com.hortonworks.iotas.schemaregistry.client.SchemaMetadata;
 import com.hortonworks.iotas.schemaregistry.client.SchemaRegistryClient;
-import com.hortonworks.iotas.schemaregistry.client.Schema;
 import com.hortonworks.iotas.schemaregistry.client.VersionedSchema;
 import io.dropwizard.testing.ResourceHelpers;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -34,9 +35,13 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -72,18 +77,19 @@ public class AvroSchemaRegistryClientTest {
     }
 
     @Test
-    public void testRegistryOps() throws Exception {
+    public void testSchemaRelatedOps() throws Exception {
 
-        Schema schema = new Schema();
-        schema.setName("com.hwx.iot.device.schema");
-        schema.setSchemaText(schema1);
-        schema.setType(type());
-        schema.setCompatibility(SchemaProvider.Compatibility.BOTH);
-        SchemaKey schemaKey1 = schemaRegistryClient.registerSchema(schema);
+        // registering new schema-metadata
+        SchemaMetadata schemaMetadata = new SchemaMetadata();
+        schemaMetadata.setName("com.hwx.iot.device.schema");
+        schemaMetadata.setSchemaText(schema1);
+        schemaMetadata.setType(type());
+        schemaMetadata.setCompatibility(SchemaProvider.Compatibility.BOTH);
+        SchemaKey schemaKey1 = schemaRegistryClient.registerSchema(schemaMetadata);
         int v1 = schemaKey1.getVersion();
 
+        // adding a new version of the schema
         VersionedSchema schemaInfo2 = new VersionedSchema();
-        schemaInfo2.setCompatibility(SchemaProvider.Compatibility.BOTH);
         schemaInfo2.setSchemaText(schema2);
         SchemaKey schemaKey2 = schemaRegistryClient.addVersionedSchema(schemaKey1.getId(), schemaInfo2);
         int v2 = schemaKey2.getVersion();
@@ -93,6 +99,42 @@ public class AvroSchemaRegistryClientTest {
         SchemaDto schemaDto2 = schemaRegistryClient.getSchema(schemaKey2);
         SchemaDto latest = schemaRegistryClient.getLatestSchema(schemaKey1.getId());
         Assert.assertEquals(latest, schemaDto2);
+
+    }
+
+    public void testSerializerOps() throws Exception {
+
+        // upload a jar containing serializer and deserializer classes.
+        InputStream inputStream = new FileInputStream("/schema-custom-ser-des.jar");
+        String fileId = schemaRegistryClient.uploadFile(inputStream);
+
+        Long schemaMetadataId = 0L;
+
+        // add serializer with the respective uploaded jar file id.
+        SerializerInfo serializerInfo = new SerializerInfo();
+        serializerInfo.setName("avro serializer");
+        serializerInfo.setDescription("avro serializer");
+        serializerInfo.setFileId(fileId);
+        serializerInfo.setClassName("con.hwx.iotas.serializer.AvroSnapshotSerializer");
+        Long serializerId = schemaRegistryClient.addSerializer(serializerInfo);
+
+        // map this serializer with a registered schema
+        schemaRegistryClient.mapSerializer(schemaMetadataId, serializerId);
+
+        // get registered serializers
+        Collection<SerializerInfo> serializers = schemaRegistryClient.getSerializers(schemaMetadataId);
+        SchemaMetadata schemaMetadata = null;
+        Object input = null;
+
+        SerializerInfo registeredSerializerInfo = serializers.iterator().next();
+
+        //get serializer and serialize the given payload
+        try(AvroSnapshotSerializer snapshotSerializer = schemaRegistryClient.createInstance(registeredSerializerInfo);) {
+            Map<String, Object> config = Collections.emptyMap();
+            snapshotSerializer.init(config);
+
+            byte[] serializedData = snapshotSerializer.serialize(input, schemaMetadata);
+        }
 
     }
 

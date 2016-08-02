@@ -49,15 +49,15 @@ public final class SchemaDto {
     public SchemaDto() {
     }
 
-    public SchemaDto(SchemaMetadata schemaMetadata, SchemaInfo schemaInfo) {
-        id = schemaMetadata.getId();
-        name = schemaMetadata.getName();
-        type = schemaMetadata.getType();
-        description = schemaMetadata.getDescription();
-        version = schemaInfo.getVersion();
-        schemaText = schemaInfo.getSchemaText();
-        timestamp = schemaInfo.getTimestamp();
-        compatibility = schemaInfo.getCompatibility();
+    public SchemaDto(SchemaMetadataStorable schemaMetadataStorable, SchemaInfoStorable schemaInfoStorable) {
+        id = schemaMetadataStorable.getId();
+        name = schemaMetadataStorable.getName();
+        type = schemaMetadataStorable.getType();
+        description = schemaMetadataStorable.getDescription();
+        version = schemaInfoStorable.getVersion();
+        schemaText = schemaInfoStorable.getSchemaText();
+        timestamp = schemaInfoStorable.getTimestamp();
+        compatibility = schemaMetadataStorable.getCompatibility();
     }
 
     public Long getId() {
@@ -112,33 +112,32 @@ public final class SchemaDto {
         this.compatibility = compatibility;
     }
 
-    public SchemaMetadata schemaMetadata() {
-        SchemaMetadata schemaMetadata = new SchemaMetadata();
-        schemaMetadata.setName(name);
-        schemaMetadata.setType(type);
-        schemaMetadata.setDescription(description);
+    private SchemaMetadataStorable schemaMetadataStorable() {
+        SchemaMetadataStorable schemaMetadataStorable = new SchemaMetadataStorable();
+        schemaMetadataStorable.setName(name);
+        schemaMetadataStorable.setType(type);
+        schemaMetadataStorable.setDescription(description);
 
-        return schemaMetadata;
+        return schemaMetadataStorable;
     }
 
-    public SchemaInfo schemaInfo() {
-        SchemaInfo schemaInfo = new SchemaInfo(){{id=id; timestamp=timestamp;}};
-        schemaInfo.setVersion(version);
-        schemaInfo.setSchemaText(schemaText);
-        schemaInfo.setCompatibility(compatibility);
+    private SchemaInfoStorable schemaInfoStorable() {
+        SchemaInfoStorable schemaInfoStorable = new SchemaInfoStorable(){{id=id; timestamp=timestamp;}};
+        schemaInfoStorable.setVersion(version);
+        schemaInfoStorable.setSchemaText(schemaText);
 
-        return schemaInfo;
+        return schemaInfoStorable;
     }
 
     public static SchemaDto addSchemaDto(ISchemaRegistry schemaRegistry, SchemaDto schemaDto) {
-        SchemaMetadata givenSchemaMetadata = schemaDto.schemaMetadata();
-        SchemaMetadata schemaMetadata = schemaRegistry.getOrCreateSchemaMetadata(givenSchemaMetadata);
+        SchemaMetadataStorable givenSchemaMetadataStorable = schemaDto.schemaMetadataStorable();
+        SchemaMetadataStorable schemaMetadataStorable = schemaRegistry.getOrCreateSchemaMetadata(givenSchemaMetadataStorable);
 
-        SchemaInfo givenSchemaInfo = schemaDto.schemaInfo();
-        givenSchemaInfo.setSchemaMetadataId(schemaMetadata.getId());
-        SchemaInfo addedSchemaInfo = schemaRegistry.addSchemaInfo(givenSchemaInfo);
+        SchemaInfoStorable givenSchemaInfoStorable = schemaDto.schemaInfoStorable();
+        givenSchemaInfoStorable.setSchemaMetadataId(schemaMetadataStorable.getId());
+        SchemaInfoStorable addedSchemaInfoStorable = schemaRegistry.addSchemaInfo(givenSchemaInfoStorable);
 
-        return new SchemaDto(schemaMetadata, addedSchemaInfo);
+        return new SchemaDto(schemaMetadataStorable, addedSchemaInfoStorable);
     }
 
 

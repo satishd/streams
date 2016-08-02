@@ -29,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Map;
 
 /**
  * Sample {@link PullDeserializer} implementation
@@ -98,6 +99,11 @@ public class SamplePullDeserializer implements PullDeserializer<SchemaDetails, S
     @Override
     public void close() throws Exception {
         payloadReader.close();
+    }
+
+    @Override
+    public void init(Map<String, Object> config) {
+
     }
 
     private class MyFieldValue implements PullEventContext.FieldValue<Schema.Field> {

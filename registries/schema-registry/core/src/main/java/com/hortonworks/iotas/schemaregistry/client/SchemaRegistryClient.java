@@ -19,19 +19,24 @@ package com.hortonworks.iotas.schemaregistry.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hortonworks.iotas.schemaregistry.DeserializerInfo;
+import com.hortonworks.iotas.schemaregistry.IncompatibleSchemaException;
+import com.hortonworks.iotas.schemaregistry.InvalidSchemaException;
 import com.hortonworks.iotas.schemaregistry.SchemaDto;
 import com.hortonworks.iotas.schemaregistry.SchemaKey;
-import com.hortonworks.iotas.schemaregistry.serde.SnapshotDeserializer;
-import com.hortonworks.iotas.schemaregistry.serde.SnapshotSerializer;
+import com.hortonworks.iotas.schemaregistry.SerDesInfo;
+import com.hortonworks.iotas.schemaregistry.SerializerInfo;
+import com.hortonworks.iotas.schemaregistry.serde.SerDeException;
 import org.glassfish.jersey.client.ClientConfig;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -41,15 +46,20 @@ import java.util.Map;
  * <pre>
  * This can be used to
  *      - register schemas
- *      - adding new versions of a schema
- *      - fetching different versions of schema
- *      - fetching latest version of a schema
+ *      - add new versions of a schema
+ *      - fetch different versions of schema
+ *      - fetch latest version of a schema
  *      - check whether the given schema text is compatible with a latest version of the schema
+ *      - register serializer/deserializer for a schema
+ *      - fetch serializer/deserializer for a schema
  * </pre>
  */
 public class SchemaRegistryClient implements ISchemaRegistryClient {
-    private static final String SCHEMAREGISTRY_PATH = "/schemaregistry/schemas/";
+    private static final String SCHEMA_REGISTRY_PATH = "/schemaregistry/schemas/";
     public static final String SCHEMA_REGISTRY_URL = "schema.registry.url";
+    public static final String JAR_STORAGE_LOCATION = "jar.storage.location";
+    public static final String LOCAL_JAR_PATH = "schema.registry.local.jars.path";
+    public static final String CLASSLOADER_CACHE_SIZE = "schema.registry.class.loader.cache.size";
 
     private WebTarget webTarget;
     private Client client;
@@ -61,7 +71,7 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
     public void init(Map<String, Object> conf) {
         client = ClientBuilder.newClient(new ClientConfig());
         String rootCatalogURL = (String) conf.get(SCHEMA_REGISTRY_URL);
-        webTarget = client.target(rootCatalogURL).path(SCHEMAREGISTRY_PATH);
+        webTarget = client.target(rootCatalogURL).path(SCHEMA_REGISTRY_PATH);
     }
 
     @Override
@@ -70,12 +80,12 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
     }
 
     @Override
-    public SchemaKey registerSchema(Schema schema) {
-        return postEntity(webTarget, new SchemaDto(schema.schemaMetadata(), schema.schemaInfo()), SchemaKey.class);
+    public SchemaKey registerSchema(SchemaMetadata schemaMetadata) {
+        return postEntity(webTarget, new SchemaDto(schemaMetadata.schemaMetadataStorable(), schemaMetadata.schemaInfoStorable()), SchemaKey.class);
     }
 
     @Override
-    public SchemaKey addVersionedSchema(Long schemaMetadataId, VersionedSchema schemaInfo) {
+    public SchemaKey addVersionedSchema(Long schemaMetadataId, VersionedSchema schemaInfo) throws InvalidSchemaException, IncompatibleSchemaException {
         WebTarget path = webTarget.path(schemaMetadataId.toString());
         return postEntity(path, schemaInfo, SchemaKey.class);
     }
@@ -146,14 +156,63 @@ public class SchemaRegistryClient implements ISchemaRegistryClient {
     }
 
     @Override
-    public <I, O> SnapshotSerializer<I, O, Schema> getSnapshotSerializer(Long schemaMetadataId) {
+    public String uploadFile(InputStream inputStream) {
         return null;
     }
 
     @Override
-    public <O> SnapshotDeserializer<O, Schema> getSnapshotDeserializer(Long schemaMetadataId) {
+    public InputStream downloadFile(String fileId) {
         return null;
     }
 
+    @Override
+    public Long addSerializer(SerializerInfo serializerInfo) {
+        return null;
+    }
+
+    @Override
+    public Long addDeserializer(DeserializerInfo deserializerInfo) {
+        return null;
+    }
+
+    @Override
+    public Collection<SerializerInfo> getSerializers(Long schemaMetadataId) {
+        return null;
+    }
+
+    @Override
+    public Collection<DeserializerInfo> getDeserializers(Long schemaMetadataId) {
+        return null;
+    }
+
+    public void mapSerializer(Long schemaMetadataId, Long serializerId) {
+        // map internally
+    }
+
+    public void mapDeserializer(Long schemaMetadataId, Long deserializerId) {
+        // map internally
+    }
+
+    public <T> T createInstance(SerDesInfo serDesInfo) {
+        // loading serializer, create a class loader and and keep them in cache.
+        String fileId = serDesInfo.getFileId();
+        // get class loader for this file ID
+        ClassLoader classLoader = getClassLoader(fileId);
+
+        //
+        T t = null;
+        try {
+            Class<T> clazz = (Class<T>) Class.forName(serDesInfo.getClassName(), true, classLoader);
+            t = clazz.newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            throw new SerDeException(e);
+        }
+
+        return t;
+    }
+
+    private ClassLoader getClassLoader(String fileId) {
+        return null;
+    }
 
 }

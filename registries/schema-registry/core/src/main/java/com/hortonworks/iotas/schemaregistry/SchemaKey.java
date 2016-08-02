@@ -17,11 +17,13 @@
  */
 package com.hortonworks.iotas.schemaregistry;
 
+import com.google.common.base.Preconditions;
+
 import java.io.Serializable;
 
 /**
- * This class contains the schema metadata id and version of a schema. This key can be used to find any version of the
- * schema in the schema repository.
+ * This class contains the schema metadata id and version of a schema instance. This key can be used to find any version
+ * of a schema in the schema repository.
  */
 public class SchemaKey implements Serializable {
     private Long id;
@@ -31,6 +33,8 @@ public class SchemaKey implements Serializable {
     }
 
     public SchemaKey(Long id, Integer version) {
+        Preconditions.checkNotNull(id, "id can not be null");
+        Preconditions.checkNotNull(version, "version can not be null");
         this.id = id;
         this.version = version;
     }

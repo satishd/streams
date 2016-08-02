@@ -35,6 +35,7 @@ import org.apache.avro.io.EncoderFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Deserializes the JSON payload InputStream to desired output {@code O} with the given Avro schema
@@ -44,6 +45,11 @@ import java.io.InputStream;
 public class AvroJsonDeserializer<O> implements SnapshotDeserializer<O, Schema> {
 
     public AvroJsonDeserializer() {
+    }
+
+    @Override
+    public void init(Map<String, Object> config) {
+
     }
 
     @Override
@@ -66,5 +72,10 @@ public class AvroJsonDeserializer<O> implements SnapshotDeserializer<O, Schema> 
         } catch (IOException e) {
             throw new SerDeException(e);
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+
     }
 }

@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -149,6 +150,11 @@ public class SampleNestedPullDeserializer implements PullDeserializer<SchemaDeta
         }
 
         return context;
+    }
+
+    @Override
+    public void init(Map<String, Object> config) {
+
     }
 
     private static class FieldWithIndex {

@@ -15,31 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hortonworks.iotas.schemaregistry.client;
-
-import java.io.Serializable;
+package com.hortonworks.iotas.schemaregistry;
 
 /**
- * This can be used for adding details about versioned instance of a schema.
+ *
  */
-public class VersionedSchema implements Serializable {
-    private String description;
-    private String schemaText;
-
-    public String getDescription() {
-        return description;
+public class IncompatibleSchemaException extends Exception {
+    public IncompatibleSchemaException() {
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public IncompatibleSchemaException(String message) {
+        super(message);
     }
 
-    public String getSchemaText() {
-        return schemaText;
+    public IncompatibleSchemaException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public void setSchemaText(String schemaText) {
-        this.schemaText = schemaText;
+    public IncompatibleSchemaException(Throwable cause) {
+        super(cause);
     }
 
+    public IncompatibleSchemaException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }

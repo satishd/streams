@@ -31,6 +31,7 @@ import org.apache.avro.io.EncoderFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * Serializes the given input {@code I} to byte[] or OutputStream using the given Avro schema.
@@ -38,6 +39,11 @@ import java.io.OutputStream;
  * @param <I> type of input payload to be serialized
  */
 public class AvroJsonSerializer<I> implements SnapshotSerializer<I, byte[], Schema> {
+
+    @Override
+    public void init(Map<String, Object> config) {
+
+    }
 
     @Override
     public byte[] serialize(I input, Schema schema) {
@@ -62,5 +68,10 @@ public class AvroJsonSerializer<I> implements SnapshotSerializer<I, byte[], Sche
         } catch (IOException e) {
             throw new SerDeException(e);
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+
     }
 }

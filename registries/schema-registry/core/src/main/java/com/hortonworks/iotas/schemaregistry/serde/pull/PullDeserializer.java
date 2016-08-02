@@ -19,6 +19,7 @@
 package com.hortonworks.iotas.schemaregistry.serde.pull;
 
 import com.hortonworks.iotas.common.exception.ParserException;
+import com.hortonworks.iotas.schemaregistry.Resourceable;
 
 /**
  * This is a pull based deserializer which deserializes the given payload and user can call {@link #hasNext()} and
@@ -27,7 +28,7 @@ import com.hortonworks.iotas.common.exception.ParserException;
  * @param <S> type to represent schema related information.
  * @param <F> type to represent a field in a schema.
  */
-public interface PullDeserializer<S, F> extends AutoCloseable {
+public interface PullDeserializer<S, F> extends Resourceable {
 
     public enum State {
         /**

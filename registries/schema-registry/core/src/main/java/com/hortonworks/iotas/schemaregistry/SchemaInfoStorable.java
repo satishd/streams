@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  *
  */
-public class SchemaInfo extends AbstractStorable {
+public class SchemaInfoStorable extends AbstractStorable {
     public static final String NAME_SPACE = "schema_instance_info";
     public static final String ID = "id";
     public static final String SCHEMA_METADATA_ID = "schemaMetadataId";
@@ -37,7 +37,6 @@ public class SchemaInfo extends AbstractStorable {
     public static final String SCHEMA_TEXT = "schemaText";
     public static final String VERSION = "version";
     public static final String TIMESTAMP = "timestamp";
-    public static final String COMPATIBILITY = "compatibility";
 
     /**
      * Unique ID generated for this component.
@@ -69,21 +68,15 @@ public class SchemaInfo extends AbstractStorable {
      */
     protected Long timestamp;
 
-    /**
-     * Compatibility of this schema instance
-     */
-    private SchemaProvider.Compatibility compatibility = SchemaProvider.Compatibility.NONE;
-
-    public SchemaInfo() {
+    public SchemaInfoStorable() {
     }
 
-    public SchemaInfo(SchemaInfo givenSchemaInfo) {
-        id = givenSchemaInfo.id;
-        schemaMetadataId = givenSchemaInfo.schemaMetadataId;
-        version = givenSchemaInfo.version;
-        schemaText = givenSchemaInfo.schemaText;
-        timestamp = givenSchemaInfo.timestamp;
-        compatibility = givenSchemaInfo.compatibility;
+    public SchemaInfoStorable(SchemaInfoStorable givenSchemaInfoStorable) {
+        id = givenSchemaInfoStorable.id;
+        schemaMetadataId = givenSchemaInfoStorable.schemaMetadataId;
+        version = givenSchemaInfoStorable.version;
+        schemaText = givenSchemaInfoStorable.schemaText;
+        timestamp = givenSchemaInfoStorable.timestamp;
     }
 
     @Override
@@ -114,21 +107,6 @@ public class SchemaInfo extends AbstractStorable {
     }
 
     @Override
-    public Map<String, Object> toMap() {
-        Map<String, Object> values = super.toMap();
-        values.put(COMPATIBILITY, compatibility.name());
-        return values;
-    }
-
-    @Override
-    public Storable fromMap(Map<String, Object> map) {
-        String compatibilityName = (String) map.remove(COMPATIBILITY);
-        compatibility = SchemaProvider.Compatibility.valueOf(compatibilityName);
-        super.fromMap(map);
-        return this;
-    }
-
-    @Override
     public Long getId() {
         return id;
     }
@@ -155,14 +133,6 @@ public class SchemaInfo extends AbstractStorable {
 
     public Long getTimestamp() {
         return timestamp;
-    }
-
-    public SchemaProvider.Compatibility getCompatibility() {
-        return compatibility;
-    }
-
-    public void setCompatibility(SchemaProvider.Compatibility compatibility) {
-        this.compatibility = compatibility;
     }
 
     public Long getSchemaMetadataId() {

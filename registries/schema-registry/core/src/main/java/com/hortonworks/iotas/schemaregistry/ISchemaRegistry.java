@@ -28,25 +28,25 @@ public interface ISchemaRegistry {
 
     public void init(Map<String, Object> props);
 
-    public SchemaMetadata addSchemaMetadata(SchemaMetadata schemaMetadata);
+    public SchemaMetadataStorable addSchemaMetadata(SchemaMetadataStorable schemaMetadataStorable);
 
-    public SchemaMetadata getSchemaMetadata(Long schemaMetadataId);
+    public SchemaMetadataStorable getSchemaMetadata(Long schemaMetadataId);
 
-    public Collection<SchemaInfo> findAllVersions(Long schemaMetadataId);
+    public Collection<SchemaInfoStorable> findAllVersions(Long schemaMetadataId);
 
-    public SchemaInfo getSchemaInfo(Long schemaMetadataId, Integer version);
+    public SchemaInfoStorable getSchemaInfo(Long schemaMetadataId, Integer version);
 
-    public SchemaInfo getLatestSchemaInfo(Long schemaMetadataId);
+    public SchemaInfoStorable getLatestSchemaInfo(Long schemaMetadataId);
 
-    public SchemaInfo addSchemaInfo(SchemaInfo schemaInfo);
+    public SchemaInfoStorable addSchemaInfo(SchemaInfoStorable schemaInfoStorable);
 
-    public Collection<SchemaInfo> listAll();
+    public Collection<SchemaInfoStorable> listAll();
 
-    public SchemaInfo getSchemaInfo(String type, String name, Integer version);
+    public SchemaInfoStorable getSchemaInfo(String type, String name, Integer version);
 
-    public SchemaInfo getSchemaInfo(Long schemaInfoId);
+    public SchemaInfoStorable getSchemaInfo(Long schemaInfoId);
 
-    public SchemaInfo removeSchemaInfo(Long schemaInfoId);
+    public SchemaInfoStorable removeSchemaInfo(Long schemaInfoId);
 
     public boolean isCompatible(Long schemaMetadataId, Integer existingSchemaVersion, Integer toSchemaVersion) throws SchemaNotFoundException;
 
@@ -54,15 +54,17 @@ public interface ISchemaRegistry {
 
     public boolean isCompatible(String type, String toSchema, String existingSchema, SchemaProvider.Compatibility compatibility);
 
-    public Collection<SchemaInfo> getCompatibleSchemas(Long schemaMetadataId, SchemaProvider.Compatibility compatibility, String toSchema) throws SchemaNotFoundException;
+    public Collection<SchemaInfoStorable> getCompatibleSchemas(Long schemaMetadataId, SchemaProvider.Compatibility compatibility, String toSchema) throws SchemaNotFoundException;
 
-    public SchemaMetadata getOrCreateSchemaMetadata(SchemaMetadata givenSchemaMetadata);
+    public SchemaMetadataStorable getOrCreateSchemaMetadata(SchemaMetadataStorable givenSchemaMetadataStorable);
 
-    public Long addSerializer(SchemaSerializerInfo schemaSerializerInfo, InputStream inputStream);
+    public String uploadFile(InputStream inputStream);
 
-    public SchemaSerializerInfo getSerializer(Long serializerId);
+    public Long addSerializer(SerDesInfoStorable serDesInfoStorable);
 
-    public Iterable<SchemaSerializerInfo> getSchemaSerializers(Long schemaMetadataId);
+    public SerDesInfo getSerializer(Long serializerId);
+
+    public Iterable<SerDesInfoStorable> getSchemaSerializers(Long schemaMetadataId);
 
     public InputStream downloadSerializer(Long schemaMetadataId, Long serializerId);
 }

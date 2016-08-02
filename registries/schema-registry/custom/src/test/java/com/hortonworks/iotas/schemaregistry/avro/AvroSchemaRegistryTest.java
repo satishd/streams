@@ -19,7 +19,7 @@ package com.hortonworks.iotas.schemaregistry.avro;
 
 import com.hortonworks.iotas.schemaregistry.DefaultSchemaRegistry;
 import com.hortonworks.iotas.schemaregistry.SchemaDto;
-import com.hortonworks.iotas.schemaregistry.SchemaInfo;
+import com.hortonworks.iotas.schemaregistry.SchemaInfoStorable;
 import com.hortonworks.iotas.schemaregistry.SchemaProvider;
 import com.hortonworks.iotas.storage.StorageManager;
 import com.hortonworks.iotas.storage.impl.memory.InMemoryStorageManager;
@@ -60,7 +60,7 @@ public class AvroSchemaRegistryTest {
     }
 
     @Test
-    public void testRegistryOps() throws Exception {
+    public void testRegistrySchemaOps() throws Exception {
 
         SchemaDto schemaDto = new SchemaDto();
         schemaDto.setSchemaText(schema1);
@@ -69,25 +69,24 @@ public class AvroSchemaRegistryTest {
         SchemaDto schemaDto1 = SchemaDto.addSchemaDto(schemaRegistry, schemaDto);
         int v1 = schemaDto1.getVersion();
 
-        SchemaInfo schemaInfo2 = new SchemaInfo();
-        schemaInfo2.setSchemaMetadataId(schemaDto1.getId());
-        schemaInfo2.setCompatibility(SchemaProvider.Compatibility.BOTH);
-        schemaInfo2.setSchemaText(schema2);
-        SchemaInfo addedSchemaInfo2 = addSchemaAndVerify(schemaInfo2);
-        int v2 = addedSchemaInfo2.getVersion();
+        SchemaInfoStorable schemaInfoStorable2 = new SchemaInfoStorable();
+        schemaInfoStorable2.setSchemaMetadataId(schemaDto1.getId());
+        schemaInfoStorable2.setSchemaText(schema2);
+        SchemaInfoStorable addedSchemaInfoStorable2 = addSchemaAndVerify(schemaInfoStorable2);
+        int v2 = addedSchemaInfoStorable2.getVersion();
 
         Assert.assertTrue(v2 == v1 + 1);
 
-        SchemaInfo latest = schemaRegistry.getLatestSchemaInfo(schemaDto1.getId());
-        Assert.assertEquals(latest, addedSchemaInfo2);
+        SchemaInfoStorable latest = schemaRegistry.getLatestSchemaInfo(schemaDto1.getId());
+        Assert.assertEquals(latest, addedSchemaInfoStorable2);
 
     }
 
-    private SchemaInfo addSchemaAndVerify(SchemaInfo schemaInfo) {
-        SchemaInfo addedSchemaInfo = schemaRegistry.addSchemaInfo(schemaInfo);
-        Assert.assertEquals(addedSchemaInfo.getSchemaMetadataId(), schemaInfo.getSchemaMetadataId());
-        Assert.assertEquals(addedSchemaInfo.getSchemaText(), schemaInfo.getSchemaText());
-        return addedSchemaInfo;
+    private SchemaInfoStorable addSchemaAndVerify(SchemaInfoStorable schemaInfoStorable) {
+        SchemaInfoStorable addedSchemaInfoStorable = schemaRegistry.addSchemaInfo(schemaInfoStorable);
+        Assert.assertEquals(addedSchemaInfoStorable.getSchemaMetadataId(), schemaInfoStorable.getSchemaMetadataId());
+        Assert.assertEquals(addedSchemaInfoStorable.getSchemaText(), schemaInfoStorable.getSchemaText());
+        return addedSchemaInfoStorable;
     }
 
 }

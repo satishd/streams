@@ -21,12 +21,9 @@ import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Preconditions;
 import com.hortonworks.iotas.common.util.WSUtils;
 import com.hortonworks.iotas.schemaregistry.client.VersionedSchema;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -92,14 +89,13 @@ public class SchemaRegistryCatalog {
     @Timed
     public Response addSchemaInfo(@PathParam("id") Long schemaMetadataId, VersionedSchema versionedSchema) {
         try {
-            SchemaInfo schemaInfo = new SchemaInfo();
-            schemaInfo.setSchemaMetadataId(schemaMetadataId);
-            schemaInfo.setCompatibility(versionedSchema.getCompatibility());
-            schemaInfo.setSchemaText(versionedSchema.getSchemaText());
-            schemaInfo.setDescription(versionedSchema.getDescription());
+            SchemaInfoStorable schemaInfoStorable = new SchemaInfoStorable();
+            schemaInfoStorable.setSchemaMetadataId(schemaMetadataId);
+            schemaInfoStorable.setSchemaText(versionedSchema.getSchemaText());
+            schemaInfoStorable.setDescription(versionedSchema.getDescription());
 
-            SchemaInfo addedSchemaInfo = schemaRegistry.addSchemaInfo(schemaInfo);
-            return WSUtils.respond(CREATED, SUCCESS, new SchemaKey(addedSchemaInfo.getSchemaMetadataId(), addedSchemaInfo.getVersion()));
+            SchemaInfoStorable addedSchemaInfoStorable = schemaRegistry.addSchemaInfo(schemaInfoStorable);
+            return WSUtils.respond(CREATED, SUCCESS, new SchemaKey(addedSchemaInfoStorable.getSchemaMetadataId(), addedSchemaInfoStorable.getVersion()));
         } catch (Exception ex) {
             LOG.error("Error encountered while adding schema", ex);
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
@@ -112,10 +108,10 @@ public class SchemaRegistryCatalog {
     public Response getSchema(@PathParam("id") Long schemaMetadataId) {
         Preconditions.checkNotNull(schemaMetadataId, "id must not be null");
         try {
-            SchemaInfo schemaInfo = schemaRegistry.getSchemaInfo(schemaMetadataId);
-            if (schemaInfo != null) {
-                SchemaMetadata schemaMetadata = schemaRegistry.getSchemaMetadata(schemaInfo.getSchemaMetadataId());
-                SchemaDto schemaDto = new SchemaDto(schemaMetadata, schemaInfo);
+            SchemaInfoStorable schemaInfoStorable = schemaRegistry.getSchemaInfo(schemaMetadataId);
+            if (schemaInfoStorable != null) {
+                SchemaMetadataStorable schemaMetadataStorable = schemaRegistry.getSchemaMetadata(schemaInfoStorable.getSchemaMetadataId());
+                SchemaDto schemaDto = new SchemaDto(schemaMetadataStorable, schemaInfoStorable);
                 return WSUtils.respond(OK, SUCCESS, schemaDto);
             }
         } catch (Exception ex) {
@@ -130,7 +126,7 @@ public class SchemaRegistryCatalog {
     @Timed
     public Response removeSchemaInfo(@PathParam("id") Long schemaMetadataId) {
         try {
-            SchemaInfo removedParser = schemaRegistry.removeSchemaInfo(schemaMetadataId);
+            SchemaInfoStorable removedParser = schemaRegistry.removeSchemaInfo(schemaMetadataId);
             return WSUtils.respond(OK, SUCCESS, removedParser);
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
@@ -142,10 +138,10 @@ public class SchemaRegistryCatalog {
     @Timed
     public Response getLatestSchema(@PathParam("id") Long schemaMetadataId) {
         try {
-            SchemaMetadata schemaMetadata = schemaRegistry.getSchemaMetadata(schemaMetadataId);
-            SchemaInfo schemaInfo = schemaRegistry.getLatestSchemaInfo(schemaMetadataId);
-            if (schemaInfo != null) {
-                return WSUtils.respond(OK, SUCCESS, new SchemaDto(schemaMetadata, schemaInfo));
+            SchemaMetadataStorable schemaMetadataStorable = schemaRegistry.getSchemaMetadata(schemaMetadataId);
+            SchemaInfoStorable schemaInfoStorable = schemaRegistry.getLatestSchemaInfo(schemaMetadataId);
+            if (schemaInfoStorable != null) {
+                return WSUtils.respond(OK, SUCCESS, new SchemaDto(schemaMetadataStorable, schemaInfoStorable));
             }
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
@@ -159,10 +155,10 @@ public class SchemaRegistryCatalog {
     @Timed
     public Response getLatestSchema(@PathParam("id") Long schemaMetadataId, @PathParam("version") Integer version) {
         try {
-            SchemaMetadata schemaMetadata = schemaRegistry.getSchemaMetadata(schemaMetadataId);
-            SchemaInfo schemaInfo = schemaRegistry.getSchemaInfo(schemaMetadataId, version);
-            if (schemaInfo != null) {
-                return WSUtils.respond(OK, SUCCESS, new SchemaDto(schemaMetadata, schemaInfo));
+            SchemaMetadataStorable schemaMetadataStorable = schemaRegistry.getSchemaMetadata(schemaMetadataId);
+            SchemaInfoStorable schemaInfoStorable = schemaRegistry.getSchemaInfo(schemaMetadataId, version);
+            if (schemaInfoStorable != null) {
+                return WSUtils.respond(OK, SUCCESS, new SchemaDto(schemaMetadataStorable, schemaInfoStorable));
             }
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
@@ -192,7 +188,7 @@ public class SchemaRegistryCatalog {
     @Timed
     public Response getSerializers(@PathParam("id") Long schemaMetadataId) {
         try {
-            Iterable<SchemaSerializerInfo> serializers = schemaRegistry.getSchemaSerializers(schemaMetadataId);
+            Iterable<SerDesInfoStorable> serializers = schemaRegistry.getSchemaSerializers(schemaMetadataId);
 
             if (serializers != null) {
                 return WSUtils.respond(OK, SUCCESS, serializers);
@@ -226,13 +222,10 @@ public class SchemaRegistryCatalog {
 
     @POST
     @Path("/serializers")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Timed
-    public Response addSerializer(@FormDataParam("file") final InputStream inputStream,
-                                  @FormDataParam("file") final FormDataContentDisposition contentDispositionHeader,
-                                  @FormDataParam("serializerInfo") SchemaSerializerInfo schemaSerializerInfo) {
+    public Response addSerializer(SerializerInfo schemaSerDesInfo) {
         try {
-            Long serializerId = schemaRegistry.addSerializer(schemaSerializerInfo, inputStream);
+            Long serializerId = schemaRegistry.addSerializer(schemaSerDesInfo);
             return WSUtils.respond(OK, SUCCESS, serializerId);
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());
@@ -244,7 +237,7 @@ public class SchemaRegistryCatalog {
     @Timed
     public Response getSerializer(@PathParam("id") Long serializerId) {
         try {
-            SchemaSerializerInfo serializerInfo = schemaRegistry.getSerializer(serializerId);
+            SerDesInfo serializerInfo = schemaRegistry.getSerializer(serializerId);
             return WSUtils.respond(OK, SUCCESS, serializerInfo);
         } catch (Exception ex) {
             return WSUtils.respond(INTERNAL_SERVER_ERROR, EXCEPTION, ex.getMessage());

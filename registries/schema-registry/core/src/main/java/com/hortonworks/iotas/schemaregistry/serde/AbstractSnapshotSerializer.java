@@ -18,45 +18,50 @@
 package com.hortonworks.iotas.schemaregistry.serde;
 
 import com.hortonworks.iotas.schemaregistry.SchemaKey;
-import com.hortonworks.iotas.schemaregistry.client.Schema;
+import com.hortonworks.iotas.schemaregistry.client.SchemaMetadata;
 import com.hortonworks.iotas.schemaregistry.client.SchemaRegistryClient;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 /**
- * SnapshotSerializer implementation which sends schema-id and version to the outputstream by taking {@link Schema} instance.
+ * SnapshotSerializer implementation which sends schema-id and version to the outputstream by taking {@link SchemaMetadata} instance.
  */
-public abstract class AbstractSnapshotSerializer<O> implements SnapshotSerializer<InputStream, O, Schema> {
-    private final SchemaRegistryClient schemaRegistryClient;
+public abstract class AbstractSnapshotSerializer<O> implements SnapshotSerializer<InputStream, O, SchemaMetadata> {
+    private SchemaRegistryClient schemaRegistryClient;
 
-    protected AbstractSnapshotSerializer(SchemaRegistryClient schemaRegistryClient) {
-        this.schemaRegistryClient = schemaRegistryClient;
+    protected AbstractSnapshotSerializer() {
     }
 
-    protected abstract void doSerialize(InputStream input, OutputStream outputStream, Schema schema) throws SerDeException;
+    @Override
+    public void init(Map<String, Object> config) {
+        schemaRegistryClient = new SchemaRegistryClient();
+        schemaRegistryClient.init(config);
+    }
+
+    protected abstract void doSerialize(InputStream input, OutputStream outputStream, SchemaMetadata schemaMetadata) throws SerDeException;
 
     @Override
-    public final O serialize(InputStream input, Schema schema) throws SerDeException {
+    public final O serialize(InputStream input, SchemaMetadata schemaMetadata) throws SerDeException {
         throw new UnsupportedOperationException("This method is not supported");
     }
 
     @Override
-    public final void serialize(InputStream input, OutputStream outputStream, Schema schema) throws SerDeException {
+    public final void serialize(InputStream input, OutputStream outputStream, SchemaMetadata schemaMetadata) throws SerDeException {
 
         try {
             // register given schema
-            SchemaKey schemaKey = schemaRegistryClient.registerSchema(schema);
+            SchemaKey schemaKey = schemaRegistryClient.registerSchema(schemaMetadata);
             // write schema id and version, both of them require 12 bytes (Long +Int)
             outputStream.write(ByteBuffer.allocate(12).putLong(schemaKey.getId()).putInt(schemaKey.getVersion()).array());
         } catch (IOException e) {
             throw new SerDeException(e);
         }
 
-        doSerialize(input, outputStream, schema);
+        doSerialize(input, outputStream, schemaMetadata);
     }
 
-    ;
 }

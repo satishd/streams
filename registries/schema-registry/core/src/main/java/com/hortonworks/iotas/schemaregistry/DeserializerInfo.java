@@ -15,31 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hortonworks.iotas.schemaregistry.client;
-
-import java.io.Serializable;
+package com.hortonworks.iotas.schemaregistry;
 
 /**
- * This can be used for adding details about versioned instance of a schema.
+ *
  */
-public class VersionedSchema implements Serializable {
-    private String description;
-    private String schemaText;
+public class DeserializerInfo extends SerDesInfoStorable implements SerDesInfo {
 
-    public String getDescription() {
-        return description;
+    public DeserializerInfo() {
+        isSerializer = false;
     }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getSchemaText() {
-        return schemaText;
-    }
-
-    public void setSchemaText(String schemaText) {
-        this.schemaText = schemaText;
-    }
-
 }

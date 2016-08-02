@@ -24,13 +24,13 @@ import com.hortonworks.iotas.storage.Storable;
 import com.hortonworks.iotas.storage.catalog.AbstractStorable;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  *
  */
-public class SchemaMetadata extends AbstractStorable {
+public class SchemaMetadataStorable extends AbstractStorable {
     public static final String NAME_SPACE = "schema_metadata_info";
     public static final String ID = "id";
     public static final String NAME = "name";
@@ -68,15 +68,25 @@ public class SchemaMetadata extends AbstractStorable {
      */
     private SchemaProvider.Compatibility compatibility = SchemaProvider.Compatibility.NONE;
 
-    public SchemaMetadata() {
+    /**
+     * Serializer Ids which be used for this set of schemas
+     */
+    private List<Long> serializerIds;
+
+    /**
+     * Deserializer ids which can be used for this set of schemas
+     */
+    private List<Long> deserializerIds;
+
+    public SchemaMetadataStorable() {
     }
 
-    public SchemaMetadata(String name, String type) {
+    public SchemaMetadataStorable(String name, String type) {
         this.name = name;
         this.type = type;
     }
 
-    public SchemaMetadata(SchemaMetadata givenSchemaInfo) {
+    public SchemaMetadataStorable(SchemaMetadataStorable givenSchemaInfo) {
         id = givenSchemaInfo.id;
         name = givenSchemaInfo.name;
         type = givenSchemaInfo.type;
@@ -170,7 +180,7 @@ public class SchemaMetadata extends AbstractStorable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        SchemaMetadata that = (SchemaMetadata) o;
+        SchemaMetadataStorable that = (SchemaMetadataStorable) o;
 
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;

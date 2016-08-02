@@ -18,7 +18,10 @@
  */
 package com.hortonworks.iotas.schemaregistry.serde.push;
 
+import com.hortonworks.iotas.schemaregistry.Resourceable;
+
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * This deserializer gives callbacks to the given {@link PushDeserializerHandler} whenever a respective event or field is encountered.
@@ -27,7 +30,7 @@ import java.io.InputStream;
  * @param <S> Schema representation class
  * @param <F> Field representation class
  */
-public interface PushDeserializer<S, F> extends AutoCloseable {
+public interface PushDeserializer<S, F> extends Resourceable {
 
     /**
      * Deserializes the given input stream and invokes respective callbacks to the given {@code handler} whenever a respective

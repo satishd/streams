@@ -17,8 +17,8 @@
  */
 package com.hortonworks.iotas.schemaregistry.client;
 
-import com.hortonworks.iotas.schemaregistry.SchemaInfo;
-import com.hortonworks.iotas.schemaregistry.SchemaMetadata;
+import com.hortonworks.iotas.schemaregistry.SchemaInfoStorable;
+import com.hortonworks.iotas.schemaregistry.SchemaMetadataStorable;
 import com.hortonworks.iotas.schemaregistry.SchemaProvider;
 
 import java.io.Serializable;
@@ -28,7 +28,7 @@ import java.io.Serializable;
  * be used when client does not know about the existing registered schema information.
  *
  */
-public final class Schema implements Serializable {
+public class SchemaMetadata implements Serializable {
 
     // name for schema which is part of schema metadata
     private String name;
@@ -45,7 +45,14 @@ public final class Schema implements Serializable {
     // Compatibility of the schema for a given version which is given in SchemaInfo
     private SchemaProvider.Compatibility compatibility;
 
-    public Schema() {
+    public SchemaMetadata() {
+    }
+
+    public SchemaMetadata(String name, String type, String description, SchemaProvider.Compatibility compatibility) {
+        this.name = name;
+        this.type = type;
+        this.description = description;
+        this.compatibility = compatibility;
     }
 
     public String getName() {
@@ -88,20 +95,20 @@ public final class Schema implements Serializable {
         this.compatibility = compatibility;
     }
 
-    public SchemaMetadata schemaMetadata() {
-        SchemaMetadata schemaMetadata = new SchemaMetadata();
-        schemaMetadata.setName(name);
-        schemaMetadata.setType(type);
-        schemaMetadata.setDescription(description);
+    public SchemaMetadataStorable schemaMetadataStorable() {
+        SchemaMetadataStorable schemaMetadataStorable = new SchemaMetadataStorable();
+        schemaMetadataStorable.setName(name);
+        schemaMetadataStorable.setType(type);
+        schemaMetadataStorable.setDescription(description);
 
-        return schemaMetadata;
+        return schemaMetadataStorable;
     }
 
-    public SchemaInfo schemaInfo() {
-        SchemaInfo schemaInfo = new SchemaInfo();
-        schemaInfo.setSchemaText(schemaText);
-        schemaInfo.setCompatibility(compatibility);
+    public SchemaInfoStorable schemaInfoStorable() {
+        SchemaInfoStorable schemaInfoStorable = new SchemaInfoStorable();
+        schemaInfoStorable.setSchemaText(schemaText);
 
-        return schemaInfo;
+        return schemaInfoStorable;
     }
+
 }

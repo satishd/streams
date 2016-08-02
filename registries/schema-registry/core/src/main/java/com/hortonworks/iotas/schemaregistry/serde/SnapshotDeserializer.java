@@ -17,7 +17,10 @@
  */
 package com.hortonworks.iotas.schemaregistry.serde;
 
+import com.hortonworks.iotas.schemaregistry.Resourceable;
+
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Deserializer interface for deserializing InputStream into output {@code O} according to the Schema {@code S}.
@@ -26,7 +29,7 @@ import java.io.InputStream;
  * @param <O> Output type of the deserialized content.
  * @param <S> Schema representation class
  */
-public interface SnapshotDeserializer<O, S> {
+public interface SnapshotDeserializer<O, S> extends Resourceable {
 
     /**
      * Returns output {@code O} after deserializing the given {@code payloadInputStream} according to the Schema {@code S}.

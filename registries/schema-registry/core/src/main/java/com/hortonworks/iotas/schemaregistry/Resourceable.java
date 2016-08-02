@@ -15,31 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hortonworks.iotas.schemaregistry.client;
+package com.hortonworks.iotas.schemaregistry;
 
-import java.io.Serializable;
+import java.util.Map;
 
 /**
- * This can be used for adding details about versioned instance of a schema.
+ * A resource which can be initialized and closed. {@link #init(Map)} method initializes the resources and {@link #close()}
+ * method closes the underlying resources.
  */
-public class VersionedSchema implements Serializable {
-    private String description;
-    private String schemaText;
+public interface Resourceable extends AutoCloseable {
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getSchemaText() {
-        return schemaText;
-    }
-
-    public void setSchemaText(String schemaText) {
-        this.schemaText = schemaText;
-    }
+    /**
+     * Initializes with the given configuration.
+     *
+     * @param config
+     */
+    public void init(Map<String, Object> config);
 
 }
