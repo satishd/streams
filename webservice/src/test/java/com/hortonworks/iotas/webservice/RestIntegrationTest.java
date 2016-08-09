@@ -24,7 +24,6 @@ import com.hortonworks.iotas.catalog.DataFeed;
 import com.hortonworks.iotas.catalog.DataSource;
 import com.hortonworks.iotas.catalog.FileInfo;
 import com.hortonworks.iotas.catalog.ParserInfo;
-import com.hortonworks.iotas.catalog.Tag;
 import com.hortonworks.iotas.common.AbstractRestIntegrationTest;
 import com.hortonworks.iotas.common.QueryParamsResourceTestElement;
 import com.hortonworks.iotas.common.ResourceTestElement;
