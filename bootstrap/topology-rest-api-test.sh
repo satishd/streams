@@ -222,6 +222,97 @@ out=$(curl -s -X POST -H "Content-Type: application/json" -H "Cache-Control: no-
 echo $out
 ruleprocessorid=$(getId $out)
 
+
+
+# --
+# Create SplitProcessor
+# --
+echo -e "\n------"
+out=$(curl -s -X POST -H "Content-Type: application/json" -H "Cache-Control: no-cache"  -d '{
+    "name": "SplitProcessor",
+    "config": {
+        "properties": {
+            "split-config": {
+                "name": "split-action",
+                "outputStreams": ["split-stream-1", "split-stream-2"],
+                "__type": "com.hortonworks.iotas.streams.layout.component.impl.splitjoin.SplitAction",
+                "jaId" : 1234,
+                "splitterClassName" : "com.hortonworks.splitjoin.MySplitter"
+            }
+        }
+    },
+    "type": "SPLIT",
+    "outputStreamIds": ['$split-stream-1', '$split-stream-2']
+}' "${catalogurl}/topologies/$topologyid/processors")
+
+
+
+# --
+# Create Join Processor
+# --
+echo -e "\n------"
+out=$(curl -s -X POST -H "Content-Type: application/json" -H "Cache-Control: no-cache"  -d '{
+    "name": "JoinProcessor",
+    "config": {
+        "properties": {
+            "join-config": {
+                "name": "join-action",
+                "outputStreams": ["joined-stream"],
+                "__type": "com.hortonworks.iotas.streams.layout.component.impl.splitjoin.JoinAction",
+                "jaId" : 1234,
+                "joinerClassName" : "com.hortonworks.splitjoin.MyJoiner",
+                "groupExpiryInterval": 30000,
+                "eventExpiryInterval": 30000
+            }
+        }
+    },
+    "type": "JOIN",
+    "outputStreamIds": ['$joined-stream']
+}' "${catalogurl}/topologies/$topologyid/processors")
+
+
+
+
+# --
+# Create Stage Processor
+# --
+echo -e "\n------"
+out=$(curl -s -X POST -H "Content-Type: application/json" -H "Cache-Control: no-cache"  -d '{
+    "name": "StageProcessor",
+    "config": {
+        "properties": {
+            "stage-config": {
+                "name": "stage-action",
+                "outputStreams": ["stage-stream"],
+                "__type": "com.hortonworks.iotas.streams.layout.component.impl.splitjoin.StageAction",
+                "transforms": [{
+                    "__type": "com.hortonworks.iotas.streams.layout.component.rule.action.transform.ProjectionTransform",
+                    "projectionFields": ["foo", "bar"],
+                    "name": "projection-transform",
+                },
+                {
+                    "__type": "com.hortonworks.iotas.streams.layout.component.rule.action.transform.EnrichmentTransform",
+                    "fieldsToBeEnriched": ["foo", "bar"],
+                    "name": "projection-transform",
+                    "transformDataProvider": {
+                        "config": {
+                            "prop-1": "value-1",
+                            "prop-2": "value-2"
+                        }
+                    }
+                    "entryExpirationInterval": 30000,
+                    "entryRefreshInterval": 30000,
+                    "maxCacheSize": 1000,
+                }]
+            }
+        }
+    },
+    "type": "STAGE",
+    "outputStreamIds": ['$stage-stream']
+}' "${catalogurl}/topologies/$topologyid/processors")
+
+
+
 # --
 # Create notification sink
 # --
