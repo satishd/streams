@@ -17,6 +17,7 @@
         <module>webservice</module>
         <module>streams</module>
         <module>registries</module>
+        <module>examples</module>
     </modules>
 
     <properties>

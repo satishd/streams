@@ -1,0 +1,55 @@
+{
+  "type": "record",
+  "namespace": "org.apache.iot.sensors",
+  "name": "SensorEvent",
+  "fields": [
+    {
+      "name": "xid",
+      "type": "long"
+    },
+    {
+      "name": "name",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "version",
+      "type": "int"
+    },
+    {
+      "name": "timestamp",
+      "type": "long"
+    },
+    {
+      "name": "type",
+      "type": {
+        "type": "enum",
+        "name": "typeEnum",
+        "symbols": [
+          "temeperature",
+          "humidity",
+          "illuminance"
+        ]
+      }
+    },
+    {
+      "name": "location",
+      "type": {
+        "type": "record",
+        "name": "LocationRecord",
+        "fields": [
+          {
+            "name": "longitude",
+            "type": "string"
+          },
+          {
+            "name": "latitude",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}
