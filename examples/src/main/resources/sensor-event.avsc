@@ -26,7 +26,7 @@
       "name": "type",
       "type": {
         "type": "enum",
-        "name": "typeEnum",
+        "name": "SensorType",
         "symbols": [
           "temeperature",
           "humidity",
@@ -42,11 +42,11 @@
         "fields": [
           {
             "name": "longitude",
-            "type": "string"
+            "type": "double"
           },
           {
             "name": "latitude",
-            "type": "string"
+            "type": "double"
           }
         ]
       }

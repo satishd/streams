@@ -1,0 +1,6 @@
+topicName=truck_events_stream_1
+bootstrap.servers=localhost:9092
+schema.registry.url=http://localhost:7070/api/v1
+key.serializer=org.apache.kafka.common.serialization.StringSerializer
+value.serializer=org.apache.registries.schemaregistry.serdes.avro.kafka.KafkaAvroSerializer
+maxAvroRecords=100
