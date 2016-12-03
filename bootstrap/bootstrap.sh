@@ -4,7 +4,7 @@
 verbose=false
 bootstrap_dir=$(dirname $0)
 host="localhost"
-port="8080"
+port="8989"
 
 function run_cmd {
   cmd=$*
